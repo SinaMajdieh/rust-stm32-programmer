@@ -1,0 +1,83 @@
+import {
+    Button,
+    HorizontalBox,
+    LineEdit,
+    ProgressIndicator,
+    TextEdit,
+    VerticalBox
+} from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: "STM32 Programmer";
+    width: 800px;
+    height: 600px;
+
+    in-out property <string> selected-file-path: "No file selected";
+    in-out property <string> file-contents: "";
+    in-out property <float> progress-value: 0;
+    in-out property <bool> is-programming: false;
+
+    callback browse-file();
+    callback program-file();
+
+    VerticalBox {
+        padding: 20px;
+        spacing: 10px;
+
+        Text {
+            text: "STM32 Programmer";
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        Text {
+            text: "Selected file";
+        }
+
+        LineEdit {
+            text: root.selected-file-path;
+            read-only: true;
+        }
+
+        TextEdit {
+            text: root.file-contents;
+            read-only: true;
+            vertical-stretch: 1;
+        }
+
+        ProgressIndicator {
+            progress: root.progress-value / 100;
+        }
+
+        Text {
+            text: round(root.progress-value) + "%";
+            horizontal-alignment: center;
+        }
+
+        HorizontalBox {
+            spacing: 10px;
+
+            Button {
+                text: "Browse File";
+                enabled: !root.is-programming;
+
+                clicked => {
+                    root.browse-file();
+                }
+            }
+
+            Button {
+                text: "Program";
+                enabled:
+                    !root.is-programming
+                    && root.selected-file-path != "No file selected";
+
+                primary: true;
+
+                clicked => {
+                    root.program-file();
+                }
+            }
+        }
+    }
+}

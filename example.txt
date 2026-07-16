@@ -1,0 +1,4 @@
+Hello from rust.
+This is the second line.
+The file is being read gradually.
+The UI will eventually show these lines.
