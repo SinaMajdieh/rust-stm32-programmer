@@ -22,7 +22,6 @@ export component MainWindow inherits Window {
 
     callback browse-file();
     callback program-file();
-    callback scroll-log-to-bottom();
 
     VerticalBox {
         padding: 22px;
@@ -57,12 +56,6 @@ export component MainWindow inherits Window {
             is-programming: root.is-programming;
 
             program => { root.program-file(); }
-        }
-    }
-
-    scroll-log-to-bottom => {
-        if (root.follow-log) {
-            log-view.scroll-to-bottom();
         }
     }
 }
