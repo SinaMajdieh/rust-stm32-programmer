@@ -1,0 +1,170 @@
+import { HorizontalBox, ListView, VerticalBox } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+
+export component LogView inherits Rectangle {
+    in property <[string]> entries;
+    in-out property <bool> follow-output: true;
+
+    callback scroll-to-bottom();
+
+    background: Theme.log-background;
+    border-color: Theme.border;
+    border-width: Theme.card-border-width;
+    border-radius: Theme.card-radius;
+
+    VerticalBox {
+        Rectangle {
+            height: 42px;
+            background: Theme.panel-background;
+            border-radius: Theme.card-radius;
+
+            HorizontalBox {
+                padding-left: 14px;
+                padding-right: 14px;
+                spacing: 9px;
+
+                HorizontalBox {
+                    spacing: 6px;
+                    alignment: center;
+
+                    Rectangle {
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 5px;
+                        background: #ef4444;
+                    }
+
+                    Rectangle {
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 5px;
+                        background: Theme.amber;
+                    }
+
+                    Rectangle {
+                        width: 9px;
+                        height: 9px;
+                        border-radius: 5px;
+                        background: #22c55e;
+                    }
+                }
+
+                Text {
+                    text: "Programming output";
+                    color: #cbd5e1;
+                    font-size: 13px;
+                    font-weight: 600;
+                    vertical-alignment: center;
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                Text {
+                    text: root.entries.length + " entries";
+                    color: Theme.text-muted;
+                    font-size: 12px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle {
+            height: 1px;
+            background: Theme.border;
+        }
+
+        Rectangle {
+            vertical-stretch: 1;
+            background: Theme.log-background;
+
+            log-list := ListView {
+                x: 12px;
+                y: 10px;
+                width: parent.width - 24px;
+                height: parent.height - 20px;
+                horizontal-scrollbar-policy: always-off;
+                vertical-scrollbar-policy: as-needed;
+
+                for line[index] in root.entries: Rectangle {
+                    width: log-list.visible-width - 8px;
+                    height: line-text.preferred-height + 10px;
+                    background: Math.mod(index, 2) == 0
+                        ? Theme.log-background
+                        : Theme.log-row-background;
+                    border-radius: 4px;
+
+                    line-text := Text {
+                        x: 8px;
+                        y: 5px;
+                        width: parent.width - 16px;
+                        height: self.preferred-height;
+                        text: line;
+                        color: Theme.text-log;
+                        font-family: "Consolas";
+                        font-size: 13px;
+                        wrap: word-wrap;
+                    }
+                }
+
+                scrolled => {
+                    root.follow-output =
+                        log-list.viewport-y
+                        <= min(
+                            0px,
+                            log-list.visible-height - log-list.viewport-height
+                        ) + 15px;
+                }
+
+                changed viewport-height => {
+                    if (root.follow-output) {
+                        log-list.viewport-y = min(
+                            0px,
+                            log-list.visible-height - log-list.viewport-height
+                        );
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: root.entries.length == 0;
+                width: parent.width;
+                height: parent.height;
+                background: Theme.log-background;
+
+                VerticalBox {
+                    alignment: center;
+                    spacing: 7px;
+
+                    Text {
+                        text: ">_";
+                        color: #334155;
+                        font-family: "Consolas";
+                        font-size: 26px;
+                        horizontal-alignment: center;
+                    }
+
+                    Text {
+                        text: "Programming output will appear here";
+                        color: Theme.text-muted;
+                        font-size: 13px;
+                        horizontal-alignment: center;
+                    }
+
+                    Text {
+                        text: "Select a firmware file and start programming";
+                        color: Theme.text-faint;
+                        font-size: 12px;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+
+    scroll-to-bottom => {
+        log-list.viewport-y = min(
+            0px,
+            log-list.visible-height - log-list.viewport-height
+        );
+    }
+}

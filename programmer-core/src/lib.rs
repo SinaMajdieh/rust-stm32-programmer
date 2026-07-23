@@ -45,7 +45,7 @@ pub fn program_file(
             text_chunk: line.clone(),
         });
 
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(10));
     }
 
     report_progress(ProgrammingProgress {

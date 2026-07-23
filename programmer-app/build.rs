@@ -1,4 +1,4 @@
 fn main() {
-    slint_build::compile("ui/main.slint")
-        .expect("Failed to compile slint UI");
+    slint_build::compile("ui/main-window.slint")
+        .unwrap();
 }

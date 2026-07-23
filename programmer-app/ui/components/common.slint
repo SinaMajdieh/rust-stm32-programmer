@@ -1,0 +1,41 @@
+import { Theme } from "../theme.slint";
+
+export component SectionLabel inherits Text {
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+export component StatusBadge inherits Rectangle {
+    in property <bool> active: false;
+
+    height: 30px;
+    width: active ? 142px : 84px;
+    border-radius: 15px;
+    background: active ? #172554 : #16231c;
+    border-width: 1px;
+    border-color: active ? #2563eb : #27633d;
+
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        spacing: 8px;
+        alignment: center;
+        cross-axis-alignment: center;
+
+        Rectangle {
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: root.active ? #60a5fa : Theme.green;
+        }
+
+        Text {
+            text: root.active ? "PROGRAMMING" : "READY";
+            color: root.active ? #bfdbfe : #bbf7d0;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    }
+}

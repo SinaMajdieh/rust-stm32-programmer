@@ -1,0 +1,59 @@
+import { Button, HorizontalBox, VerticalBox, LineEdit } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { SectionLabel } from "./common.slint";
+
+export component FileCard inherits Rectangle {
+    in property <string> selected-path;
+    in property <bool> has-selection;
+    in property <bool> enabled: true;
+
+    callback browse();
+
+    height: 106px;
+    background: Theme.panel-background;
+    border-color: Theme.border;
+    border-width: Theme.card-border-width;
+    border-radius: Theme.card-radius;
+
+    VerticalBox {
+        padding: 16px;
+        spacing: 9px;
+
+        HorizontalBox {
+            SectionLabel {
+                text: "FIRMWARE FILE";
+                vertical-alignment: center;
+            }
+
+            Rectangle { horizontal-stretch: 1; }
+
+            Text {
+                text: root.has-selection ? "Selected" : "Required";
+                color: root.has-selection ? Theme.green : Theme.amber;
+                font-size: 12px;
+                font-weight: 600;
+                vertical-alignment: center;
+            }
+        }
+
+        HorizontalBox {
+            spacing: 10px;
+
+            LineEdit {
+                horizontal-stretch: 1;
+                height: 38px;
+                text: root.selected-path;
+                read-only: true;
+            }
+
+            Button {
+                width: 110px;
+                height: 38px;
+                text: "Browse";
+                enabled: root.enabled;
+
+                clicked => { root.browse(); }
+            }
+        }
+    }
+}

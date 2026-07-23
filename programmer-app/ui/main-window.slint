@@ -1,0 +1,68 @@
+import { VerticalBox } from "std-widgets.slint";
+import { Theme } from "./theme.slint";
+import { FileCard } from "./components/file-card.slint";
+import { LogView } from "./components/log-view.slint";
+import { ProgressCard } from "./components/progress-card.slint";
+import { ActionBar, AppHeader } from "./components/window-chrome.slint";
+
+export component MainWindow inherits Window {
+    title: "STM32 Programmer";
+    min-width: 680px;
+    min-height: 560px;
+    background: Theme.window-background;
+
+    in-out property <string> selected-file-path: "No file selected";
+    in property <[string]> log-entries;
+    in-out property <float> progress-value: 0;
+    in-out property <bool> is-programming: false;
+    in-out property <bool> follow-log: true;
+
+    private property <bool> has-selected-file:
+        selected-file-path != "No file selected";
+
+    callback browse-file();
+    callback program-file();
+    callback scroll-log-to-bottom();
+
+    VerticalBox {
+        padding: 22px;
+        spacing: 16px;
+
+        AppHeader {
+            is-programming: root.is-programming;
+        }
+
+        FileCard {
+            selected-path: root.selected-file-path;
+            has-selection: root.has-selected-file;
+            enabled: !root.is-programming;
+
+            browse => { root.browse-file(); }
+        }
+
+        log-view := LogView {
+            vertical-stretch: 1;
+            min-height: 260px;
+            entries: root.log-entries;
+            follow-output <=> root.follow-log;
+        }
+
+        ProgressCard {
+            value: root.progress-value;
+            running: root.is-programming;
+        }
+
+        ActionBar {
+            has-selection: root.has-selected-file;
+            is-programming: root.is-programming;
+
+            program => { root.program-file(); }
+        }
+    }
+
+    scroll-log-to-bottom => {
+        if (root.follow-log) {
+            log-view.scroll-to-bottom();
+        }
+    }
+}

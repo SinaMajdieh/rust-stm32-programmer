@@ -1,0 +1,80 @@
+import { Button, HorizontalBox, VerticalBox } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { StatusBadge } from "./common.slint";
+
+export component AppHeader inherits HorizontalBox {
+    in property <bool> is-programming;
+
+    height: 62px;
+    spacing: 14px;
+    cross-axis-alignment: center;
+
+    Rectangle {
+        width: 46px;
+        height: 46px;
+        border-radius: Theme.card-radius;
+        background: Theme.blue;
+
+        Text {
+            text: "ST";
+            color: white;
+            font-size: 17px;
+            font-weight: 800;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
+    VerticalBox {
+        spacing: 3px;
+        alignment: center;
+
+        Text {
+            text: "STM32 Programmer";
+            color: Theme.text-primary;
+            font-size: 23px;
+            font-weight: 700;
+        }
+
+        Text {
+            text: "Flash firmware safely and monitor device output";
+            color: Theme.text-muted;
+            font-size: 12px;
+        }
+    }
+
+    Rectangle { horizontal-stretch: 1; }
+
+    StatusBadge { active: root.is-programming; }
+}
+
+export component ActionBar inherits HorizontalBox {
+    in property <bool> has-selection;
+    in property <bool> is-programming;
+
+    callback program();
+
+    height: 42px;
+    spacing: 12px;
+
+    Text {
+        text: root.has-selection
+            ? "Firmware file ready"
+            : "Select a .hex, .bin, or .txt file to continue";
+        color: root.has-selection ? Theme.green : Theme.text-muted;
+        font-size: 12px;
+        vertical-alignment: center;
+    }
+
+    Rectangle { horizontal-stretch: 1; }
+
+    Button {
+        width: 156px;
+        height: 42px;
+        text: root.is-programming ? "Programming..." : "Program Device";
+        enabled: root.has-selection && !root.is-programming;
+        primary: true;
+
+        clicked => { root.program(); }
+    }
+}

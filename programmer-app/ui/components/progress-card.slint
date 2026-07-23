@@ -1,0 +1,57 @@
+import { HorizontalBox, ProgressIndicator, VerticalBox } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+
+export component ProgressCard inherits Rectangle {
+    in property <float> value: 0;
+    in property <bool> running: false;
+
+    height: 92px;
+    background: Theme.panel-background;
+    border-color: Theme.border;
+    border-width: Theme.card-border-width;
+    border-radius: Theme.card-radius;
+
+    VerticalBox {
+        padding: 15px;
+        spacing: 9px;
+
+        HorizontalBox {
+            Text {
+                text: root.running
+                    ? "Programming device"
+                    : root.value >= 100
+                        ? "Programming complete"
+                        : "Programming progress";
+                color: Theme.text-normal;
+                font-size: 13px;
+                font-weight: 600;
+                vertical-alignment: center;
+            }
+
+            Rectangle { horizontal-stretch: 1; }
+
+            Text {
+                text: round(root.value) + "%";
+                color: root.value >= 100 ? Theme.green : Theme.blue-light;
+                font-size: 14px;
+                font-weight: 700;
+                vertical-alignment: center;
+            }
+        }
+
+        ProgressIndicator {
+            height: 8px;
+            progress: root.value / 100;
+        }
+
+        Text {
+            text: root.running
+                ? "Do not disconnect the device while programming."
+                : root.value >= 100
+                    ? "The firmware was written successfully."
+                    : "Ready to program the selected firmware file.";
+            color: Theme.text-muted;
+            font-size: 11px;
+        }
+    }
+}
