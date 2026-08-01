@@ -6,6 +6,8 @@ use std::{
     time::Duration,
 };
 
+pub mod hex;
+
 #[derive(Debug, Clone)]
 pub struct ProgrammingProgress {
     pub percentage: i32,
