@@ -1,45 +1,42 @@
-use std::{fmt::Display, thread};
+use std::thread;
 
-use programmer_core::{program_file, ProgrammingProgress};
+use programmer_core::{Report, validate_firmware};
 
-use crate::{ui, MainWindow};
+use crate::{MainWindow, ui};
 
 pub fn start(window: slint::Weak<MainWindow>, file_path: String) {
     thread::spawn(move || {
-        let result = program_file(file_path, {
-            let window = window.clone();
+        let _ = {
+            let mut report = |event| {
+                show_report(&window, event);
+            };
 
-            move |progress| show_progress(&window, progress)
-        });
+            let _ = validate_firmware(&file_path, &mut report);
+        };
 
-        show_result(&window, result);
+        finish(&window);
     });
 }
 
-fn show_progress(
+fn show_report(
     window: &slint::Weak<MainWindow>,
-    progress: ProgrammingProgress,
+    report: Report,
 ) {
     let _ = window.clone().upgrade_in_event_loop(move |window| {
-        window.set_progress_value(progress.percentage as f32);
-        ui::append_log(&window, progress.text_chunk);
+        match report {
+            Report::Progress(progress) => {
+                window.set_progress_value(progress as f32);
+            }
+            Report::Log(message) => {
+                ui::append_log(&window, message);
+            }
+        }
     });
 }
 
-fn show_result<E>(
-    window: &slint::Weak<MainWindow>,
-    result: Result<(), E>,
-) where
-    E: Display + Send + 'static,
+fn finish(window: &slint::Weak<MainWindow>)
 {
     let _ = window.clone().upgrade_in_event_loop(move |window| {
         window.set_is_programming(false);
-
-        let message = match result {
-            Ok(()) => "Programming completed successfully.".into(),
-            Err(error) => format!("Programming failed: {error}"),
-        };
-
-        ui::append_log(&window, message);
     });
 }

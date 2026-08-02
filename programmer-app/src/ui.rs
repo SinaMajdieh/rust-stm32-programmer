@@ -17,7 +17,6 @@ pub fn begin_programming(window: &MainWindow) {
     reset(window);
     window.set_is_programming(true);
     window.set_follow_log(true);
-    append_log(window, "Programming started...");
 }
 
 pub fn append_log(
