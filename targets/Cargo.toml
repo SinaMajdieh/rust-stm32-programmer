@@ -1,0 +1,8 @@
+[package]
+name = "targets"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+include_dir = "0.7.4"
+tempfile = "3.27.0"
