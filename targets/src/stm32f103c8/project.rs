@@ -7,19 +7,13 @@ use std::{
 /// A generated STM32 project stored on disk.
 #[derive(Debug)]
 pub struct Project {
-    pub(crate) directory: PathBuf,
-    pub(crate) sources: Vec<PathBuf>,
+    directory: PathBuf,
+    sources: Vec<PathBuf>,
 }
 
 impl Project {
-    pub(super) fn from_generated(
-        directory: PathBuf,
-        sources: Vec<PathBuf>,
-    ) -> Self {
-        Self {
-            directory,
-            sources,
-        }
+    pub(super) fn from_generated(directory: PathBuf, sources: Vec<PathBuf>) -> Self {
+        Self { directory, sources }
     }
     /// Adds a source file to the generated project's `src` directory.
     ///
@@ -29,11 +23,7 @@ impl Project {
     ///
     /// Returns an error if `file_name` is not a simple supported filename,
     /// already exists, or cannot be written.
-    pub fn add_source(
-        &mut self,
-        file_name: impl AsRef<Path>,
-        source: &str,
-    ) -> io::Result<()> {
+    pub fn add_source(&mut self, file_name: impl AsRef<Path>, source: &str) -> io::Result<()> {
         let file_name = file_name.as_ref();
 
         validate_source_name(file_name)?;
