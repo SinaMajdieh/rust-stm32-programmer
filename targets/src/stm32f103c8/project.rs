@@ -23,7 +23,7 @@ impl Project {
     ///
     /// Returns an error if `file_name` is not a simple supported filename,
     /// already exists, or cannot be written.
-    pub fn add_source(&mut self, file_name: impl AsRef<Path>, source: &str) -> io::Result<()> {
+    pub fn add_source(&mut self, file_name: impl AsRef<Path>, source: &str) -> io::Result<&mut Self> {
         let file_name = file_name.as_ref();
 
         validate_source_name(file_name)?;
@@ -39,7 +39,7 @@ impl Project {
 
         self.sources.push(path);
 
-        Ok(())
+        Ok(self)
     }
     /// Returns the root directory of the generated project.
     pub fn root(&self) -> &Path {
