@@ -1336,6 +1336,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
+name = "firmware-targets"
+version = "0.1.0"
+dependencies = [
+ "include_dir",
+ "tempfile",
+]
+
+[[package]]
 name = "fixed_decimal"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4718,14 +4726,6 @@ dependencies = [
  "filetime",
  "libc",
  "xattr",
-]
-
-[[package]]
-name = "targets"
-version = "0.1.0"
-dependencies = [
- "include_dir",
- "tempfile",
 ]
 
 [[package]]
