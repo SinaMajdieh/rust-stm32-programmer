@@ -133,3 +133,7 @@ fn validate_source_name(file_name: &Path, supported_extensions: &[&str]) -> io::
 
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "project_tests.rs"]
+mod tests;

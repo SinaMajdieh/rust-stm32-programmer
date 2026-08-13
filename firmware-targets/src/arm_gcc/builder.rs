@@ -181,3 +181,7 @@ impl<'a> ArmGcc<'a> {
         Ok(BuildArtifacts::new(linked.elf, hex, binary, linked.map))
     }
 }
+
+#[cfg(test)]
+#[path = "builder_tests.rs"]
+mod tests;

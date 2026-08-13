@@ -91,3 +91,7 @@ impl ArmGccConfig {
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[path = "config_tests.rs"]
+mod tests;

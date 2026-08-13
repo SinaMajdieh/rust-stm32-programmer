@@ -56,3 +56,7 @@ fn convert(config: &ArmGccConfig, elf: &Path, format: OutputFormat) -> Result<Pa
 
     Ok(output)
 }
+
+#[cfg(test)]
+#[path = "objcopy_tests.rs"]
+mod tests;

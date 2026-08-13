@@ -33,3 +33,7 @@ fn run(command: &mut Command, stage: BuildStage, path: &Path) -> Result<(), Buil
         diagnostics,
     })
 }
+
+#[cfg(test)]
+#[path = "mod_tests.rs"]
+mod tests;

@@ -58,3 +58,7 @@ fn command(
 
     command
 }
+
+#[cfg(test)]
+#[path = "link_tests.rs"]
+mod tests;

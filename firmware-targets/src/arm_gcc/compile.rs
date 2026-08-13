@@ -91,3 +91,7 @@ fn is_supported_source(source: &Path) -> bool {
                 || extension == OsStr::new("S")
     )
 }
+
+#[cfg(test)]
+#[path = "compile_tests.rs"]
+mod tests;
