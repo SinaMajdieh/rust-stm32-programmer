@@ -1,7 +1,7 @@
-use std::path::Path;
 use crate::hex;
 use crate::hex::HexError;
 use crate::report::Report;
+use std::path::Path;
 
 pub fn validate_firmware(
     path: impl AsRef<Path>,

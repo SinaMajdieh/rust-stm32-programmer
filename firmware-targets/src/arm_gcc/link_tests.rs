@@ -50,5 +50,3 @@ fn link_command_contains_the_linker_script_map_file_and_every_object() {
         ]
     );
 }
-
-

@@ -3,9 +3,7 @@ use slint::{Model, ModelRc, SharedString, VecModel};
 use crate::MainWindow;
 
 pub fn initialize(window: &MainWindow) {
-    window.set_log_entries(ModelRc::new(
-        VecModel::<SharedString>::default(),
-    ));
+    window.set_log_entries(ModelRc::new(VecModel::<SharedString>::default()));
 }
 
 pub fn reset(window: &MainWindow) {
@@ -19,10 +17,7 @@ pub fn begin_programming(window: &MainWindow) {
     window.set_follow_log(true);
 }
 
-pub fn append_log(
-    window: &MainWindow,
-    message: impl Into<SharedString>,
-) {
+pub fn append_log(window: &MainWindow, message: impl Into<SharedString>) {
     with_log_model(window, |log| log.push(message.into()));
 }
 
@@ -30,10 +25,7 @@ fn clear_log(window: &MainWindow) {
     with_log_model(window, VecModel::clear);
 }
 
-fn with_log_model(
-    window: &MainWindow,
-    action: impl FnOnce(&VecModel<SharedString>),
-) {
+fn with_log_model(window: &MainWindow, action: impl FnOnce(&VecModel<SharedString>)) {
     let model = window.get_log_entries();
     let log = model
         .as_any()

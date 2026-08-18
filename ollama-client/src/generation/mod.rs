@@ -79,6 +79,9 @@ pub struct GenerateRequest {
     model: String,
     prompt: String,
     options: GenerateOptions,
+    system_prompt: Option<String>,
+    thinking: Option<bool>,
+    keep_alive: Option<String>,
 }
 
 impl GenerateRequest {
@@ -88,6 +91,9 @@ impl GenerateRequest {
             model: model.into(),
             prompt: prompt.into(),
             options: GenerateOptions::default(),
+            system_prompt: None,
+            thinking: None,
+            keep_alive: None,
         }
     }
 
@@ -95,6 +101,24 @@ impl GenerateRequest {
     #[must_use]
     pub fn with_options(mut self, options: GenerateOptions) -> Self {
         self.options = options;
+        self
+    }
+
+    #[must_use]
+    pub fn with_system_prompt(mut self, system_prompt: impl Into<String>) -> Self {
+        self.system_prompt = Some(system_prompt.into());
+        self
+    }
+
+    #[must_use]
+    pub fn with_thinking(mut self, thinking: bool) -> Self {
+        self.thinking = Some(thinking);
+        self
+    }
+
+    #[must_use]
+    pub fn with_keep_alive(mut self, keep_alive: impl Into<String>) -> Self {
+        self.keep_alive = Some(keep_alive.into());
         self
     }
 
@@ -111,6 +135,18 @@ impl GenerateRequest {
     /// Returns the request's generation options.
     pub fn options(&self) -> &GenerateOptions {
         &self.options
+    }
+
+    pub fn system_prompt(&self) -> Option<&str> {
+        self.system_prompt.as_deref()
+    }
+
+    pub fn thinking(&self) -> Option<bool> {
+        self.thinking
+    }
+
+    pub fn keep_alive(&self) -> Option<&str> {
+        self.keep_alive.as_deref()
     }
 }
 

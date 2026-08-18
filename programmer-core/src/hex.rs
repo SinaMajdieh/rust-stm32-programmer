@@ -15,10 +15,7 @@ const RECORD_OVERHEAD: usize = 5;
 #[derive(Debug)]
 pub enum HexError {
     Read(io::Error),
-    Invalid {
-        line: usize,
-        message: &'static str,
-    },
+    Invalid { line: usize, message: &'static str },
     MissingEof,
 }
 
@@ -86,9 +83,7 @@ fn validate(text: &str) -> Result<(), HexError> {
 }
 
 fn validate_record(line: &str) -> Result<Vec<u8>, &'static str> {
-    let hex = line
-        .strip_prefix(':')
-        .ok_or("record must start with ':'")?;
+    let hex = line.strip_prefix(':').ok_or("record must start with ':'")?;
 
     if hex.len() % 2 != 0 {
         return Err("record has an odd number of hexadecimal digits");
@@ -122,25 +117,17 @@ fn validate_record(line: &str) -> Result<Vec<u8>, &'static str> {
     Ok(record)
 }
 
-fn validate_record_type(
-    kind: u8,
-    length: usize,
-    address: u16,
-) -> Result<(), &'static str> {
+fn validate_record_type(kind: u8, length: usize, address: u16) -> Result<(), &'static str> {
     match kind {
         DATA => Ok(()),
 
         EOF if length == 0 && address == 0 => Ok(()),
 
-        EXTENDED_SEGMENT_ADDRESS | EXTENDED_LINEAR_ADDRESS
-        if length == 2 && address == 0 => Ok(()),
+        EXTENDED_SEGMENT_ADDRESS | EXTENDED_LINEAR_ADDRESS if length == 2 && address == 0 => Ok(()),
 
-        START_SEGMENT_ADDRESS | START_LINEAR_ADDRESS
-        if length == 4 && address == 0 => Ok(()),
+        START_SEGMENT_ADDRESS | START_LINEAR_ADDRESS if length == 4 && address == 0 => Ok(()),
 
-        EOF => {
-            Err("EOF record must have address 0000 and no data")
-        }
+        EOF => Err("EOF record must have address 0000 and no data"),
 
         EXTENDED_SEGMENT_ADDRESS | EXTENDED_LINEAR_ADDRESS => {
             Err("address record must have address 0000 and two data bytes")
@@ -155,11 +142,9 @@ fn validate_record_type(
 }
 
 fn parse_byte(pair: &[u8]) -> Result<u8, &'static str> {
-    let pair =
-        std::str::from_utf8(pair).map_err(|_| "record contains invalid hexadecimal data")?;
+    let pair = std::str::from_utf8(pair).map_err(|_| "record contains invalid hexadecimal data")?;
 
-    u8::from_str_radix(pair, 16)
-        .map_err(|_| "record contains invalid hexadecimal data")
+    u8::from_str_radix(pair, 16).map_err(|_| "record contains invalid hexadecimal data")
 }
 
 fn is_record_eof(record: &[u8]) -> bool {

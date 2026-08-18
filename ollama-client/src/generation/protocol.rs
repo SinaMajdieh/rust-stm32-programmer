@@ -43,6 +43,15 @@ pub(crate) struct GenerateBody<'a> {
     prompt: &'a str,
     stream: bool,
 
+    #[serde(skip_serializing_if = "Option::is_none")]
+    system: Option<&'a str>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    think: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    keep_alive: Option<&'a str>,
+
     #[serde(skip_serializing_if = "GenerateOptionsBody::is_empty")]
     options: GenerateOptionsBody,
 }
@@ -53,6 +62,9 @@ impl<'a> From<&'a GenerateRequest> for GenerateBody<'a> {
             model: request.model(),
             prompt: request.prompt(),
             stream: false,
+            system: request.system_prompt(),
+            think: request.thinking(),
+            keep_alive: request.keep_alive(),
             options: GenerateOptionsBody::from(request.options()),
         }
     }

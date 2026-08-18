@@ -89,5 +89,8 @@ fn assembly_compile_command_omits_the_c_language_standard() {
     let arguments = arguments(&command);
 
     assert!(!arguments.iter().any(|argument| argument == "-std=c11"));
-    assert_eq!(arguments.last(), Some(&"generated/blink/build/startup_stm32f103xb.s.o".into()));
+    assert_eq!(
+        arguments.last(),
+        Some(&"generated/blink/build/startup_stm32f103xb.s.o".into())
+    );
 }

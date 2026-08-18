@@ -29,10 +29,16 @@ async fn generates_a_response() {
         .with_temperature(0.0)
         .with_seed(42)
         .with_context_length(4096)
-        .with_maximum_output_tokens(64);
+        .with_maximum_output_tokens(256);
 
-    let request =
-        GenerateRequest::new(model, "Respond with exactly the word READY.").with_options(options);
+    let request = GenerateRequest::new(
+        model,
+        "Write a C function that returns the larger of two integers.",
+    )
+    .with_system_prompt("Comment all the steps and Only return the C code.")
+    .with_thinking(false)
+    .with_keep_alive("5m")
+    .with_options(options);
 
     let generation = client
         .generate(&request)

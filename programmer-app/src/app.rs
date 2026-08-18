@@ -1,5 +1,5 @@
+use crate::{MainWindow, programming, ui};
 use slint::ComponentHandle;
-use crate::{programming, ui, MainWindow};
 
 pub fn run() -> Result<(), slint::PlatformError> {
     let window = MainWindow::new()?;
@@ -27,9 +27,7 @@ fn connect_file_picker(window: &MainWindow) {
             return;
         };
 
-        window.set_selected_file_path(
-            path.to_string_lossy().into_owned().into(),
-        );
+        window.set_selected_file_path(path.to_string_lossy().into_owned().into());
 
         ui::reset(&window);
     });

@@ -27,7 +27,9 @@ fn generated_layout() -> tempfile::TempDir {
 #[test]
 fn source_name_validation_accepts_only_simple_c_and_assembly_filenames() {
     for name in ["main.c", "startup.s", "startup.S"] {
-        assert!(validate_source_name(Path::new(name), Project::SUPPORTED_SOURCE_EXTENSIONS).is_ok());
+        assert!(
+            validate_source_name(Path::new(name), Project::SUPPORTED_SOURCE_EXTENSIONS).is_ok()
+        );
     }
 }
 
@@ -67,7 +69,8 @@ fn from_generated_rejects_a_missing_project_directory() {
 fn from_generated_rejects_a_missing_source_file() {
     let layout = generated_layout();
     let missing = layout.path().join("src/missing.c");
-    let error = Project::from_generated(layout.path(), vec![missing.clone()], config()).unwrap_err();
+    let error =
+        Project::from_generated(layout.path(), vec![missing.clone()], config()).unwrap_err();
 
     assert_eq!(error.kind(), io::ErrorKind::NotFound);
     assert!(error.to_string().contains(&missing.display().to_string()));
@@ -126,7 +129,10 @@ fn add_source_does_not_overwrite_an_existing_file_or_duplicate_the_source_list()
         .expect_err("existing sources must never be overwritten");
 
     assert_eq!(error.kind(), io::ErrorKind::AlreadyExists);
-    assert_eq!(fs::read_to_string(layout.path().join("src/main.c"))?, "first");
+    assert_eq!(
+        fs::read_to_string(layout.path().join("src/main.c"))?,
+        "first"
+    );
     assert_eq!(project.sources().len(), sources_before);
 
     Ok(())
