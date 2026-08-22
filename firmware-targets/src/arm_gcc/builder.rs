@@ -8,6 +8,9 @@ use std::{
 use super::{ArmGccConfig, compile, link, objcopy};
 
 /// Files produced by a successful firmware build.
+///
+/// The artifacts consist of the linked ELF image, Intel HEX and raw binary
+/// firmware images, and the linker map file.
 #[derive(Debug, Clone)]
 pub struct BuildArtifacts {
     elf: PathBuf,
@@ -26,37 +29,40 @@ impl BuildArtifacts {
         }
     }
 
-    /// Returns the ELF firmware image.
+    /// Returns the path to the ELF firmware image.
     pub fn elf(&self) -> &Path {
         &self.elf
     }
 
-    /// Returns the Intel HEX firmware image.
+    /// Returns the path to the Intel HEX firmware image.
     pub fn hex(&self) -> &Path {
         &self.hex
     }
 
-    /// Returns the raw binary firmware image.
+    /// Returns the path to the raw binary firmware image.
     pub fn binary(&self) -> &Path {
         &self.binary
     }
 
-    /// Returns the linker map file.
+    /// Returns the path to the linker map file.
     pub fn map(&self) -> &Path {
         &self.map
     }
 }
 
-/// The build stage that produced an error.
+/// Identifies the build stage at which an error occurred.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BuildStage {
-    /// Compiling a C or assembly source file.
+    /// Compiling a C or assembly source file into an object file.
     Compile,
-    /// Linking object files into an ELF image.
+
+    /// Linking object files into an ELF firmware image.
     Link,
-    /// Converting an ELF image to Intel HEX.
+
+    /// Converting the ELF image into an Intel HEX firmware image.
     ConvertToHex,
-    /// Converting an ELF image to raw binary.
+
+    /// Converting the ELF image into a raw binary firmware image.
     ConvertToBinary,
 }
 
@@ -76,27 +82,28 @@ impl fmt::Display for BuildStage {
 /// An error produced while building firmware.
 #[derive(Debug)]
 pub enum BuildError {
-    /// A filesystem or process-launch error.
+    /// A filesystem operation or external process could not be started.
     Io(io::Error),
 
-    /// A source file has an unsupported extension.
+    /// A source file has an extension that is not supported by the ARM GCC
+    /// build pipeline.
     UnsupportedSource {
         /// The unsupported source file.
         source: PathBuf,
     },
 
-    /// An external tool returned a non-zero exit status.
+    /// An external tool exited unsuccessfully during a build stage.
     CommandFailed {
-        /// The stage that failed.
+        /// The stage at which the command failed.
         stage: BuildStage,
 
-        /// The file being produced or compiled.
+        /// The source or output file associated with the failed command.
         path: PathBuf,
 
-        /// The tool's exit status.
+        /// The exit status returned by the external tool.
         status: ExitStatus,
 
-        /// Compiler diagnostics written to standard error.
+        /// Diagnostics written by the tool to standard error.
         diagnostics: String,
     },
 }
@@ -149,7 +156,16 @@ impl From<io::Error> for BuildError {
     }
 }
 
-/// Executes an ARM GCC firmware build.
+/// Coordinates the ARM GCC firmware build pipeline.
+///
+/// `ArmGcc` owns no build state itself; it borrows the configuration, project
+/// root, and source list supplied by the caller. A build proceeds through the
+/// following stages:
+///
+/// 1. Validate the project layout.
+/// 2. Compile each source file into an object file.
+/// 3. Link the object files into an ELF image and linker map.
+/// 4. Convert the ELF image into Intel HEX and raw binary images.
 pub(crate) struct ArmGcc<'a> {
     config: &'a ArmGccConfig,
     project_root: &'a Path,
@@ -157,6 +173,7 @@ pub(crate) struct ArmGcc<'a> {
 }
 
 impl<'a> ArmGcc<'a> {
+    /// Creates a build coordinator for the given project.
     pub(crate) fn new(
         config: &'a ArmGccConfig,
         project_root: &'a Path,
@@ -169,10 +186,16 @@ impl<'a> ArmGcc<'a> {
         }
     }
 
+    /// Runs the complete ARM GCC firmware build pipeline.
+    ///
+    /// The build artifacts are written to the project's `build` directory.
+    /// Compilation, linking, and image conversion are performed by the
+    /// corresponding stages of the build pipeline.
     pub(crate) fn build(&self) -> Result<BuildArtifacts, BuildError> {
         self.config.validate_project_layout(self.project_root)?;
 
         let objects = compile::sources(self.config, self.project_root, self.sources)?;
+
         let linked = link::objects(self.config, self.project_root, &objects)?;
 
         let hex = objcopy::to_hex(self.config, &linked.elf)?;

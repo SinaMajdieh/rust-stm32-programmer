@@ -7,6 +7,11 @@ use std::{
 
 use super::{ArmGccConfig, BuildError, BuildStage, run};
 
+/// Compiles all supported source files into object files.
+///
+/// Object files are written to the project's `build` directory. Compilation
+/// errors are reported with [`BuildError::CommandFailed`], while unsupported
+/// source extensions are reported with [`BuildError::UnsupportedSource`].
 pub(super) fn sources(
     config: &ArmGccConfig,
     project_root: &Path,
@@ -21,6 +26,11 @@ pub(super) fn sources(
         .collect()
 }
 
+/// Compiles one source file and returns the resulting object file path.
+///
+/// Source files are validated before invoking the compiler so unsupported
+/// extensions produce a crate-level [`BuildError`] instead of an opaque
+/// compiler failure.
 fn compile_source(
     config: &ArmGccConfig,
     project_root: &Path,
@@ -36,11 +46,18 @@ fn compile_source(
     let object = object_path(source, build_directory)?;
 
     let mut command = command(config, project_root, source, &object);
+
     run(&mut command, BuildStage::Compile, source)?;
 
     Ok(object)
 }
 
+/// Constructs the compiler invocation for a source file.
+///
+/// The generated command uses the configured target CPU and Thumb
+/// instruction set, enables function and data sections, and builds with
+/// debugging information and low optimization suitable for development
+/// firmware builds.
 fn command(config: &ArmGccConfig, project_root: &Path, source: &Path, object: &Path) -> Command {
     let mut command = Command::new(config.compiler());
 
@@ -69,6 +86,10 @@ fn command(config: &ArmGccConfig, project_root: &Path, source: &Path, object: &P
     command
 }
 
+/// Derives the object-file path for a source file.
+///
+/// The source filename is retained and `.o` is appended, placing the result
+/// directly in the build directory.
 fn object_path(source: &Path, build_directory: &Path) -> Result<PathBuf, BuildError> {
     let file_name = source
         .file_name()
@@ -82,6 +103,11 @@ fn object_path(source: &Path, build_directory: &Path) -> Result<PathBuf, BuildEr
     Ok(build_directory.join(object_name))
 }
 
+/// Returns whether the source file uses an extension supported by the
+/// compiler stage.
+///
+/// The build pipeline accepts C source files (`.c`) and ARM assembly source
+/// files (`.s` and `.S`).
 fn is_supported_source(source: &Path) -> bool {
     matches!(
         source.extension(),

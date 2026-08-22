@@ -7,11 +7,20 @@ use std::{
 
 use super::{ArmGccConfig, BuildError, BuildStage, run};
 
+/// Output produced by the linker stage.
 pub(super) struct LinkOutput {
+    /// The linked ELF firmware image.
     pub(super) elf: PathBuf,
+
+    /// The linker map containing symbol and memory-layout information.
     pub(super) map: PathBuf,
 }
 
+/// Links compiled object files into the firmware ELF image.
+///
+/// The linker uses the project's configured linker script and enables section
+/// garbage collection. The resulting ELF image and linker map are written to
+/// the project's `build` directory.
 pub(super) fn objects(
     config: &ArmGccConfig,
     project_root: &Path,
@@ -24,11 +33,18 @@ pub(super) fn objects(
     let map = build_directory.join("firmware.map");
 
     let mut command = command(config, project_root, objects, &elf, &map);
+
     run(&mut command, BuildStage::Link, &elf)?;
 
     Ok(LinkOutput { elf, map })
 }
 
+/// Constructs the linker invocation.
+///
+/// Linking is performed through the configured ARM GCC compiler so that GCC
+/// supplies the appropriate linker and runtime configuration. The project's
+/// linker script determines the target memory layout, while section garbage
+/// collection removes unused sections from the final image.
 fn command(
     config: &ArmGccConfig,
     project_root: &Path,

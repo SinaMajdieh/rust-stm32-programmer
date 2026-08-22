@@ -1,31 +1,93 @@
-use firmware_targets::stm32f103c8::Stm32F103C8;
+use firmware_targets::stm32f103c8::{Ll, ProjectTemplate};
 
 fn main() {
     let code = r#"
-    #include "stm32f1xx.h"
+        #include <stdint.h>
 
-    void SystemClock_Config(void) {
-        // Already configured to use 8 MHz HSI as default clock
-    }
+        /*
+         * STM32F103C8 memory-mapped registers
+         *
+         * RCC APB2 peripheral clock enable register
+         */
+        #define RCC_APB2ENR   (*(volatile uint32_t *)0x40021018)
 
-    int main(void) {
-        // Enable GPIOC clock
-        RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
+        /*
+         * GPIOC configuration registers
+         */
+        #define GPIOC_CRH     (*(volatile uint32_t *)0x40011004)
+        #define GPIOC_ODR     (*(volatile uint32_t *)0x4001100C)
 
-        // Configure PC13 as output
-        GPIOC->CRH &= ~(0xF << (4 * 1)); // Clear mode bits for PC13
-        GPIOC->CRH |= (0x1 << (4 * 1));  // Set mode to push-pull output, max speed 2 MHz
+        /*
+         * Bit used to enable the GPIOC peripheral clock.
+         * IOPCEN = bit 4
+         */
+        #define RCC_IOPCEN    (1U << 4)
 
-        while (1) {
-            // Toggle PC13
-            GPIOC->ODR ^= (1 << 13);
+        /*
+         * PC13 is the onboard LED.
+         *
+         * PC13 is in GPIOC_CRH because it is pin 8..15.
+         *
+         * Each pin gets 4 configuration bits.
+         * PC13 starts at bit (13 - 8) * 4 = 20.
+         */
+        #define PC13_CONFIG_SHIFT 20
 
-            // Blocking delay of 500 ms using HSI clock
-            for (volatile uint32_t i = 0; i < (8 * 500 * 1000) / 2; ++i);
+        static void delay(volatile uint32_t count)
+        {
+            while (count--)
+            {
+                __asm volatile ("nop");
+            }
         }
-    }
+
+        int main(void)
+        {
+            /*
+             * 1. Enable the clock for GPIOC.
+             */
+            RCC_APB2ENR |= RCC_IOPCEN;
+
+            /*
+             * 2. Configure PC13 as:
+             *
+             * MODE = 01 → output mode, max 10 MHz
+             * CNF  = 00 → general-purpose push-pull
+             *
+             * Binary:
+             *
+             * 0001
+             *
+             * which is 0x1.
+             */
+            GPIOC_CRH &= ~(0xFU << PC13_CONFIG_SHIFT);
+            GPIOC_CRH |=  (0x1U << PC13_CONFIG_SHIFT);
+
+            while (1)
+            {
+                /*
+                 * LED ON
+                 *
+                 * Active-low:
+                 * PC13 = 0
+                 */
+                GPIOC_ODR &= ~(1U << 13);
+
+                delay(500000);
+
+                /*
+                 * LED OFF
+                 *
+                 * PC13 = 1
+                 */
+                GPIOC_ODR |= (1U << 13);
+
+                delay(500000);
+            }
+        }
+
     "#;
-    let mut project = Stm32F103C8::generate("build").unwrap();
+    let mut project = Ll::generate("build").unwrap();
     project.add_source("main.c", code).unwrap();
 
     match project.compile() {

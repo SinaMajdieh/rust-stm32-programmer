@@ -2,7 +2,7 @@
 
 use std::io;
 
-use firmware_targets::stm32f103c8::Stm32F103C8;
+use firmware_targets::stm32f103c8::{Cmsis, ProjectTemplate};
 use tempfile::tempdir;
 
 #[test]
@@ -10,7 +10,7 @@ fn target_generation_produces_a_reusable_project_with_builtin_sources() -> io::R
     let directory = tempdir()?;
     let output = directory.path().join("generated/blue-pill");
 
-    let mut project = Stm32F103C8::generate(&output)?;
+    let mut project = Cmsis::generate(&output)?;
 
     assert_eq!(project.root(), output);
     assert_eq!(project.sources().len(), 2);
@@ -29,9 +29,9 @@ fn target_generation_does_not_replace_an_existing_project() -> io::Result<()> {
     let directory = tempdir()?;
     let output = directory.path().join("blue-pill");
 
-    Stm32F103C8::generate(&output)?;
-    let error = Stm32F103C8::generate(&output)
-        .expect_err("the target generator must never overwrite user files");
+    Cmsis::generate(&output)?;
+    let error =
+        Cmsis::generate(&output).expect_err("the target generator must never overwrite user files");
 
     assert_eq!(error.kind(), io::ErrorKind::AlreadyExists);
 
@@ -43,7 +43,7 @@ fn target_generation_does_not_replace_an_existing_project() -> io::Result<()> {
 fn public_api_builds_a_minimal_blue_pill_program() -> Result<(), Box<dyn std::error::Error>> {
     let directory = tempdir()?;
     let output = directory.path().join("blue-pill");
-    let mut project = Stm32F103C8::generate(&output)?;
+    let mut project = Cmsis::generate(&output)?;
 
     project.add_source(
         "main.c",
