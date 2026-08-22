@@ -1,91 +1,101 @@
-mod protocol;
+mod wire;
 
 use std::time::Duration;
 
-use serde::Deserialize;
+use crate::{OllamaClient, Result};
+use wire::{GenerateRequestBody, GenerateResponseBody};
 
-pub(crate) use protocol::GenerateBody;
+const GENERATE_ENDPOINT: &str = "/api/generate";
 
-/// Optional runtime settings applied to a generation request.
-///
-/// Unspecified options are omitted from the HTTP request, allowing Ollama to
-/// use its model or server defaults.
+/// Options that control text generation.
 #[derive(Debug, Clone, Default, PartialEq)]
+#[non_exhaustive]
 pub struct GenerateOptions {
-    temperature: Option<f32>,
-    seed: Option<u64>,
-    context_length: Option<u32>,
-    maximum_output_tokens: Option<u32>,
+    /// Controls the randomness of the generated output.
+    pub temperature: Option<f32>,
+
+    /// Sets the random seed used during generation.
+    pub seed: Option<u64>,
+
+    /// Sets the maximum context length in tokens.
+    pub context_length: Option<u32>,
+
+    /// Sets the maximum number of tokens to generate.
+    pub maximum_output_tokens: Option<u32>,
 }
 
 impl GenerateOptions {
-    /// Creates options with no explicit overrides.
+    /// Creates a set of generation options with all options unset.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Sets the sampling temperature.
+    /// Sets the temperature used during generation.
+    ///
+    /// Higher values produce more varied output, while lower values make the
+    /// output more deterministic.
     #[must_use]
     pub fn with_temperature(mut self, temperature: f32) -> Self {
         self.temperature = Some(temperature);
         self
     }
 
-    /// Sets the random seed used for generation.
+    /// Sets the random seed used during generation.
+    ///
+    /// Using the same seed can make generation reproducible when the other
+    /// generation parameters and model state are unchanged.
     #[must_use]
     pub fn with_seed(mut self, seed: u64) -> Self {
         self.seed = Some(seed);
         self
     }
 
-    /// Sets the context-window length.
+    /// Sets the maximum context length in tokens.
     #[must_use]
     pub fn with_context_length(mut self, context_length: u32) -> Self {
         self.context_length = Some(context_length);
         self
     }
 
-    /// Sets the maximum number of tokens Ollama may generate.
+    /// Sets the maximum number of tokens to generate.
     #[must_use]
     pub fn with_maximum_output_tokens(mut self, maximum_output_tokens: u32) -> Self {
         self.maximum_output_tokens = Some(maximum_output_tokens);
+
         self
-    }
-
-    /// Returns the configured sampling temperature.
-    pub fn temperature(&self) -> Option<f32> {
-        self.temperature
-    }
-
-    /// Returns the configured random seed.
-    pub fn seed(&self) -> Option<u64> {
-        self.seed
-    }
-
-    /// Returns the configured context-window length.
-    pub fn context_length(&self) -> Option<u32> {
-        self.context_length
-    }
-
-    /// Returns the configured maximum output-token count.
-    pub fn maximum_output_tokens(&self) -> Option<u32> {
-        self.maximum_output_tokens
     }
 }
 
-/// A request to generate text with an Ollama model.
+/// A request to generate a response from an Ollama model.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct GenerateRequest {
-    model: String,
-    prompt: String,
-    options: GenerateOptions,
-    system_prompt: Option<String>,
-    thinking: Option<bool>,
-    keep_alive: Option<String>,
+    /// The name of the model to use for generation.
+    pub model: String,
+
+    /// The prompt to provide to the model.
+    pub prompt: String,
+
+    /// Options controlling how the response is generated.
+    pub options: GenerateOptions,
+
+    /// An optional system prompt that provides instructions or context to the
+    /// model.
+    pub system_prompt: Option<String>,
+
+    /// Whether the model should include its thinking process in the response.
+    pub thinking: Option<bool>,
+
+    /// How long the model should remain loaded after the request completes.
+    ///
+    /// The value is passed directly to Ollama as its `keep_alive` setting.
+    pub keep_alive: Option<String>,
 }
 
 impl GenerateRequest {
-    /// Creates a request with no explicit generation-option overrides.
+    /// Creates a generation request for the given model and prompt.
+    ///
+    /// All optional generation settings are left unset.
     pub fn new(model: impl Into<String>, prompt: impl Into<String>) -> Self {
         Self {
             model: model.into(),
@@ -97,140 +107,127 @@ impl GenerateRequest {
         }
     }
 
-    /// Applies explicit generation options.
+    /// Sets the options used for generation.
     #[must_use]
     pub fn with_options(mut self, options: GenerateOptions) -> Self {
         self.options = options;
         self
     }
 
+    /// Sets a system prompt for the model.
     #[must_use]
     pub fn with_system_prompt(mut self, system_prompt: impl Into<String>) -> Self {
         self.system_prompt = Some(system_prompt.into());
         self
     }
 
+    /// Enables or disables thinking for the generation request.
     #[must_use]
     pub fn with_thinking(mut self, thinking: bool) -> Self {
         self.thinking = Some(thinking);
         self
     }
 
+    /// Sets how long Ollama should keep the model loaded after the request.
+    ///
+    /// The value is passed directly to Ollama's `keep_alive` option.
     #[must_use]
     pub fn with_keep_alive(mut self, keep_alive: impl Into<String>) -> Self {
         self.keep_alive = Some(keep_alive.into());
         self
     }
-
-    /// Returns the requested model name.
-    pub fn model(&self) -> &str {
-        &self.model
-    }
-
-    /// Returns the generation prompt.
-    pub fn prompt(&self) -> &str {
-        &self.prompt
-    }
-
-    /// Returns the request's generation options.
-    pub fn options(&self) -> &GenerateOptions {
-        &self.options
-    }
-
-    pub fn system_prompt(&self) -> Option<&str> {
-        self.system_prompt.as_deref()
-    }
-
-    pub fn thinking(&self) -> Option<bool> {
-        self.thinking
-    }
-
-    pub fn keep_alive(&self) -> Option<&str> {
-        self.keep_alive.as_deref()
-    }
 }
 
-/// A completed, non-streaming generation returned by Ollama.
-#[derive(Debug, Clone, Deserialize)]
+/// The result of a completed text generation request.
+#[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct Generation {
-    response: String,
+    /// The generated response text.
+    pub response: String,
 
-    #[serde(default)]
-    thinking: String,
+    /// The model's thinking output, if provided.
+    pub thinking: String,
 
-    done: bool,
-    done_reason: Option<String>,
+    /// Whether Ollama has finished generating the response.
+    pub done: bool,
 
-    total_duration: u64,
-    load_duration: u64,
-    prompt_eval_count: u64,
-    prompt_eval_duration: u64,
-    eval_count: u64,
-    eval_duration: u64,
+    /// The reason Ollama reported for completing generation.
+    pub done_reason: Option<String>,
+
+    /// The total time spent processing the request.
+    pub total_duration: Duration,
+
+    /// The time spent loading the model.
+    pub load_duration: Duration,
+
+    /// The number of tokens in the input prompt.
+    pub prompt_tokens: u64,
+
+    /// The time spent evaluating the input prompt.
+    pub prompt_evaluation_duration: Duration,
+
+    /// The number of tokens generated in the response.
+    pub generated_tokens: u64,
+
+    /// The time spent generating the response tokens.
+    pub evaluation_duration: Duration,
 }
 
 impl Generation {
-    /// Returns the generated response text.
-    pub fn response(&self) -> &str {
-        &self.response
-    }
-
-    /// Returns separate thinking output when supplied by the model.
-    pub fn thinking(&self) -> &str {
-        &self.thinking
-    }
-
-    /// Reports whether Ollama marked the generation as complete.
-    pub fn is_done(&self) -> bool {
-        self.done
-    }
-
-    /// Returns Ollama's completion reason, when provided.
-    pub fn done_reason(&self) -> Option<&str> {
-        self.done_reason.as_deref()
-    }
-
-    /// Returns the complete server-reported generation duration.
-    pub fn total_duration(&self) -> Duration {
-        Duration::from_nanos(self.total_duration)
-    }
-
-    /// Returns the time Ollama spent loading the model.
-    pub fn load_duration(&self) -> Duration {
-        Duration::from_nanos(self.load_duration)
-    }
-
-    /// Returns the time spent evaluating prompt tokens.
-    pub fn prompt_evaluation_duration(&self) -> Duration {
-        Duration::from_nanos(self.prompt_eval_duration)
-    }
-
-    /// Returns the time spent generating output tokens.
-    pub fn evaluation_duration(&self) -> Duration {
-        Duration::from_nanos(self.eval_duration)
-    }
-
-    /// Returns the number of evaluated prompt tokens.
-    pub fn prompt_tokens(&self) -> u64 {
-        self.prompt_eval_count
-    }
-
-    /// Returns the number of generated output tokens.
-    pub fn generated_tokens(&self) -> u64 {
-        self.eval_count
-    }
-
-    /// Calculates output tokens generated per second.
+    /// Returns the average generation rate in tokens per second.
     ///
-    /// Returns `None` if Ollama reports zero evaluation time.
+    /// Returns `None` when the recorded evaluation duration is zero.
     pub fn tokens_per_second(&self) -> Option<f64> {
-        let seconds = self.evaluation_duration().as_secs_f64();
+        let seconds = self.evaluation_duration.as_secs_f64();
 
         if seconds == 0.0 {
             return None;
         }
 
-        Some(self.generated_tokens() as f64 / seconds)
+        Some(self.generated_tokens as f64 / seconds)
+    }
+}
+
+impl From<GenerateResponseBody> for Generation {
+    fn from(response: GenerateResponseBody) -> Self {
+        Self {
+            response: response.response,
+            thinking: response.thinking,
+            done: response.done,
+            done_reason: response.done_reason,
+            total_duration: Duration::from_nanos(response.total_duration),
+            load_duration: Duration::from_nanos(response.load_duration),
+            prompt_tokens: response.prompt_eval_count,
+            prompt_evaluation_duration: Duration::from_nanos(response.prompt_eval_duration),
+            generated_tokens: response.eval_count,
+            evaluation_duration: Duration::from_nanos(response.eval_duration),
+        }
+    }
+}
+
+impl OllamaClient {
+    /// Generates a response using an Ollama model.
+    ///
+    /// The request is sent as a non-streaming generation request and the
+    /// complete response is returned once generation finishes.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the request cannot be sent, times out, Ollama
+    /// returns an unsuccessful HTTP status, or the response cannot be
+    /// deserialized.
+    pub async fn generate(
+        &self,
+        request: &GenerateRequest,
+        timeout: Duration,
+    ) -> Result<Generation> {
+        let body = GenerateRequestBody::from(request);
+
+        let request = self.post(GENERATE_ENDPOINT)?.json(&body);
+
+        let response: GenerateResponseBody = self.execute_json(request, timeout).await?;
+
+        Ok(response.into())
     }
 }
 

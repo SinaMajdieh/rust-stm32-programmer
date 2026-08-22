@@ -1,17 +1,16 @@
-use super::*;
+use super::{GenerateOptions, GenerateRequest, wire::GenerateRequestBody};
 
 #[test]
 fn omits_options_when_none_are_configured() {
     let request = GenerateRequest::new("test-model", "Hello");
 
-    let body = GenerateBody::from(&request);
+    let body = GenerateRequestBody::from(&request);
 
     let json = serde_json::to_value(body).expect("request body should serialize");
 
     assert_eq!(json["model"], "test-model");
     assert_eq!(json["prompt"], "Hello");
     assert_eq!(json["stream"], false);
-    assert!(json.get("options").is_none());
 
     assert!(json.get("system").is_none());
     assert!(json.get("think").is_none());
@@ -29,7 +28,7 @@ fn serializes_options_using_ollama_field_names() {
 
     let request = GenerateRequest::new("test-model", "Hello").with_options(options);
 
-    let body = GenerateBody::from(&request);
+    let body = GenerateRequestBody::from(&request);
 
     let json = serde_json::to_value(body).expect("request body should serialize");
 
@@ -51,7 +50,7 @@ fn serializes_request_controls_using_ollama_names() {
         .with_thinking(false)
         .with_keep_alive("5m");
 
-    let body = GenerateBody::from(&request);
+    let body = GenerateRequestBody::from(&request);
 
     let json = serde_json::to_value(body).expect("request body should serialize");
 

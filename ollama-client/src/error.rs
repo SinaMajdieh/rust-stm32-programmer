@@ -1,22 +1,44 @@
-use url::ParseError;
+use std::time::Duration;
 
-/// An error produced while configuring or communicating with Ollama.
+use reqwest::StatusCode;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// An HTTP request or response operation failed.
-    #[error("Ollama request failed: {0}")]
-    Http(#[from] reqwest::Error),
-
-    /// The configured Ollama URL was invalid.
     #[error("invalid Ollama URL: {0}")]
-    Url(#[from] ParseError),
+    Url(#[from] url::ParseError),
 
-    #[error("Ollama returned HTTP {status}: {body}")]
-    OllamaStatus {
-        status: reqwest::StatusCode,
-        body: String,
+    #[error("Ollama request failed: {0}")]
+    Http(#[source] reqwest::Error),
+
+    #[error("Ollama request timed out after {timeout:?}")]
+    Timeout {
+        timeout: Duration,
+
+        #[source]
+        source: reqwest::Error,
     },
+
+    #[error("Ollama returned HTTP {status}: {message}")]
+    Api { status: StatusCode, message: String },
 }
 
-/// A result returned by this crate.
+impl Error {
+    /// Returns `true` if the error was caused by a request timing out.
+    pub fn is_timeout(&self) -> bool {
+        matches!(self, Self::Timeout { .. })
+    }
+
+    /// Returns the HTTP status code returned by Ollama, if available.
+    ///
+    /// This returns `Some` only for [`Error::Api`] errors. Transport errors,
+    /// URL parsing errors, and timeouts do not contain an HTTP response status.
+    pub fn status(&self) -> Option<StatusCode> {
+        match self {
+            Self::Api { status, .. } => Some(*status),
+            _ => None,
+        }
+    }
+}
+
+/// A specialized [`Result`] type for Ollama API operations.
 pub type Result<T> = std::result::Result<T, Error>;
