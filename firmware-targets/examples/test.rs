@@ -1,4 +1,7 @@
-use firmware_targets::stm32f103c8::{Ll, ProjectTemplate};
+use firmware_targets::{
+    programmer::OpenOcd,
+    stm32f103c8::{Ll, ProjectTemplate, Target},
+};
 
 fn main() {
     let code = r#"
@@ -90,10 +93,20 @@ fn main() {
     let mut project = Ll::generate("build").unwrap();
     project.add_source("main.c", code).unwrap();
 
-    match project.compile() {
-        Ok(_) => (),
-        Err(error) => println!("{error}"),
+    let artifact = match project.compile() {
+        Ok(artifact) => artifact,
+        Err(error) => {
+            eprintln!("{error}");
+            return;
+        }
     };
+
+    let board = Target::<OpenOcd>::new();
+
+    match board.program(artifact.elf()) {
+        Ok(_) => (),
+        Err(error) => eprintln!("Error while programming: {}", error),
+    }
 
     println!("done")
 }

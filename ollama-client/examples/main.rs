@@ -7,28 +7,20 @@ const MODEL: &str = "qwen2.5-coder:7b";
 
 #[tokio::main]
 async fn main() {
-    // Ollama client to use the APIs.
-    let a = OllamaClient::new(OLLAMA_URL);
-    let Ok(client) = a else {
-        eprintln!("Client Initializiation failes: {:?}", a.unwrap_err());
-        return;
-    };
+    let client = OllamaClient::new(OLLAMA_URL).unwrap();
 
-    // Ollama Options.
     let options = GenerateOptions::new()
-        // .with_seed(329)
+        .with_seed(329)
         .with_temperature(0.05)
         .with_context_length(8192)
         .with_maximum_output_tokens(1024);
 
-    // Request
     let request = GenerateRequest::new(MODEL, "Make the onboard LED blink every 500 ms.")
         .with_system_prompt(SYSTEM_PROMPT)
         .with_thinking(false)
         .with_keep_alive("2m")
         .with_options(options);
 
-    // Generation
     match client.generate(&request, Duration::from_secs(120)).await {
         Ok(generation) => {
             println!("Responce: {}", generation.response);

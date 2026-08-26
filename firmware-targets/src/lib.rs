@@ -16,6 +16,7 @@
 //! support.
 
 mod arm_gcc;
+pub mod programmer;
 mod project;
 
 /// Project templates for supported microcontroller targets.

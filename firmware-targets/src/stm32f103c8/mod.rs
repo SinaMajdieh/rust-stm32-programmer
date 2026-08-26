@@ -13,8 +13,10 @@
 
 mod cmsis;
 mod ll;
+mod target;
 mod template;
 
 pub use cmsis::Cmsis;
 pub use ll::Ll;
+pub use target::Target;
 pub use template::ProjectTemplate;
