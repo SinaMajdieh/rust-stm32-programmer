@@ -12,11 +12,13 @@
 //! configuration.
 
 mod cmsis;
+mod hal;
 mod ll;
 mod target;
 mod template;
 
 pub use cmsis::Cmsis;
+pub use hal::Hal;
 pub use ll::Ll;
 pub use target::Target;
 pub use template::ProjectTemplate;
