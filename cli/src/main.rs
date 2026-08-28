@@ -1,51 +1,43 @@
-use std::time::Instant;
+mod cli;
+mod config;
+mod firmware;
+mod generation;
 
+use anyhow::Result;
 use clap::Parser;
 
-use cli::{Cli, Command, Config, build_project, generate_code, program, save_source};
+use cli::{Cli, Command};
+use config::Config;
+use firmware::{build_project, program, save_source};
+use generation::generate_code;
+use tokio::time::Instant;
 
 #[tokio::main]
-async fn main() {
-    if let Err(error) = run().await {
-        eprintln!("error: {error:#}");
-        std::process::exit(1);
-    }
-}
+async fn main() -> Result<()> {
+    let cli = Cli::parse();
+    let config = Config::load()?;
 
-async fn run() -> anyhow::Result<()> {
-    match Cli::parse().command {
+    match cli.command {
         Command::Generate {
+            provider,
             model,
             project,
             prompt,
         } => {
-            let config = Config::load()?;
-
-            println!("Generating {project} with {model}...");
-
-            let code = generate_code(&config, &model, &prompt).await?;
-
+            let code = generate_code(&config, provider, &model, &prompt).await?;
+            println!("Generated code: {code}");
             save_source(&project, &code)?;
-
-            println!("Generated {project}/main.c.");
-            println!("{code}");
         }
 
         Command::Build { project } => {
             let start = Instant::now();
-            println!("Building {project}...");
-
             build_project(&project)?;
-
-            println!("Build finished in {} ms.", start.elapsed().as_millis());
+            println!("Build finished in {} ms.", start.elapsed().as_millis())
         }
 
         Command::Program { firmware } => {
             let start = Instant::now();
-            println!("Programming {firmware}...");
-
-            program(firmware)?;
-
+            program(&firmware)?;
             println!(
                 "Programming finished in {} ms.",
                 start.elapsed().as_millis()
@@ -53,25 +45,21 @@ async fn run() -> anyhow::Result<()> {
         }
 
         Command::Run {
+            provider,
             model,
             project,
             prompt,
         } => {
-            let config = Config::load()?;
-
-            println!("Generating {project} with {model}...");
-            let code = generate_code(&config, &model, &prompt).await?;
+            let code = generate_code(&config, provider, &model, &prompt).await?;
+            println!("Generated code:\n ```C\n{code}\n```");
             save_source(&project, &code)?;
-            println!("Generation complete.");
 
             let start = Instant::now();
-            println!("Building {project}...");
             let artifacts = build_project(&project)?;
             println!("Build finished in {} ms.", start.elapsed().as_millis());
 
             let start = Instant::now();
-            println!("Programming {} ...", artifacts.hex().display());
-            program(artifacts.elf())?;
+            program(&artifacts.elf())?;
             println!(
                 "Programming finished in {} ms.",
                 start.elapsed().as_millis()

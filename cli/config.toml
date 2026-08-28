@@ -1,11 +1,15 @@
 [ollama]
 url = "http://localhost:11434"
-system_prompt_path = "hal_prompt.txt"
-keep_alive = "4m"
+keep_alive = "5m"
 timeout_seconds = 120
+context_length = 32000
+
+[openai]
+url = "https://api.gapgpt.app/v1"
+api_key_env = "GAPGPT_API_KEY"
 
 [generation]
-seed = 329
-temperature = 0.05
-context_length = 32000
-max_output_tokens = 1024
+system_prompt_path = "hal_prompt.txt"
+seed = 42
+temperature = 0.1
+max_output_tokens = 5000

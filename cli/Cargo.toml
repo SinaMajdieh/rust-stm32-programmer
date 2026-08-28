@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1"
+async-openai = { version = "0.41.3", features = ["chat-completion"] }
 clap = { version = "4", features = ["derive"] }
 firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
 ollama-client = { path = "../ollama-client", version = "0.1.0" }
