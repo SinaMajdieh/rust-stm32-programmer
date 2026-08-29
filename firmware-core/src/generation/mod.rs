@@ -2,43 +2,39 @@ mod ollama;
 mod openai;
 mod provider;
 
-use anyhow::Result;
+use crate::{Config, GenerationError};
 
-use crate::{cli::Provider, config::Config};
-
-pub use provider::LlmProvider;
+pub use provider::{GenerationOutput, GenerationStatistics, LlmProvider, Provider};
 
 /// Generates firmware source code using the selected provider.
-///
-/// The provider-specific implementation is responsible for communicating
-/// with the underlying API and reporting provider-specific generation
-/// statistics.
 pub async fn generate_code(
     config: &Config,
     provider: Provider,
     model: &str,
     prompt: &[String],
-) -> Result<String> {
+) -> Result<GenerationOutput, GenerationError> {
     let prompt = prompt.join(" ");
 
     if prompt.trim().is_empty() {
-        anyhow::bail!("prompt cannot be empty");
+        return Err(GenerationError::EmptyPrompt);
     }
 
     match provider {
         Provider::Ollama => {
-            let provider = ollama::OllamaProvider::new(config);
-            provider.generate(model, &prompt).await
+            ollama::OllamaProvider::new(config)
+                .generate(model, &prompt)
+                .await
         }
 
         Provider::OpenAi => {
-            let provider = openai::OpenAiProvider::new(config)?;
-            provider.generate(model, &prompt).await
+            openai::OpenAiProvider::new(config)?
+                .generate(model, &prompt)
+                .await
         }
     }
 }
 
-/// Removes Markdown code fences from an LLM response.
+/// Removes Markdown code fences from generated source code.
 fn unfence_code(code: &str) -> &str {
     let code = code.trim();
 

@@ -1,11 +1,10 @@
-use std::time::Duration;
+use std::time::Instant;
 
-use anyhow::{Context, Result};
 use ollama_client::{GenerateOptions, GenerateRequest, OllamaClient};
 
-use crate::{config::Config, generation::unfence_code};
+use crate::{Config, GenerationError, GenerationOutput, GenerationStatistics};
 
-use super::provider::LlmProvider;
+use super::{LlmProvider, unfence_code};
 
 /// LLM provider backed by a local Ollama server.
 pub struct OllamaProvider<'a> {
@@ -13,16 +12,19 @@ pub struct OllamaProvider<'a> {
 }
 
 impl<'a> OllamaProvider<'a> {
-    /// Creates an Ollama provider using the application configuration.
+    /// Creates an Ollama provider using `config`.
     pub fn new(config: &'a Config) -> Self {
         Self { config }
     }
 }
 
 impl LlmProvider for OllamaProvider<'_> {
-    async fn generate(&self, model: &str, prompt: &str) -> Result<String> {
-        let client =
-            OllamaClient::new(&self.config.ollama.url).context("failed to create Ollama client")?;
+    async fn generate(
+        &self,
+        model: &str,
+        prompt: &str,
+    ) -> Result<GenerationOutput, GenerationError> {
+        let client = OllamaClient::new(&self.config.ollama.url)?;
 
         let options = GenerateOptions::new()
             .with_seed(self.config.generation.seed)
@@ -36,20 +38,24 @@ impl LlmProvider for OllamaProvider<'_> {
             .with_keep_alive(&self.config.ollama.keep_alive)
             .with_options(options);
 
+        let start = Instant::now();
+
         let generation = client
             .generate(
                 &request,
-                Duration::from_secs(self.config.ollama.timeout_seconds),
+                std::time::Duration::from_secs(self.config.ollama.timeout_seconds),
             )
-            .await
-            .context("Ollama code generation failed")?;
+            .await?;
 
-        println!(
-            "Generated {} tokens at {:.1} tokens/s.",
-            generation.generated_tokens,
-            generation.tokens_per_second().unwrap_or(0.0),
-        );
+        let statistics = GenerationStatistics {
+            prompt_tokens: None,
+            generated_tokens: generation.generated_tokens,
+            elapsed: start.elapsed(),
+        };
 
-        Ok(unfence_code(&generation.response).to_owned())
+        Ok(GenerationOutput {
+            code: unfence_code(&generation.response).to_owned(),
+            statistics,
+        })
     }
 }

@@ -26,20 +26,20 @@ fn build_stages_have_stable_user_facing_names() {
 #[test]
 fn unsupported_source_errors_name_the_file_and_supported_extensions() {
     let error = BuildError::UnsupportedSource {
-        source: PathBuf::from("src/main.rs"),
+        path: PathBuf::from("src/main.rs"),
     };
 
     assert_eq!(
         error.to_string(),
         "unsupported source file src/main.rs; supported extensions are .c, .s, and .S"
     );
-    assert!(Error::source(&error).is_none());
+    assert!(std::error::Error::source(&error).is_none());
 }
 
 #[test]
 fn io_errors_are_displayed_and_exposed_as_the_error_source() {
-    let error = BuildError::from(io::Error::other("toolchain unavailable"));
+    let error = BuildError::from(std::io::Error::other("toolchain unavailable"));
 
     assert_eq!(error.to_string(), "toolchain unavailable");
-    assert!(Error::source(&error).is_some());
+    assert!(std::error::Error::source(&error).is_some());
 }

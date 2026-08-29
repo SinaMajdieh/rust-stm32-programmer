@@ -1,0 +1,12 @@
+[package]
+name = "firmware-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-openai = { version = "0.41.3", features = ["chat-completion"] }
+firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
+ollama-client = { path = "../ollama-client", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2.0.20"
+toml = "0.9"

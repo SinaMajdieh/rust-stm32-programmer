@@ -145,7 +145,7 @@ pub enum ProgramError {
     ///
     /// The captured standard output and standard error are retained to aid
     /// diagnosis of programming failures.
-    #[error("programming failed with exit code {code:?}:\n{stdout}\n{stderr}")]
+    #[error("Programming failed with exit code {code:?}:\n{stdout}\n{stderr}")]
     Failed {
         /// The process exit code, if one was provided by the operating system.
         code: Option<i32>,

@@ -949,14 +949,9 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 name = "cli"
 version = "0.1.0"
 dependencies = [
- "anyhow",
- "async-openai",
  "clap",
- "firmware-targets",
- "ollama-client",
- "serde",
+ "firmware-core",
  "tokio",
- "toml 0.9.12+spec-1.1.0",
 ]
 
 [[package]]
@@ -1611,6 +1606,18 @@ name = "find-msvc-tools"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
+
+[[package]]
+name = "firmware-core"
+version = "0.1.0"
+dependencies = [
+ "async-openai",
+ "firmware-targets",
+ "ollama-client",
+ "serde",
+ "thiserror 2.0.20",
+ "toml 0.9.12+spec-1.1.0",
+]
 
 [[package]]
 name = "firmware-targets"
@@ -2806,9 +2813,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.14.0"
+version = "2.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
+checksum = "07aa2048142242915a31d35844fb311e0e53fcca590c3a0a40dcf1b841fa09eb"
 dependencies = [
  "equivalent",
  "hashbrown 0.17.1",
@@ -4219,15 +4226,11 @@ dependencies = [
 name = "programmer-app"
 version = "0.1.0"
 dependencies = [
- "programmer-core",
+ "firmware-core",
  "rfd",
  "slint",
  "slint-build",
 ]
-
-[[package]]
-name = "programmer-core"
-version = "0.1.0"
 
 [[package]]
 name = "pulldown-cmark"

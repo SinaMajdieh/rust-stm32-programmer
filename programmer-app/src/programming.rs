@@ -1,6 +1,6 @@
 use std::thread;
 
-use programmer_core::{Report, validate_firmware};
+use firmware_core::{Report, validate_firmware};
 
 use crate::{MainWindow, ui};
 

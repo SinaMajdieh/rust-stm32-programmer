@@ -39,7 +39,7 @@ fn compile_source(
 ) -> Result<PathBuf, BuildError> {
     if !is_supported_source(source) {
         return Err(BuildError::UnsupportedSource {
-            source: source.to_path_buf(),
+            path: source.to_path_buf(),
         });
     }
 
@@ -94,7 +94,7 @@ fn object_path(source: &Path, build_directory: &Path) -> Result<PathBuf, BuildEr
     let file_name = source
         .file_name()
         .ok_or_else(|| BuildError::UnsupportedSource {
-            source: source.to_path_buf(),
+            path: source.to_path_buf(),
         })?;
 
     let mut object_name = OsString::from(file_name);

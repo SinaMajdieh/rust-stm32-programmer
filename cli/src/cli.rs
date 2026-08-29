@@ -17,50 +17,30 @@ pub struct Cli {
 pub enum Command {
     /// Generate `main.c` using an LLM.
     Generate {
-        /// LLM provider to use.
         #[arg(long, value_enum, default_value_t = Provider::Ollama)]
         provider: Provider,
-
-        /// Model to use.
         model: String,
-
-        /// Name of the firmware project.
         project: String,
-
-        /// Description of the firmware to generate.
         prompt: Vec<String>,
     },
 
     /// Build an existing generated project.
-    Build {
-        /// Name of the firmware project.
-        project: String,
-    },
+    Build { project: String },
 
     /// Program an existing firmware binary.
-    Program {
-        /// Path to the firmware binary.
-        firmware: String,
-    },
+    Program { firmware: String },
 
     /// Generate, build, and program firmware.
     Run {
-        /// LLM provider to use.
         #[arg(long, value_enum, default_value_t = Provider::Ollama)]
         provider: Provider,
-
-        /// Model to use.
         model: String,
-
-        /// Name of the firmware project.
         project: String,
-
-        /// Description of the firmware to generate.
         prompt: Vec<String>,
     },
 }
 
-/// LLM providers supported by the application.
+/// LLM providers accepted by the CLI.
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Provider {
     /// Use a local Ollama server.
@@ -69,4 +49,13 @@ pub enum Provider {
     /// Use an OpenAI-compatible API.
     #[value(name = "openai")]
     OpenAi,
+}
+
+impl From<Provider> for firmware_core::Provider {
+    fn from(provider: Provider) -> Self {
+        match provider {
+            Provider::Ollama => Self::Ollama,
+            Provider::OpenAi => Self::OpenAi,
+        }
+    }
 }

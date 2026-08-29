@@ -1,9 +1,10 @@
 use std::{
-    error::Error,
     fmt, io,
     path::{Path, PathBuf},
     process::ExitStatus,
 };
+
+use thiserror::Error;
 
 use super::{ArmGccConfig, compile, link, objcopy};
 
@@ -80,19 +81,22 @@ impl fmt::Display for BuildStage {
 }
 
 /// An error produced while building firmware.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum BuildError {
     /// A filesystem operation or external process could not be started.
-    Io(io::Error),
+    #[error(transparent)]
+    Io(#[from] io::Error),
 
     /// A source file has an extension that is not supported by the ARM GCC
     /// build pipeline.
+    #[error("unsupported source file {path}; supported extensions are .c, .s, and .S")]
     UnsupportedSource {
         /// The unsupported source file.
-        source: PathBuf,
+        path: PathBuf,
     },
 
     /// An external tool exited unsuccessfully during a build stage.
+    #[error("{stage} stage failed for {path} ({status}){diagnostics}")]
     CommandFailed {
         /// The stage at which the command failed.
         stage: BuildStage,
@@ -106,54 +110,6 @@ pub enum BuildError {
         /// Diagnostics written by the tool to standard error.
         diagnostics: String,
     },
-}
-
-impl fmt::Display for BuildError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Io(error) => error.fmt(formatter),
-
-            Self::UnsupportedSource { source } => write!(
-                formatter,
-                "unsupported source file {}; supported extensions are .c, .s, and .S",
-                source.display()
-            ),
-
-            Self::CommandFailed {
-                stage,
-                path,
-                status,
-                diagnostics,
-            } => {
-                write!(
-                    formatter,
-                    "{stage} stage failed for {} ({status})",
-                    path.display()
-                )?;
-
-                if !diagnostics.trim().is_empty() {
-                    write!(formatter, ":\n{}", diagnostics.trim_end())?;
-                }
-
-                Ok(())
-            }
-        }
-    }
-}
-
-impl Error for BuildError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            Self::Io(error) => Some(error),
-            Self::UnsupportedSource { .. } | Self::CommandFailed { .. } => None,
-        }
-    }
-}
-
-impl From<io::Error> for BuildError {
-    fn from(error: io::Error) -> Self {
-        Self::Io(error)
-    }
 }
 
 /// Coordinates the ARM GCC firmware build pipeline.

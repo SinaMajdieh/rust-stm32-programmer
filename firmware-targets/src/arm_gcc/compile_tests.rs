@@ -44,7 +44,7 @@ fn object_path_rejects_a_path_without_a_filename() {
 
     assert!(matches!(
         error,
-        BuildError::UnsupportedSource { source } if source.as_path() == Path::new("")
+        BuildError::UnsupportedSource { path } if path.as_path() == Path::new("")
     ));
 }
 
