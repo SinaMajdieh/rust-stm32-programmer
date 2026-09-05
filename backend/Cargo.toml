@@ -1,0 +1,9 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
+generation = { path = "../generation", version = "0.1.0" }
+thiserror = "2.0.20"
