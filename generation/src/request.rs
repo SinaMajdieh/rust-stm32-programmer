@@ -1,5 +1,7 @@
 //! Generation request types.
 
+use crate::GenerationError;
+
 /// Input to a generation request.
 ///
 /// The request borrows its model identifier and textual data, allowing callers
@@ -24,5 +26,17 @@ impl<'a> GenerationRequest<'a> {
             prompt,
             system_prompt,
         }
+    }
+
+    pub(crate) fn validate(&self) -> Result<(), GenerationError> {
+        if self.model.trim().is_empty() {
+            return Err(GenerationError::EmptyModel);
+        }
+
+        if self.prompt.trim().is_empty() {
+            return Err(GenerationError::EmptyPrompt);
+        }
+
+        Ok(())
     }
 }

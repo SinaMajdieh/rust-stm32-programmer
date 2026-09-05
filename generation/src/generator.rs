@@ -53,6 +53,8 @@ impl LlmGenerator {
         &self,
         request: GenerationRequest<'_>,
     ) -> Result<GenerationOutput, GenerationError> {
+        request.validate()?;
+
         let model = self.find_model(request.model)?;
 
         let provider_request = GenerationRequest {
