@@ -1,5 +1,6 @@
 //! OpenAI-compatible generation provider.
 
+use crate::providers::duration_seconds;
 use std::time::{Duration, Instant};
 
 use async_openai::{
@@ -206,27 +207,6 @@ fn statistics(usage: Option<&CompletionUsage>, elapsed: Duration) -> GenerationS
         prompt_tokens: usage.map(|usage| usage.prompt_tokens as u64),
         generated_tokens: usage.map_or(0, |usage| usage.completion_tokens as u64),
         elapsed,
-    }
-}
-
-mod duration_seconds {
-    use std::time::Duration;
-
-    use serde::{Deserialize, Deserializer, Serializer};
-
-    pub fn serialize<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_u64(duration.as_secs())
-    }
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let seconds = u64::deserialize(deserializer)?;
-        Ok(Duration::from_secs(seconds))
     }
 }
 

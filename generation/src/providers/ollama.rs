@@ -1,9 +1,9 @@
 //! Ollama generation provider.
 
-use std::time::{Duration, Instant};
-
+use crate::providers::duration_seconds;
 use ollama_client::{GenerateOptions, GenerateRequest as OllamaRequest, OllamaClient};
 use serde::{Deserialize, Serialize};
+use std::time::{Duration, Instant};
 
 use crate::{
     code::clean_generated_code,
@@ -35,6 +35,10 @@ pub struct OllamaClientConfig {
     /// How long a model should remain loaded after a request.
     #[serde(default)]
     pub keep_alive: Option<String>,
+
+    /// Maximum duration of a generation request.
+    #[serde(default = "default_request_timeout", with = "duration_seconds")]
+    pub request_timeout: Duration,
 }
 
 impl Default for OllamaClientConfig {
@@ -42,6 +46,7 @@ impl Default for OllamaClientConfig {
         Self {
             url: default_ollama_url(),
             keep_alive: None,
+            request_timeout: default_request_timeout(),
         }
     }
 }
@@ -64,10 +69,6 @@ pub struct OllamaGenerationOptions {
     /// Random seed used for generation.
     #[serde(default)]
     pub seed: Option<u64>,
-
-    /// Maximum duration of a generation request, in seconds.
-    #[serde(default = "default_request_timeout_seconds")]
-    pub request_timeout_seconds: u64,
 }
 
 impl Default for OllamaGenerationOptions {
@@ -77,7 +78,6 @@ impl Default for OllamaGenerationOptions {
             max_output_tokens: None,
             context_length: None,
             seed: None,
-            request_timeout_seconds: default_request_timeout_seconds(),
         }
     }
 }
@@ -95,13 +95,12 @@ impl OllamaProvider {
     pub fn new(config: OllamaConfig) -> Result<Self, GenerationError> {
         let client = OllamaClient::new(&config.client.url)?;
         let options = build_options(&config.generation);
-        let request_timeout = Duration::from_secs(config.generation.request_timeout_seconds);
 
         Ok(Self {
             client,
             options,
             keep_alive: config.client.keep_alive,
-            request_timeout,
+            request_timeout: config.client.request_timeout,
         })
     }
 }
@@ -170,6 +169,6 @@ fn default_ollama_url() -> String {
     "http://localhost:11434".to_owned()
 }
 
-const fn default_request_timeout_seconds() -> u64 {
-    120
+const fn default_request_timeout() -> Duration {
+    Duration::from_secs(120)
 }
