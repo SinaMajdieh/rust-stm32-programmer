@@ -1,0 +1,42 @@
+import { Theme } from "../theme.slint";
+
+export component RecentProjectRow inherits Rectangle {
+    in property<string> name;
+    in property<string> time;
+    callback selected;
+
+    width: 720px;
+    height: 42px;
+    background: row.has-hover ? Theme.surface-2 : transparent;
+    border-radius: Theme.radius-small;
+
+    Text {
+        x: 12px;
+        y: 6px;
+        width: parent.width - 150px;
+        height: 18px;
+        text: root.name;
+        color: Theme.text;
+        font-family: Theme.font-ui;
+        font-size: 11px;
+        vertical-alignment: center;
+    }
+
+    Text {
+        x: parent.width - 122px;
+        y: 6px;
+        width: 110px;
+        height: 18px;
+        text: root.time;
+        color: Theme.text-muted;
+        font-family: Theme.font-ui;
+        font-size: 10px;
+        horizontal-alignment: right;
+        vertical-alignment: center;
+    }
+
+    row := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.selected(); }
+    }
+}

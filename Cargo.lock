@@ -621,6 +621,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "backend"
+version = "0.1.0"
+dependencies = [
+ "firmware-targets",
+ "generation",
+ "thiserror 2.0.20",
+]
+
+[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -949,9 +958,11 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 name = "cli"
 version = "0.1.0"
 dependencies = [
+ "backend",
  "clap",
- "firmware-core",
+ "serde",
  "tokio",
+ "toml 0.9.12+spec-1.1.0",
 ]
 
 [[package]]
@@ -1608,18 +1619,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 
 [[package]]
-name = "firmware-core"
-version = "0.1.0"
-dependencies = [
- "async-openai",
- "firmware-targets",
- "ollama-client",
- "serde",
- "thiserror 2.0.20",
- "toml 0.9.12+spec-1.1.0",
-]
-
-[[package]]
 name = "firmware-targets"
 version = "0.1.0"
 dependencies = [
@@ -1883,6 +1882,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c13a5f2acc785d8fb6bf6b7ab6bfb0ef5dad4f4d97e8e70bb8e470722312f76f"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "generation"
+version = "0.1.0"
+dependencies = [
+ "async-openai",
+ "ollama-client",
+ "serde",
+ "thiserror 2.0.20",
+ "tokio",
+ "toml 0.9.12+spec-1.1.0",
 ]
 
 [[package]]
@@ -4226,7 +4237,7 @@ dependencies = [
 name = "programmer-app"
 version = "0.1.0"
 dependencies = [
- "firmware-core",
+ "backend",
  "rfd",
  "slint",
  "slint-build",

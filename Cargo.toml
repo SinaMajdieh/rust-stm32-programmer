@@ -1,3 +1,3 @@
 [workspace]
 resolver = "3"
-members = ["cli", "firmware-core", "firmware-targets", "ollama-client", "programmer-app"]
+members = ["backend", "cli", "firmware-targets", "generation", "ollama-client", "programmer-app"]

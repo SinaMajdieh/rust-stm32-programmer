@@ -1,0 +1,124 @@
+import { Theme } from "../theme.slint";
+import { StatusDot, StatusState } from "status-dot.slint";
+import { IconButton } from "icon-button.slint";
+
+export component AppHeader inherits Rectangle {
+    in property<string> device-name: "STM32F103C8T6";
+    in property<bool> connected: true;
+
+    callback new-project;
+    callback device-settings;
+
+    height: 62px;
+    background: Theme.background;
+
+    Rectangle {
+        y: parent.height - 1px;
+        width: parent.width;
+        height: 1px;
+        background: Theme.border;
+    }
+
+    HorizontalLayout {
+        x: 28px;
+        width: parent.width - 48px;
+        height: parent.height;
+
+        spacing: 8px;
+        cross-axis-alignment: center;
+
+        // ─────────────────────────
+        // Application identity
+        // ─────────────────────────
+
+        VerticalLayout {
+            width: 142px;
+            alignment: center;
+
+            Text {
+                text: "STM32 Studio";
+                color: Theme.text;
+                font-family: Theme.font-ui;
+                font-size: 16px;
+                font-weight: 700;
+            }
+
+            Text {
+                text: "Firmware automation";
+                color: Theme.text-muted;
+                font-family: Theme.font-ui;
+                font-size: 10px;
+            }
+        }
+
+        // Divider
+        Rectangle {
+            width: 1px;
+            height: 32px;
+            background: Theme.border;
+        }
+
+        // This is the ONLY thing that expands.
+        Rectangle {
+            horizontal-stretch: 1;
+        }
+
+        // ─────────────────────────
+        // Device
+        // ─────────────────────────
+
+        // StatusDot {
+        //     state: root.connected
+        //         ? StatusState.success
+        //         : StatusState.muted;
+        // }
+
+        // VerticalLayout {
+        //     alignment: center;
+
+        //     Text {
+        //         text: root.device-name;
+        //         color: Theme.text;
+        //         font-family: Theme.font-mono;
+        //         font-size: 11px;
+        //     }
+
+        //     Text {
+        //         text: root.connected
+        //             ? "Connected"
+        //             : "Disconnected";
+
+        //         color: root.connected
+        //             ? Theme.success
+        //             : Theme.text-muted;
+
+        //         font-family: Theme.font-ui;
+        //         font-size: 10px;
+        //     }
+        // }
+
+        // Settings
+        IconButton {
+            width: 34px;
+            height: 34px;
+
+            glyph: "⚙";
+
+            clicked => {
+                root.device-settings();
+            }
+        }
+
+        // New project
+        IconButton {
+            width: 34px;
+            height: 34px;
+
+            glyph: "+";
+
+            clicked => {
+                root.new-project();
+            }
+        }
+    }
+}

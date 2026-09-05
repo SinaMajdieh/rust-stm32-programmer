@@ -1,0 +1,66 @@
+import { Theme } from "../theme.slint";
+import { PipelineNode } from "pipeline-node.slint";
+
+export component Pipeline inherits Rectangle {
+    in property<int> stage: 0;
+
+    width: 529px;
+    height: 72px;
+    background: transparent;
+
+    PipelineNode {
+        x: 0px;
+        y: 0px;
+        label: "Generate";
+        index: 1;
+        active-stage: root.stage;
+    }
+
+    Rectangle {
+        x: 89px;
+        y: 13px;
+        width: 58px;
+        height: 1px;
+        background: root.stage >= 2 ? Theme.border-strong : Theme.border;
+    }
+
+    PipelineNode {
+        x: 147px;
+        y: 0px;
+        label: "Build";
+        index: 2;
+        active-stage: root.stage;
+    }
+
+    Rectangle {
+        x: 236px;
+        y: 13px;
+        width: 58px;
+        height: 1px;
+        background: root.stage >= 3 ? Theme.border-strong : Theme.border;
+    }
+
+    PipelineNode {
+        x: 294px;
+        y: 0px;
+        label: "Program";
+        index: 3;
+        active-stage: root.stage;
+    }
+
+    Rectangle {
+        x: 383px;
+        y: 13px;
+        width: 58px;
+        height: 1px;
+        background: root.stage >= 4 ? Theme.border-strong : Theme.border;
+    }
+
+    PipelineNode {
+        x: 441px;
+        y: 0px;
+        label: "Ready";
+        index: 4;
+        active-stage: root.stage;
+    }
+}

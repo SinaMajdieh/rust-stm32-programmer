@@ -1,0 +1,51 @@
+import { Theme } from "../theme.slint";
+import { PromptBox } from "prompt-box.slint";
+import { RecentProjects } from "recent-projects.slint";
+
+export component Landing inherits Rectangle {
+    in-out property<string> prompt;
+    in property<bool> busy: false;
+    callback generate-and-flash;
+    callback recent-project-selected(string);
+
+    background: Theme.background;
+
+    Text {
+        x: 0;
+        y: 126px;
+        width: parent.width;
+        height: 40px;
+        text: "What do you want to build?";
+        color: Theme.text;
+        font-family: Theme.font-ui;
+        font-size: 28px;
+        font-weight: 700;
+        horizontal-alignment: center;
+    }
+
+    Text {
+        x: 0;
+        y: 171px;
+        width: parent.width;
+        height: 24px;
+        text: "Describe the firmware task. STM32 Studio handles generation, build, and programming.";
+        color: Theme.text-secondary;
+        font-family: Theme.font-ui;
+        font-size: 12px;
+        horizontal-alignment: center;
+    }
+
+    PromptBox {
+        x: (parent.width - self.width) / 2;
+        y: 218px;
+        prompt <=> root.prompt;
+        enabled: !root.busy;
+        generate-and-flash => { root.generate-and-flash(); }
+    }
+
+    RecentProjects {
+        x: (parent.width - self.width) / 2;
+        y: 414px;
+        selected(project) => { root.recent-project-selected(project); }
+    }
+}

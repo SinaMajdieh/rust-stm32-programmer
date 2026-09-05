@@ -1,0 +1,78 @@
+import { Theme } from "../theme.slint";
+import { ProjectSidebar } from "project-sidebar.slint";
+import { CodeView } from "code-view.slint";
+import { Pipeline } from "pipeline.slint";
+import { OutputPanel } from "output-panel.slint";
+import { IconButton } from "icon-button.slint";
+
+export component Workspace inherits Rectangle {
+    in property<int> pipeline-stage: 0;
+    in property<bool> output-open: false;
+    callback toggle-output;
+
+    background: Theme.background;
+
+    ProjectSidebar {
+        x: 0;
+        y: 0;
+        width: 220px;
+        height: parent.height;
+        file-selected(file) => { }
+    }
+
+    Text {
+        x: 248px;
+        y: 20px;
+        text: "Generated project";
+        color: Theme.text;
+        font-family: Theme.font-ui;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    Text {
+        x: 248px;
+        y: 44px;
+        text: "Review the generated source before programming the device.";
+        color: Theme.text-secondary;
+        font-family: Theme.font-ui;
+        font-size: 10px;
+    }
+
+    Pipeline {
+        x: 248px;
+        y: 74px;
+        stage: root.pipeline-stage;
+    }
+
+    IconButton {
+        x: parent.width - 72px;
+        y: 76px;
+        glyph: root.output-open ? "×" : "≡";
+        clicked => { root.toggle-output(); }
+    }
+
+    Rectangle {
+        x: 248px;
+        y: 150px;
+        width: parent.width - 272px;
+        height: parent.height - 166px;
+        background: Theme.surface;
+        border-width: 1px;
+        border-color: Theme.border;
+        border-radius: Theme.radius-medium;
+        clip: true;
+
+        CodeView {
+            width: parent.width;
+            height: parent.height;
+        }
+    }
+
+    OutputPanel {
+        x: 220px;
+        y: parent.height - (root.output-open ? 184px : 0px);
+        width: parent.width - 220px;
+        open: root.output-open;
+    }
+}

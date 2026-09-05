@@ -1,0 +1,82 @@
+import { Theme } from "../theme.slint";
+import { FileRow } from "file-row.slint";
+
+export component ProjectSidebar inherits Rectangle {
+    in property<string> selected-file: "main.c";
+    callback file-selected(string);
+
+    width: 220px;
+    background: Theme.surface;
+    border-width: 1px;
+    border-color: Theme.border;
+
+    Text {
+        x: 18px;
+        y: 18px;
+        text: "PROJECT";
+        color: Theme.text-muted;
+        font-family: Theme.font-ui;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    Text {
+        x: 18px;
+        y: 48px;
+        text: "▾  src";
+        color: Theme.text-secondary;
+        font-family: Theme.font-mono;
+        font-size: 11px;
+    }
+
+    FileRow {
+        x: 10px;
+        y: 72px;
+        name: "main.c";
+        selected: root.selected-file == "main.c";
+        clicked => { root.file-selected("main.c"); }
+    }
+
+    FileRow {
+        x: 10px;
+        y: 108px;
+        name: "CMakeLists.txt";
+        selected: root.selected-file == "CMakeLists.txt";
+        clicked => { root.file-selected("CMakeLists.txt"); }
+    }
+
+    FileRow {
+        x: 10px;
+        y: 144px;
+        name: "startup.s";
+        selected: root.selected-file == "startup.s";
+        clicked => { root.file-selected("startup.s"); }
+    }
+
+    Text {
+        x: 18px;
+        y: 202px;
+        text: "▾  Drivers";
+        color: Theme.text-muted;
+        font-family: Theme.font-mono;
+        font-size: 11px;
+    }
+
+    Text {
+        x: 18px;
+        y: 239px;
+        text: "CMSIS";
+        color: Theme.text-muted;
+        font-family: Theme.font-ui;
+        font-size: 10px;
+    }
+
+    Text {
+        x: 18px;
+        y: 264px;
+        text: "STM32F1xx HAL";
+        color: Theme.text-muted;
+        font-family: Theme.font-ui;
+        font-size: 10px;
+    }
+}

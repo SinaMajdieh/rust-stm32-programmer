@@ -27,7 +27,7 @@ impl ProjectTemplate for Ll {
     }
 
     fn built_in_sources() -> &'static [&'static str] {
-        &BUILT_IN_SOURCES
+        BUILT_IN_SOURCES
     }
 
     fn build_config() -> ArmGccConfig {

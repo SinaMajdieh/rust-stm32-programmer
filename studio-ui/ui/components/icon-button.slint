@@ -1,0 +1,40 @@
+import { Theme } from "../theme.slint";
+
+export component IconButton inherits Rectangle {
+    in property<string> glyph: "•";
+    in property<bool> enabled: true;
+
+    callback clicked;
+
+    width: 34px;
+    height: 34px;
+
+    background: area.has-hover && root.enabled
+        ? Theme.surface-3
+        : transparent;
+
+    border-radius: Theme.radius-small;
+    opacity: root.enabled ? 1 : 0.45;
+
+    Text {
+        width: parent.width;
+        height: parent.height;
+
+        text: root.glyph;
+        color: Theme.text-secondary;
+        font-family: Theme.font-ui;
+        font-size: 15px;
+
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+
+        clicked => {
+            root.clicked();
+        }
+    }
+}

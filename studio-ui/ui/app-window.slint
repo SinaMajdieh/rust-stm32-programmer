@@ -1,0 +1,70 @@
+import { Theme } from "theme.slint";
+import { AppHeader } from "components/app-header.slint";
+import { Landing } from "components/landing.slint";
+import { Workspace } from "components/workspace.slint";
+import { StatusBar } from "components/status-bar.slint";
+
+export component AppWindow inherits Window {
+    preferred-width: 1180px;
+    preferred-height: 760px;
+    min-width: 980px;
+    min-height: 640px;
+    title: "STM32 Studio";
+    background: Theme.background;
+    default-font-family: Theme.font-ui;
+    default-font-size: 12px;
+    default-font-weight: 400;
+
+    in-out property<string> prompt: "";
+    in-out property<bool> has-project: false;
+    in-out property<bool> busy: false;
+    in-out property<int> pipeline-stage: 0;
+    in-out property<string> status-message: "Ready";
+    in-out property<bool> output-open: false;
+
+    callback generate-and-flash;
+    callback new-project;
+    callback device-settings;
+    callback toggle-output;
+
+    AppHeader {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: 62px;
+        device-name: "STM32F103C8T6";
+        connected: true;
+        new-project => { root.new-project(); }
+        device-settings => { root.device-settings(); }
+    }
+
+    if !root.has-project : Landing {
+        x: 0;
+        y: 62px;
+        width: parent.width;
+        height: parent.height - 98px;
+        prompt <=> root.prompt;
+        busy: root.busy;
+        generate-and-flash => { root.generate-and-flash(); }
+        recent-project-selected(project) => { root.prompt = project; }
+    }
+
+    if root.has-project : Workspace {
+        x: 0;
+        y: 62px;
+        width: parent.width;
+        height: parent.height - 98px;
+        pipeline-stage: root.pipeline-stage;
+        output-open: root.output-open;
+        toggle-output => { root.toggle-output(); }
+    }
+
+    StatusBar {
+        x: 0;
+        y: parent.height - 36px;
+        width: parent.width;
+        height: 36px;
+        message: root.status-message;
+        connected: true;
+    }
+}

@@ -1,0 +1,31 @@
+import { Theme } from "../theme.slint";
+
+export component PrimaryButton inherits Rectangle {
+    in property<string> text: "Continue";
+    in property<bool> enabled: true;
+    callback clicked;
+
+    width: 154px;
+    height: 40px;
+    background: button-area.has-hover && root.enabled ? Theme.accent-hover : Theme.accent;
+    border-radius: Theme.radius-medium;
+    opacity: root.enabled ? 1 : 0.45;
+
+    Text {
+        width: parent.width;
+        height: parent.height;
+        text: root.text;
+        color: #0d1014;
+        font-family: Theme.font-ui;
+        font-size: 12px;
+        font-weight: 700;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    button-area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}

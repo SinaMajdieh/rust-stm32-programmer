@@ -1,0 +1,44 @@
+import { Theme } from "../theme.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export component CodeView inherits Rectangle {
+    in property<string> filename: "main.c";
+    in property<string> code: "#include \"stm32f1xx_hal.h\"\n\nint main(void)\n{\n    HAL_Init();\n\n    while (1) {\n        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);\n        HAL_Delay(500);\n    }\n}";
+
+    background: Theme.background;
+
+    Text {
+        x: 24px;
+        y: 16px;
+        text: root.filename;
+        color: Theme.text-secondary;
+        font-family: Theme.font-mono;
+        font-size: 11px;
+    }
+
+    Rectangle {
+        x: 24px;
+        y: 45px;
+        width: parent.width - 48px;
+        height: 1px;
+        background: Theme.border;
+    }
+
+    ScrollView {
+        x: 24px;
+        y: 60px;
+        width: parent.width - 48px;
+        height: parent.height - 76px;
+        viewport-width: parent.width - 48px;
+        viewport-height: 520px;
+
+        Text {
+            width: parent.width;
+            text: root.code;
+            color: Theme.text;
+            font-family: Theme.font-mono;
+            font-size: 11px;
+            wrap: no-wrap;
+        }
+    }
+}
