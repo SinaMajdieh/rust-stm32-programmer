@@ -1,12 +1,12 @@
 use std::thread;
 
-use firmware_core::{Report, validate_firmware};
+use backend::{Report, validate_firmware};
 
 use crate::{MainWindow, ui};
 
 pub fn start(window: slint::Weak<MainWindow>, file_path: String) {
     thread::spawn(move || {
-        let _ = {
+        {
             let mut report = |event| {
                 show_report(&window, event);
             };

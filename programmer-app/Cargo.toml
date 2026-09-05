@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-firmware-core = { path = "../firmware-core", version = "0.1.0" }
+backend = { path = "../backend", version = "0.1.0" }
 rfd = "0.17.2"
 slint = "1.17.1"
 
