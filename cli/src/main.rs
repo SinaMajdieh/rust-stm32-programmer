@@ -1,14 +1,18 @@
 mod cli;
+mod config;
 
-use std::process::ExitCode;
-use std::time::Instant;
+use std::{error::Error as StdError, process::ExitCode, time::Instant};
 
-use clap::Parser;
-use firmware_core::{
-    Config, Error, GenerationOutput, build_project, generate_code, program, save_source,
+use backend::{
+    Error, GenerationError, GenerationOutput, GenerationRequest, LlmGenerator, build_project,
+    program, save_source,
 };
+use clap::Parser;
 
 use cli::{Cli, Command};
+use config::Config;
+
+const CONFIG_PATH: &str = "config.toml";
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -22,40 +26,23 @@ async fn main() -> ExitCode {
 }
 
 async fn run() -> Result<(), Error> {
-    let cli = Cli::parse();
-    let config = Config::load()?;
-
-    match cli.command {
+    match Cli::parse().command {
         Command::Generate {
-            provider,
             model,
             project,
             prompt,
-        } => {
-            let output = generate_code(&config, provider.into(), &model, &prompt).await?;
+        } => generate(&project, model.as_deref(), &prompt).await,
 
-            print_generation(&output);
-            save_source(&project, &output.code)?;
-        }
+        Command::Build { project } => build(&project),
 
-        Command::Build { project } => {
-            run_build(&project)?;
-        }
-
-        Command::Program { firmware } => {
-            run_program(&firmware)?;
-        }
+        Command::Program { firmware } => program_firmware(&firmware),
 
         Command::Run {
-            provider,
             model,
             project,
             prompt,
         } => {
-            let output = generate_code(&config, provider.into(), &model, &prompt).await?;
-
-            print_generation(&output);
-            save_source(&project, &output.code)?;
+            generate(&project, model.as_deref(), &prompt).await?;
 
             let start = Instant::now();
             let artifacts = build_project(&project)?;
@@ -69,13 +56,38 @@ async fn run() -> Result<(), Error> {
                 "Programming finished in {} ms.",
                 start.elapsed().as_millis()
             );
+
+            Ok(())
         }
     }
+}
+
+/// Generates firmware source code using the configured or overridden model.
+async fn generate(
+    project: &str,
+    model: Option<&str>,
+    prompt_parts: &[String],
+) -> Result<(), Error> {
+    let config = Config::load(CONFIG_PATH).map_err(GenerationError::Config)?;
+    let llm = config.llm;
+
+    let model = model.unwrap_or(llm.selected_model.as_str());
+    let system_prompt = llm.system_prompt().map_err(GenerationError::Config)?;
+    let generator = LlmGenerator::from_config(llm.generator)?;
+
+    let prompt = prompt_parts.join(" ");
+    let request = GenerationRequest::new(model, &prompt, Some(&system_prompt));
+
+    let output = generator.generate(request).await?;
+
+    print_generation(&output);
+    save_source(project, &output.code)?;
 
     Ok(())
 }
 
-fn run_build(project: &str) -> Result<(), Error> {
+/// Builds an existing project.
+fn build(project: &str) -> Result<(), Error> {
     let start = Instant::now();
 
     build_project(project)?;
@@ -85,7 +97,8 @@ fn run_build(project: &str) -> Result<(), Error> {
     Ok(())
 }
 
-fn run_program(firmware: &str) -> Result<(), Error> {
+/// Programs an existing firmware ELF.
+fn program_firmware(firmware: &str) -> Result<(), Error> {
     let start = Instant::now();
 
     program(firmware)?;
@@ -98,6 +111,7 @@ fn run_program(firmware: &str) -> Result<(), Error> {
     Ok(())
 }
 
+/// Prints generated code and generation statistics.
 fn print_generation(output: &GenerationOutput) {
     let stats = &output.statistics;
 
@@ -112,13 +126,14 @@ fn print_generation(output: &GenerationOutput) {
     println!("Speed: {:.1} tokens/s.", stats.tokens_per_second());
 }
 
+/// Prints an error and its source chain.
 fn print_error(error: &Error) {
     eprintln!("error: {error}");
 
-    let mut source = std::error::Error::source(error);
+    let mut source = StdError::source(error);
 
     while let Some(error) = source {
         eprintln!("caused by: {error}");
-        source = std::error::Error::source(error);
+        source = StdError::source(error);
     }
 }

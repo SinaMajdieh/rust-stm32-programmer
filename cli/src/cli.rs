@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
 
 /// Command-line interface for the firmware generation tool.
 #[derive(Debug, Parser)]
@@ -15,47 +15,41 @@ pub struct Cli {
 /// Commands supported by the firmware generation tool.
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    /// Generate `main.c` using an LLM.
+    /// Generate firmware source code.
     Generate {
-        #[arg(long, value_enum, default_value_t = Provider::Ollama)]
-        provider: Provider,
-        model: String,
+        /// Model ID to use instead of the configured selected model.
+        #[arg(long)]
+        model: Option<String>,
+
+        /// Project directory.
         project: String,
+
+        /// Prompt passed to the model.
         prompt: Vec<String>,
     },
 
-    /// Build an existing generated project.
-    Build { project: String },
+    /// Build an existing project.
+    Build {
+        /// Project directory.
+        project: String,
+    },
 
     /// Program an existing firmware binary.
-    Program { firmware: String },
+    Program {
+        /// Firmware ELF file.
+        firmware: String,
+    },
 
     /// Generate, build, and program firmware.
     Run {
-        #[arg(long, value_enum, default_value_t = Provider::Ollama)]
-        provider: Provider,
-        model: String,
+        /// Model ID to use instead of the configured selected model.
+        #[arg(long)]
+        model: Option<String>,
+
+        /// Project directory.
         project: String,
+
+        /// Prompt passed to the model.
         prompt: Vec<String>,
     },
-}
-
-/// LLM providers accepted by the CLI.
-#[derive(Debug, Clone, Copy, ValueEnum)]
-pub enum Provider {
-    /// Use a local Ollama server.
-    Ollama,
-
-    /// Use an OpenAI-compatible API.
-    #[value(name = "openai")]
-    OpenAi,
-}
-
-impl From<Provider> for firmware_core::Provider {
-    fn from(provider: Provider) -> Self {
-        match provider {
-            Provider::Ollama => Self::Ollama,
-            Provider::OpenAi => Self::OpenAi,
-        }
-    }
 }
