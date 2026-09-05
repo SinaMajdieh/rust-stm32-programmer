@@ -1,7 +1,7 @@
 mod cli;
 mod config;
 
-use std::{error::Error as StdError, process::ExitCode, time::Instant};
+use std::{/*error::Error as StdError,*/ process::ExitCode, time::Instant};
 
 use backend::{
     Error, GenerationError, GenerationOutput, GenerationRequest, LlmGenerator, build_project,
@@ -128,12 +128,12 @@ fn print_generation(output: &GenerationOutput) {
 
 /// Prints an error and its source chain.
 fn print_error(error: &Error) {
-    eprintln!("error: {error}");
+    eprintln!("Error: {error}");
 
-    let mut source = StdError::source(error);
+    // let mut source = StdError::source(error);
 
-    while let Some(error) = source {
-        eprintln!("caused by: {error}");
-        source = StdError::source(error);
-    }
+    // while let Some(error) = source {
+    //     eprintln!("caused by: {error}");
+    //     source = StdError::source(error);
+    // }
 }

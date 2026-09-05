@@ -16,11 +16,11 @@ pub enum GenerationError {
     #[error("Model cannot be empty")]
     EmptyModel,
 
-    #[error("provider `{0:?}` is disabled")]
+    #[error("Provider `{0:?}` is disabled")]
     ProviderDisabled(Provider),
 
     /// The requested model is not registered.
-    #[error("model '{model}' is not available")]
+    #[error("Model '{model}' is not available")]
     ModelNotFound {
         /// Name of the requested model.
         model: String,
@@ -28,7 +28,7 @@ pub enum GenerationError {
 
     /// A model is registered with a provider that the generator does not
     /// currently support.
-    #[error("provider '{provider}' is not configured")]
+    #[error("Provider '{provider}' is not configured")]
     ProviderUnavailable {
         /// Provider associated with the model.
         provider: String,
@@ -56,7 +56,7 @@ pub enum OpenAIClientError {
     #[error("OpenAI request timed out after {0:?}")]
     Timeout(Duration),
 
-    #[error(transparent)]
+    #[error("OpemAI client failed {0:?}")]
     Client(#[from] async_openai::error::OpenAIError),
 }
 
@@ -64,14 +64,14 @@ pub enum OpenAIClientError {
 #[derive(Debug, thiserror::Error)]
 pub enum GenerationConfigError {
     /// An I/O error occurred while reading or writing configuration.
-    #[error("configuration I/O error: {0}")]
+    #[error("Configuration I/O error: {0}")]
     Io(#[from] std::io::Error),
 
     /// The configuration file contained invalid TOML.
-    #[error("invalid configuration TOML: {0}")]
+    #[error("Invalid configuration TOML: {0}")]
     TomlDeserialize(#[from] toml::de::Error),
 
     /// Configuration could not be serialized to TOML.
-    #[error("failed to serialize configuration: {0}")]
+    #[error("Failed to serialize configuration: {0}")]
     TomlSerialize(#[from] toml::ser::Error),
 }
