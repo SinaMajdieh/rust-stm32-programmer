@@ -1,6 +1,6 @@
 [llm]
 # Model used when --model is not provided.
-selected_model = "qwen2.5-coder:7b"
+selected_model = "ollama:qwen2.5-coder:7b"
 
 # System prompt file used for generation.
 system_prompt_path = "hal_prompt.txt"
