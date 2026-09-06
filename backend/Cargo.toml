@@ -7,3 +7,4 @@ edition = "2024"
 firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
 generation = { path = "../generation", version = "0.1.0" }
 thiserror = "2.0.20"
+toml = "0.9"

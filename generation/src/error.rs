@@ -7,9 +7,6 @@ use crate::model::Provider;
 /// An error produced while generating source code.
 #[derive(Debug, thiserror::Error)]
 pub enum GenerationError {
-    #[error("Configuration error: {0}")]
-    Config(#[from] GenerationConfigError),
-
     #[error("Prompt cannot be empty")]
     EmptyPrompt,
 
@@ -58,20 +55,4 @@ pub enum OpenAIClientError {
 
     #[error("OpemAI client failed {0:?}")]
     Client(#[from] async_openai::error::OpenAIError),
-}
-
-/// Errors produced by configuration operations.
-#[derive(Debug, thiserror::Error)]
-pub enum GenerationConfigError {
-    /// An I/O error occurred while reading or writing configuration.
-    #[error("Configuration I/O error: {0}")]
-    Io(#[from] std::io::Error),
-
-    /// The configuration file contained invalid TOML.
-    #[error("Invalid configuration TOML: {0}")]
-    TomlDeserialize(#[from] toml::de::Error),
-
-    /// Configuration could not be serialized to TOML.
-    #[error("Failed to serialize configuration: {0}")]
-    TomlSerialize(#[from] toml::ser::Error),
 }

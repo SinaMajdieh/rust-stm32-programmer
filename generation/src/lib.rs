@@ -17,7 +17,7 @@ mod providers;
 mod request;
 
 pub use config::GeneratorConfig;
-pub use error::{GenerationConfigError, GenerationError, OpenAIClientError};
+pub use error::{GenerationError, OpenAIClientError};
 pub use generator::LlmGenerator;
 pub use model::{Model, ModelId, Provider};
 pub use output::{GenerationOutput, GenerationStatistics};

@@ -627,6 +627,7 @@ dependencies = [
  "firmware-targets",
  "generation",
  "thiserror 2.0.20",
+ "toml 0.9.12+spec-1.1.0",
 ]
 
 [[package]]
@@ -960,6 +961,7 @@ version = "0.1.0"
 dependencies = [
  "backend",
  "clap",
+ "firmware-targets",
  "serde",
  "tokio",
  "toml 0.9.12+spec-1.1.0",
@@ -1623,6 +1625,7 @@ name = "firmware-targets"
 version = "0.1.0"
 dependencies = [
  "include_dir",
+ "serde",
  "tempfile",
  "thiserror 2.0.20",
 ]
@@ -1893,7 +1896,6 @@ dependencies = [
  "serde",
  "thiserror 2.0.20",
  "tokio",
- "toml 0.9.12+spec-1.1.0",
 ]
 
 [[package]]

@@ -4,13 +4,13 @@ mod config;
 use std::{/*error::Error as StdError,*/ process::ExitCode, time::Instant};
 
 use backend::{
-    Error, GenerationError, GenerationOutput, GenerationRequest, LlmGenerator, build_project,
-    program, save_source,
+    Error, GenerationOutput, GenerationRequest, LlmGenerator, build_project, program, save_source,
 };
 use clap::Parser;
 
 use cli::{Cli, Command};
 use config::Config;
+use firmware_targets::create_target;
 
 const CONFIG_PATH: &str = "config.toml";
 
@@ -45,7 +45,11 @@ async fn run() -> Result<(), Error> {
             generate(&project, model.as_deref(), &prompt).await?;
 
             let start = Instant::now();
-            let artifacts = build_project(&project)?;
+            let config = Config::load(CONFIG_PATH)?;
+            let firmware = config.firmware;
+
+            let target = create_target(&firmware.selected_target)?;
+            let artifacts = build_project(target, firmware.generation.selected_template, &project)?;
 
             println!("Build finished in {} ms.", start.elapsed().as_millis());
 
@@ -68,11 +72,11 @@ async fn generate(
     model: Option<&str>,
     prompt_parts: &[String],
 ) -> Result<(), Error> {
-    let config = Config::load(CONFIG_PATH).map_err(GenerationError::Config)?;
+    let config = Config::load(CONFIG_PATH)?;
     let llm = config.llm;
 
     let model = model.unwrap_or(llm.selected_model.as_str());
-    let system_prompt = llm.system_prompt().map_err(GenerationError::Config)?;
+    let system_prompt = llm.system_prompt()?;
     let generator = LlmGenerator::from_config(llm.generator)?;
 
     let prompt = prompt_parts.join(" ");
@@ -89,8 +93,11 @@ async fn generate(
 /// Builds an existing project.
 fn build(project: &str) -> Result<(), Error> {
     let start = Instant::now();
+    let config = Config::load(CONFIG_PATH)?;
+    let firmware = config.firmware;
 
-    build_project(project)?;
+    let target = create_target(&firmware.selected_target)?;
+    build_project(target, firmware.generation.selected_template, project)?;
 
     println!("Build finished in {} ms.", start.elapsed().as_millis());
 

@@ -1,3 +1,9 @@
+[firmware]
+selected_target = "stm32f103c8"
+
+[firmware.generation]
+selected_template = "hal"
+
 [llm]
 # Model used when --model is not provided.
 selected_model = "ollama:qwen2.5-coder:7b"

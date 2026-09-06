@@ -11,14 +11,8 @@
 //! to provide their embedded project files, built-in sources, and ARM GCC
 //! configuration.
 
-mod cmsis;
-mod hal;
-mod ll;
 mod target;
-mod template;
+pub mod templates;
 
-pub use cmsis::Cmsis;
-pub use hal::Hal;
-pub use ll::Ll;
-pub use target::Target;
-pub use template::ProjectTemplate;
+pub use target::Stm32f103c8;
+// pub use templates::*;

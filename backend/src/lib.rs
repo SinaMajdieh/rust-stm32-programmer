@@ -12,7 +12,7 @@ mod error;
 mod firmware;
 
 pub use actions::*;
-pub use error::{Error, FirmwareError, ProgrammingError, Result};
+pub use error::{ConfigError, Error, ProgrammingError, Result};
 pub use firmware::{build_project, program, save_source};
 pub use generation::*;
 pub use report::*;

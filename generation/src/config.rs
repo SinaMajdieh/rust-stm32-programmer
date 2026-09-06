@@ -1,11 +1,7 @@
 //! Persistent configuration for LLM generation.
-
-use std::path::Path;
-
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    error::GenerationConfigError,
     model::Model,
     providers::{OllamaConfig, OpenAiConfig},
 };
@@ -24,12 +20,4 @@ pub struct GeneratorConfig {
     /// OpenAI configuration.
     #[serde(default)]
     pub openai: OpenAiConfig,
-}
-
-impl GeneratorConfig {
-    /// Loads generator configuration from a TOML file.
-    pub fn load(path: impl AsRef<Path>) -> Result<Self, GenerationConfigError> {
-        let contents = std::fs::read_to_string(path)?;
-        Ok(toml::from_str(&contents)?)
-    }
 }

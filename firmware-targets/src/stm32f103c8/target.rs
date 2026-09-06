@@ -1,7 +1,9 @@
 use std::path::Path;
 
-use crate::programmer::{
-    OpenOcd, OpenOcdConfig, ProgramError, ProgramRequest, ProgramResult, Programmer,
+use crate::{
+    ProjectTemplate, Target, TemplateKind,
+    programmer::{OpenOcd, OpenOcdConfig, ProgramError, ProgramRequest, ProgramResult, Programmer},
+    stm32f103c8::templates::{Cmsis, Hal, Ll},
 };
 
 /// A programming target backed by a configurable programmer.
@@ -12,7 +14,7 @@ use crate::programmer::{
 ///
 /// The default programmer is [`OpenOcd`].
 #[derive(Debug, Clone)]
-pub struct Target<P: Programmer = OpenOcd> {
+pub struct Stm32f103c8<P: Programmer = OpenOcd> {
     programmer: P,
 }
 
@@ -29,7 +31,28 @@ impl OpenOcd {
     }
 }
 
-impl<P: Programmer> Target<P> {
+impl Target for Stm32f103c8 {
+    fn generate_project(
+        &self,
+        template: TemplateKind,
+        path: impl AsRef<Path>,
+    ) -> std::io::Result<crate::Project> {
+        match template {
+            TemplateKind::Ll => Ll::generate(path.as_ref()),
+            TemplateKind::Cmsis => Cmsis::generate(path.as_ref()),
+            TemplateKind::Hal => Hal::generate(path.as_ref()),
+        }
+    }
+
+    /// Programs a firmware image using the default programming options.
+    ///
+    /// This is a convenience wrapper around [`Target::program_with`].
+    fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgramError> {
+        self.program_with(ProgramRequest::new(firmware.as_ref()))
+    }
+}
+
+impl<P: Programmer> Stm32f103c8<P> {
     /// Creates a programming target using the specified programmer.
     ///
     /// This constructor allows callers to provide custom programmer
@@ -39,12 +62,12 @@ impl<P: Programmer> Target<P> {
         Self { programmer }
     }
 
-    /// Programs a firmware image using the default programming options.
-    ///
-    /// This is a convenience wrapper around [`Target::program_with`].
-    pub fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgramError> {
-        self.program_with(ProgramRequest::new(firmware.as_ref()))
-    }
+    // /// Programs a firmware image using the default programming options.
+    // ///
+    // /// This is a convenience wrapper around [`Target::program_with`].
+    // pub fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgramError> {
+    //     self.program_with(ProgramRequest::new(firmware.as_ref()))
+    // }
 
     /// Programs a firmware image using the specified request.
     ///
@@ -55,7 +78,7 @@ impl<P: Programmer> Target<P> {
     }
 }
 
-impl Target<OpenOcd> {
+impl Stm32f103c8<OpenOcd> {
     /// Creates an STM32F103C8 programming target using OpenOCD.
     ///
     /// The target is configured to use an ST-Link debug interface and the
@@ -67,7 +90,7 @@ impl Target<OpenOcd> {
     }
 }
 
-impl Default for Target<OpenOcd> {
+impl Default for Stm32f103c8<OpenOcd> {
     fn default() -> Self {
         Self::new()
     }

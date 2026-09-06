@@ -1,6 +1,7 @@
 use std::{fs, path::Path};
 
-use backend::{GenerationConfigError, GeneratorConfig, ModelId};
+use backend::{ConfigError, GeneratorConfig, ModelId};
+use firmware_targets::{TargetKind, TemplateKind};
 use serde::Deserialize;
 
 /// Application configuration for the firmware CLI.
@@ -8,11 +9,13 @@ use serde::Deserialize;
 pub struct Config {
     /// LLM configuration.
     pub llm: LlmConfig,
+    /// Firmware configuration.
+    pub firmware: FirmwareConfig,
 }
 
 impl Config {
     /// Loads the application configuration from a TOML file.
-    pub fn load(path: impl AsRef<Path>) -> Result<Self, GenerationConfigError> {
+    pub fn load(path: impl AsRef<Path>) -> Result<Self, ConfigError> {
         let contents = fs::read_to_string(path)?;
         Ok(toml::from_str(&contents)?)
     }
@@ -37,7 +40,24 @@ pub struct LlmConfig {
 
 impl LlmConfig {
     /// Loads the configured system prompt.
-    pub fn system_prompt(&self) -> Result<String, GenerationConfigError> {
+    pub fn system_prompt(&self) -> Result<String, ConfigError> {
         Ok(fs::read_to_string(&self.system_prompt_path)?)
     }
+}
+
+/// Firmware configuration.
+#[derive(Debug, Deserialize)]
+pub struct FirmwareConfig {
+    /// Currently selected target device.
+    pub selected_target: TargetKind,
+
+    /// Firmware generation configuration.
+    pub generation: FirmwareGenerationConfig,
+}
+
+/// Firmware generation configuration.
+#[derive(Debug, Deserialize)]
+pub struct FirmwareGenerationConfig {
+    /// Currently selected project template.
+    pub selected_template: TemplateKind,
 }

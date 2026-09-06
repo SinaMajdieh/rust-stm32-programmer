@@ -2,7 +2,7 @@
 
 use std::io;
 
-use firmware_targets::stm32f103c8::{Cmsis, ProjectTemplate};
+use firmware_targets::{ProjectTemplate, stm32f103c8::templates::Cmsis};
 use tempfile::tempdir;
 
 #[test]

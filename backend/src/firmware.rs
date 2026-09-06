@@ -4,12 +4,12 @@ use std::{
 };
 
 use firmware_targets::{
-    BuildArtifacts,
+    BuildArtifacts, FirmwareError, Target, TemplateKind,
     programmer::{OpenOcd, ProgramResult},
-    stm32f103c8::{Hal, ProjectTemplate, Target},
+    stm32f103c8::Stm32f103c8,
 };
 
-use crate::{FirmwareError, ProgrammingError};
+use crate::ProgrammingError;
 
 /// Saves generated C source code as `main.c`.
 pub fn save_source(project: impl AsRef<Path>, code: &str) -> Result<(), FirmwareError> {
@@ -23,7 +23,11 @@ pub fn save_source(project: impl AsRef<Path>, code: &str) -> Result<(), Firmware
 }
 
 /// Builds a generated firmware project.
-pub fn build_project(project: impl AsRef<Path>) -> Result<BuildArtifacts, FirmwareError> {
+pub fn build_project(
+    target: impl Target,
+    template: TemplateKind,
+    project: impl AsRef<Path>,
+) -> Result<BuildArtifacts, FirmwareError> {
     let directory = project.as_ref();
     let source_path = directory.join("main.c");
 
@@ -31,7 +35,7 @@ pub fn build_project(project: impl AsRef<Path>) -> Result<BuildArtifacts, Firmwa
 
     fs::remove_dir_all(directory)?;
 
-    let mut project = Hal::generate(directory)?;
+    let mut project = target.generate_project(template, directory)?;
 
     project.add_source("main.c", &code)?;
 
@@ -41,7 +45,7 @@ pub fn build_project(project: impl AsRef<Path>) -> Result<BuildArtifacts, Firmwa
 /// Programs a firmware binary using OpenOCD.
 pub fn program(firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgrammingError> {
     let firmware = firmware.as_ref();
-    let target = Target::<OpenOcd>::default();
+    let target = Stm32f103c8::<OpenOcd>::default();
 
     target
         .program(firmware)

@@ -1,4 +1,4 @@
-use super::ProjectTemplate;
+use crate::ProjectTemplate;
 
 use crate::ArmGccConfig;
 

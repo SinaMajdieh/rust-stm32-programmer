@@ -16,11 +16,17 @@
 //! support.
 
 mod arm_gcc;
+mod error;
 pub mod programmer;
 mod project;
+mod target;
+mod template;
 
 /// Project templates for supported microcontroller targets.
 pub mod stm32f103c8;
 
 pub use arm_gcc::{ArmGccConfig, BuildArtifacts, BuildError, BuildStage};
+pub use error::FirmwareError;
 pub use project::Project;
+pub use target::{TargetKind, Target, TemplateKind, create_target};
+pub use template::ProjectTemplate;

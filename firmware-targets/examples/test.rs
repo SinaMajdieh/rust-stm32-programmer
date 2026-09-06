@@ -1,6 +1,7 @@
 use firmware_targets::{
+    ProjectTemplate, Target,
     programmer::OpenOcd,
-    stm32f103c8::{Ll, ProjectTemplate, Target},
+    stm32f103c8::{Stm32f103c8, templates::Ll},
 };
 
 fn main() {
@@ -101,7 +102,7 @@ fn main() {
         }
     };
 
-    let board = Target::<OpenOcd>::new();
+    let board = Stm32f103c8::<OpenOcd>::new();
 
     match board.program(artifact.elf()) {
         Ok(_) => (),
