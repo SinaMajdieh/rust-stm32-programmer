@@ -3,6 +3,11 @@ use crate::hex::HexError;
 use crate::report::Report;
 use std::path::Path;
 
+/// Validates an Intel HEX firmware file and reports progress and status.
+///
+/// The validator reports progress through `report` while checking the file.
+/// A successful validation reports 100% progress and a success message.
+/// Validation failures are reported and returned unchanged.
 pub fn validate_firmware(
     path: impl AsRef<Path>,
     report: &mut impl FnMut(Report),

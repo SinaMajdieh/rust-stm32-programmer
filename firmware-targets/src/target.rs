@@ -15,6 +15,7 @@ use crate::{
 /// corresponding to a target kind.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 pub enum TargetKind {
     /// An STM32F103C8 target.
     #[default]
@@ -27,6 +28,7 @@ pub enum TargetKind {
 /// used when generating a [`Project`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 pub enum TemplateKind {
     /// An STM32 HAL-based template.
     #[default]

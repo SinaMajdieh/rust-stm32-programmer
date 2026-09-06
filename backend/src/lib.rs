@@ -1,8 +1,12 @@
 //! Core backend for firmware generation, project building, validation, and programming.
 //!
-//! This crate coordinates the higher-level backend operations while delegating
-//! target-specific project handling to [`firmware-targets`] and LLM integration
-//! to [`firmware-generation`].
+//! This crate provides the application-facing operations that coordinate the
+//! firmware workflow. Target-specific project generation and programming are
+//! delegated to [`firmware-targets`], while LLM-based source generation is
+//! delegated to [`generation`].
+//!
+//! The crate also provides Intel HEX validation and [`Report`] values for
+//! reporting progress and status to higher-level applications.
 
 pub mod actions;
 pub mod hex;

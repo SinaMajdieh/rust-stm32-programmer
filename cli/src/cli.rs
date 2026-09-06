@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use firmware_targets::{TargetKind, TemplateKind};
 
 /// Command-line interface for the firmware generation tool.
 #[derive(Debug, Parser)]
@@ -21,7 +22,7 @@ pub enum Command {
         #[arg(long)]
         model: Option<String>,
 
-        /// Project directory.
+        /// Project directory where the generated source is saved.
         project: String,
 
         /// Prompt passed to the model.
@@ -30,13 +31,25 @@ pub enum Command {
 
     /// Build an existing project.
     Build {
-        /// Project directory.
+        /// Target to use instead of the configured selected target.
+        #[arg(long)]
+        target: Option<TargetKind>,
+
+        /// Template to use instead of the configured selected template.
+        #[arg(long)]
+        template: Option<TemplateKind>,
+
+        /// Project directory containing the generated source.
         project: String,
     },
 
     /// Program an existing firmware binary.
     Program {
-        /// Firmware ELF file.
+        /// Target to use instead of the configured selected target.
+        #[arg(long)]
+        target: Option<TargetKind>,
+
+        /// Firmware ELF file to program.
         firmware: String,
     },
 
@@ -46,7 +59,15 @@ pub enum Command {
         #[arg(long)]
         model: Option<String>,
 
-        /// Project directory.
+        /// Target to use instead of the configured selected target.
+        #[arg(long)]
+        target: Option<TargetKind>,
+
+        /// Template to use instead of the configured selected template.
+        #[arg(long)]
+        template: Option<TemplateKind>,
+
+        /// Project directory where the generated source is saved.
         project: String,
 
         /// Prompt passed to the model.

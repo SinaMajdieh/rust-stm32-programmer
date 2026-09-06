@@ -1,3 +1,10 @@
+//! Intel HEX file validation.
+//!
+//! This module validates Intel HEX records without modifying the input file.
+//! It checks record syntax, hexadecimal encoding, byte counts, checksums,
+//! supported record types, and the presence and position of the end-of-file
+//! record.
+
 use std::{fmt, fs, io, path::Path};
 
 const DATA: u8 = 0x00;
@@ -12,10 +19,26 @@ const TYPE_INDEX: usize = 3;
 // length + address high + address low + type + checksum
 const RECORD_OVERHEAD: usize = 5;
 
+/// Errors that can occur while validating an Intel HEX file.
 #[derive(Debug)]
 pub enum HexError {
+    /// The HEX file could not be read.
     Read(io::Error),
-    Invalid { line: usize, message: &'static str },
+
+    /// A record contains invalid Intel HEX data.
+    ///
+    /// `line` is the one-based source line number. A line number of `0`
+    /// indicates a file-level error rather than an error in a particular
+    /// record.
+    Invalid {
+        /// Line containing the invalid record.
+        line: usize,
+
+        /// Description of the validation failure.
+        message: &'static str,
+    },
+
+    /// The file does not contain an end-of-file record.
     MissingEof,
 }
 
@@ -40,11 +63,25 @@ impl std::error::Error for HexError {
     }
 }
 
+/// Validates an Intel HEX file at `path`.
+///
+/// The file is checked for valid Intel HEX records, correct byte counts and
+/// checksums, supported record types, and a terminating end-of-file record.
+/// Empty lines and lines beginning with `#` are ignored.
+///
+/// # Errors
+///
+/// Returns [`HexError::Read`] if the file cannot be read, or another
+/// [`HexError`] variant if the file contains invalid HEX data.
 pub fn validate_file(path: impl AsRef<Path>) -> Result<(), HexError> {
     let text = fs::read_to_string(path).map_err(HexError::Read)?;
     validate(&text)
 }
 
+/// Validates the contents of an Intel HEX document.
+///
+/// Empty lines and lines beginning with `#` are ignored. Once an end-of-file
+/// record is encountered, no further records are permitted.
 fn validate(text: &str) -> Result<(), HexError> {
     let mut found_record = false;
     let mut found_eof = false;
@@ -82,6 +119,10 @@ fn validate(text: &str) -> Result<(), HexError> {
     Ok(())
 }
 
+/// Parses and validates a single Intel HEX record.
+///
+/// The returned vector contains the decoded bytes of the complete record,
+/// including its byte count, address, record type, data, and checksum.
 fn validate_record(line: &str) -> Result<Vec<u8>, &'static str> {
     let hex = line.strip_prefix(':').ok_or("record must start with ':'")?;
 
@@ -117,6 +158,7 @@ fn validate_record(line: &str) -> Result<Vec<u8>, &'static str> {
     Ok(record)
 }
 
+/// Validates the structural constraints of a supported Intel HEX record type.
 fn validate_record_type(kind: u8, length: usize, address: u16) -> Result<(), &'static str> {
     match kind {
         DATA => Ok(()),
@@ -141,16 +183,19 @@ fn validate_record_type(kind: u8, length: usize, address: u16) -> Result<(), &'s
     }
 }
 
+/// Parses a pair of hexadecimal characters into one byte.
 fn parse_byte(pair: &[u8]) -> Result<u8, &'static str> {
     let pair = std::str::from_utf8(pair).map_err(|_| "record contains invalid hexadecimal data")?;
 
     u8::from_str_radix(pair, 16).map_err(|_| "record contains invalid hexadecimal data")
 }
 
+/// Returns whether a decoded record is an end-of-file record.
 fn is_record_eof(record: &[u8]) -> bool {
     record[TYPE_INDEX] == EOF
 }
 
+/// Creates an [`HexError::Invalid`] result for a validation failure.
 fn invalid<T>(line: usize, message: &'static str) -> Result<T, HexError> {
     Err(HexError::Invalid { line, message })
 }

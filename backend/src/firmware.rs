@@ -4,14 +4,15 @@ use std::{
 };
 
 use firmware_targets::{
-    BuildArtifacts, FirmwareError, Target, TemplateKind,
-    programmer::{OpenOcd, ProgramResult},
-    stm32f103c8::Stm32f103c8,
+    BuildArtifacts, FirmwareError, Target, TemplateKind, programmer::ProgramResult,
 };
 
 use crate::ProgrammingError;
 
-/// Saves generated C source code as `main.c`.
+/// Saves generated C source code as `main.c` in the project directory.
+///
+/// The project directory is created if it does not already exist. If
+/// `main.c` already exists, its contents are replaced.
 pub fn save_source(project: impl AsRef<Path>, code: &str) -> Result<(), FirmwareError> {
     let directory = project.as_ref();
 
@@ -23,6 +24,16 @@ pub fn save_source(project: impl AsRef<Path>, code: &str) -> Result<(), Firmware
 }
 
 /// Builds a generated firmware project.
+///
+/// The function reads `main.c` from the project directory, removes the
+/// existing directory, generates a fresh project from `template`, adds the
+/// generated source, and compiles the project.
+///
+/// # Errors
+///
+/// Returns [`FirmwareError`] if the source cannot be read, the existing
+/// project cannot be removed, the project cannot be generated, the source
+/// cannot be added, or compilation fails.
 pub fn build_project(
     target: impl Target,
     template: TemplateKind,
@@ -42,10 +53,17 @@ pub fn build_project(
     Ok(project.compile()?)
 }
 
-/// Programs a firmware binary using OpenOCD.
-pub fn program(firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgrammingError> {
+/// Programs a firmware binary using the target's configured programmer.
+///
+/// # Errors
+///
+/// Returns [`ProgrammingError`] if programming fails. The error includes the
+/// firmware path and the underlying target programming error.
+pub fn program(
+    target: impl Target,
+    firmware: impl AsRef<Path>,
+) -> Result<ProgramResult, ProgrammingError> {
     let firmware = firmware.as_ref();
-    let target = Stm32f103c8::<OpenOcd>::default();
 
     target
         .program(firmware)
