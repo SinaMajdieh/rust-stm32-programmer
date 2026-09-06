@@ -1,7 +1,8 @@
 mod cli;
 mod config;
+mod spinner;
 
-use std::{/*error::Error as StdError,*/ process::ExitCode, time::Instant};
+use std::{process::ExitCode, time::Instant};
 
 use backend::{
     Error, GenerationOutput, GenerationRequest, LlmGenerator, build_project, program, save_source,
@@ -11,6 +12,8 @@ use clap::Parser;
 use cli::{Cli, Command};
 use config::Config;
 use firmware_targets::create_target;
+
+use crate::spinner::Spinner;
 
 const CONFIG_PATH: &str = "config.toml";
 
@@ -45,16 +48,23 @@ async fn run() -> Result<(), Error> {
             generate(&project, model.as_deref(), &prompt).await?;
 
             let start = Instant::now();
-            let config = Config::load(CONFIG_PATH)?;
-            let firmware = config.firmware;
+            let artifacts = {
+                let _spinner = Spinner::start("Building");
 
-            let target = create_target(&firmware.selected_target)?;
-            let artifacts = build_project(target, firmware.generation.selected_template, &project)?;
+                let config = Config::load(CONFIG_PATH)?;
+                let firmware = config.firmware;
+                let target = create_target(&firmware.selected_target)?;
+
+                build_project(target, firmware.generation.selected_template, &project)?
+            };
 
             println!("Build finished in {} ms.", start.elapsed().as_millis());
 
             let start = Instant::now();
-            program(artifacts.elf())?;
+            {
+                let _spinner = Spinner::start("Programming");
+                program(artifacts.elf())?;
+            }
 
             println!(
                 "Programming finished in {} ms.",
@@ -82,7 +92,10 @@ async fn generate(
     let prompt = prompt_parts.join(" ");
     let request = GenerationRequest::new(model, &prompt, Some(&system_prompt));
 
-    let output = generator.generate(request).await?;
+    let output = {
+        let _spinner = Spinner::start("Generating code");
+        generator.generate(request).await?
+    };
 
     print_generation(&output);
     save_source(project, &output.code)?;
@@ -97,7 +110,10 @@ fn build(project: &str) -> Result<(), Error> {
     let firmware = config.firmware;
 
     let target = create_target(&firmware.selected_target)?;
-    build_project(target, firmware.generation.selected_template, project)?;
+    {
+        let _spinner = Spinner::start("Building");
+        build_project(target, firmware.generation.selected_template, project)?;
+    }
 
     println!("Build finished in {} ms.", start.elapsed().as_millis());
 
@@ -108,7 +124,10 @@ fn build(project: &str) -> Result<(), Error> {
 fn program_firmware(firmware: &str) -> Result<(), Error> {
     let start = Instant::now();
 
-    program(firmware)?;
+    {
+        let _spinner = Spinner::start("Programming");
+        program(firmware)?;
+    }
 
     println!(
         "Programming finished in {} ms.",
