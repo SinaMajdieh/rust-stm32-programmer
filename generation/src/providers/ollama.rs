@@ -1,4 +1,9 @@
 //! Ollama generation provider.
+//!
+//! This module adapts the provider-independent generation interface to the
+//! Ollama API. [`OllamaConfig`] contains persistent configuration, while
+//! [`OllamaProvider`] owns the initialized client and runtime generation
+//! settings.
 
 use crate::providers::duration_seconds;
 use ollama_client::{GenerateOptions, GenerateRequest as OllamaRequest, OllamaClient};
@@ -14,6 +19,9 @@ use crate::{
 };
 
 /// Configuration for the Ollama provider.
+///
+/// This configuration is divided into client settings and generation options.
+/// It can be serialized directly as part of [`crate::GeneratorConfig`].
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct OllamaConfig {
     /// Configuration for the Ollama client.
@@ -29,14 +37,21 @@ pub struct OllamaConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OllamaClientConfig {
     /// URL of the Ollama server.
+    ///
+    /// Defaults to `http://localhost:11434`.
     #[serde(default = "default_ollama_url")]
     pub url: String,
 
     /// How long a model should remain loaded after a request.
+    ///
+    /// `None` leaves the Ollama client's default behavior unchanged.
     #[serde(default)]
     pub keep_alive: Option<String>,
 
     /// Maximum duration of a generation request.
+    ///
+    /// The value is serialized as a whole number of seconds in configuration
+    /// files.
     #[serde(default = "default_request_timeout", with = "duration_seconds")]
     pub request_timeout: Duration,
 }
@@ -52,7 +67,10 @@ impl Default for OllamaClientConfig {
 }
 
 /// Configuration for Ollama text generation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+///
+/// Each option is optional so that omitted values can be left to the Ollama
+/// client or model defaults.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct OllamaGenerationOptions {
     /// Sampling temperature.
     #[serde(default)]
@@ -71,18 +89,10 @@ pub struct OllamaGenerationOptions {
     pub seed: Option<u64>,
 }
 
-impl Default for OllamaGenerationOptions {
-    fn default() -> Self {
-        Self {
-            temperature: None,
-            max_output_tokens: None,
-            context_length: None,
-            seed: None,
-        }
-    }
-}
-
 /// Runtime provider backed by Ollama.
+///
+/// The provider owns an initialized Ollama client and the generation settings
+/// derived from [`OllamaConfig`].
 pub struct OllamaProvider {
     client: OllamaClient,
     options: GenerateOptions,
@@ -92,6 +102,11 @@ pub struct OllamaProvider {
 
 impl OllamaProvider {
     /// Creates an Ollama provider from its configuration.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`GenerationError`] if the configured Ollama server URL
+    /// cannot be used to initialize the client.
     pub fn new(config: OllamaConfig) -> Result<Self, GenerationError> {
         let client = OllamaClient::new(&config.client.url)?;
         let options = build_options(&config.generation);
@@ -110,6 +125,7 @@ impl GenerationProvider for OllamaProvider {
         &self,
         request: GenerationRequest<'_>,
     ) -> Result<GenerationOutput, GenerationError> {
+        // Ollama generation requests disable model thinking and return the generated source response.
         let mut ollama_request = OllamaRequest::new(request.model, request.prompt)
             .with_thinking(false)
             .with_options(self.options.clone());
@@ -142,7 +158,7 @@ impl GenerationProvider for OllamaProvider {
     }
 }
 
-/// Builds Ollama's generation options from application configuration.
+/// Builds the Ollama client generation options from application configuration.
 fn build_options(config: &OllamaGenerationOptions) -> GenerateOptions {
     let mut options = GenerateOptions::new();
 
@@ -165,10 +181,12 @@ fn build_options(config: &OllamaGenerationOptions) -> GenerateOptions {
     options
 }
 
+/// Returns the default Ollama server URL.
 fn default_ollama_url() -> String {
     "http://localhost:11434".to_owned()
 }
 
+/// Returns the default generation request timeout.
 const fn default_request_timeout() -> Duration {
     Duration::from_secs(120)
 }

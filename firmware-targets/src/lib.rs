@@ -28,5 +28,5 @@ pub mod stm32f103c8;
 pub use arm_gcc::{ArmGccConfig, BuildArtifacts, BuildError, BuildStage};
 pub use error::FirmwareError;
 pub use project::Project;
-pub use target::{TargetKind, Target, TemplateKind, create_target};
+pub use target::{Target, TargetKind, TemplateKind, create_target};
 pub use template::ProjectTemplate;

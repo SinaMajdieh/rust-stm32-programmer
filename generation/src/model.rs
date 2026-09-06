@@ -1,4 +1,8 @@
 //! Model identity and provider metadata.
+//!
+//! This module defines the provider and model identifiers used to select a
+//! generation backend without exposing provider-specific implementation
+//! details to callers.
 
 use std::fmt;
 
@@ -26,6 +30,10 @@ impl fmt::Display for Provider {
 }
 
 /// Fully qualified model identifier such as `ollama:qwen2.5:7b`.
+///
+/// A model identifier combines the provider name and provider-specific model
+/// name, allowing models with the same name on different providers to be
+/// distinguished.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct ModelId(String);
@@ -61,7 +69,7 @@ impl fmt::Display for ModelId {
     }
 }
 
-/// A model available to the application.
+/// Describes a model available to the application.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Model {
     /// Provider-specific model name.

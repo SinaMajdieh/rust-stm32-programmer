@@ -1,4 +1,9 @@
 //! OpenAI-compatible generation provider.
+//!
+//! This module adapts the provider-independent generation interface to the
+//! OpenAI-compatible chat-completions API. [`OpenAiConfig`] contains
+//! persistent configuration, while [`OpenAiProvider`] owns the initialized
+//! client and runtime generation settings.
 
 use crate::providers::duration_seconds;
 use std::time::{Duration, Instant};
@@ -22,9 +27,12 @@ use crate::{
 };
 
 /// Configuration for an OpenAI-compatible provider.
+///
+/// This configuration is divided into client settings and generation options.
+/// It can be serialized directly as part of [`crate::GeneratorConfig`].
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct OpenAiConfig {
-    /// Configuration for the OpenAI client.
+    /// Configuration for the OpenAI-compatible client.
     #[serde(default)]
     pub client: OpenAiClientConfig,
 
@@ -37,14 +45,21 @@ pub struct OpenAiConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OpenAiClientConfig {
     /// Base URL of the OpenAI-compatible API.
+    ///
+    /// Defaults to the official OpenAI API endpoint.
     #[serde(default = "default_openai_url")]
     pub url: String,
 
-    /// Environment variable containing the API key.
+    /// Name of the environment variable containing the API key.
+    ///
+    /// Defaults to `OPENAI_API_KEY`.
     #[serde(default = "default_api_key_env")]
     pub api_key_env: Option<String>,
 
     /// Maximum duration of a generation request.
+    ///
+    /// The value is serialized as a whole number of seconds in configuration
+    /// files.
     #[serde(default = "default_request_timeout", with = "duration_seconds")]
     pub request_timeout: Duration,
 }
@@ -79,6 +94,9 @@ pub struct OpenAiGenerationOptions {
     pub seed: Option<i64>,
 
     /// Whether responses should be streamed.
+    ///
+    /// This option is retained as part of the provider configuration, but
+    /// streaming is not currently enabled by the provider implementation.
     #[serde(default = "default_stream")]
     pub stream: bool,
 }
@@ -96,6 +114,9 @@ impl Default for OpenAiGenerationOptions {
 }
 
 /// Runtime provider backed by an OpenAI-compatible API.
+///
+/// The provider owns an initialized API client and the generation settings
+/// derived from [`OpenAiConfig`].
 pub struct OpenAiProvider {
     client: Client<OpenAIConfig>,
     options: OpenAiGenerationOptions,
@@ -104,9 +125,17 @@ pub struct OpenAiProvider {
 
 impl OpenAiProvider {
     /// Creates an OpenAI-compatible provider from its configuration.
+    ///
+    /// The API key is read from the environment variable configured by
+    /// [`OpenAiClientConfig::api_key_env`].
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GenerationError::OpenAI`] if the API key configuration is
+    /// missing or the configured environment variable cannot be read.
     pub fn new(config: OpenAiConfig) -> Result<Self, GenerationError> {
         let api_key_env = config.client.api_key_env.as_deref().ok_or_else(|| {
-            OpenAIClientError::ApiKey("no API key environment variable configured".to_owned())
+            OpenAIClientError::ApiKey("No API key environment variable configured".to_owned())
         })?;
 
         let api_key = std::env::var(api_key_env)
@@ -124,6 +153,14 @@ impl OpenAiProvider {
     }
 
     /// Builds the chat messages for a generation request.
+    ///
+    /// The optional system prompt is represented as a system message followed
+    /// by the user's prompt as a user message.
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`OpenAIClientError`] if either message cannot be constructed
+    /// by the OpenAI client types.
     fn build_messages(
         request: &GenerationRequest<'_>,
     ) -> Result<Vec<ChatCompletionRequestMessage>, OpenAIClientError> {
@@ -202,6 +239,7 @@ impl GenerationProvider for OpenAiProvider {
     }
 }
 
+/// Converts provider usage information into common generation statistics.
 fn statistics(usage: Option<&CompletionUsage>, elapsed: Duration) -> GenerationStatistics {
     GenerationStatistics {
         prompt_tokens: usage.map(|usage| usage.prompt_tokens as u64),
@@ -210,34 +248,42 @@ fn statistics(usage: Option<&CompletionUsage>, elapsed: Duration) -> GenerationS
     }
 }
 
+/// Returns the default OpenAI API base URL.
 fn default_openai_url() -> String {
     "https://api.openai.com/v1".to_owned()
 }
 
+/// Returns the default environment variable used for the API key.
 fn default_api_key_env() -> Option<String> {
     Some("OPENAI_API_KEY".to_owned())
 }
 
+/// Returns the default sampling temperature.
 fn default_temperature() -> Option<f32> {
     Some(0.1)
 }
 
+/// Returns the default nucleus sampling probability.
 fn default_top_p() -> Option<f32> {
     Some(1.0)
 }
 
+/// Returns the default maximum number of output tokens.
 fn default_max_output_tokens() -> Option<u32> {
     Some(5000)
 }
 
+/// Returns the default random seed.
 fn default_seed() -> Option<i64> {
     Some(42)
 }
 
+/// Returns the default generation request timeout.
 fn default_request_timeout() -> Duration {
     Duration::from_secs(120)
 }
 
+/// Returns whether response streaming is enabled by default.
 const fn default_stream() -> bool {
     false
 }

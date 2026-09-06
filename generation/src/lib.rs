@@ -1,9 +1,18 @@
 //! Provider-agnostic LLM generation for source-code generation workflows.
 //!
-//! This crate owns generation configuration, model identity, providers,
-//! requests, outputs, and the runtime generation coordinator.
+//! This crate provides the types and runtime coordination needed to generate
+//! source code through supported LLM providers. It owns generation
+//! configuration, model identity, requests, outputs, provider abstractions,
+//! and the high-level [`LlmGenerator`] coordinator.
 //!
-//! Application-specific concerns such as CLI model selection or system-prompt
+//! The generation flow is:
+//!
+//! 1. A [`GenerationRequest`] identifies a model and provides the prompts.
+//! 2. [`LlmGenerator`] resolves the model to its configured [`Provider`].
+//! 3. The corresponding provider performs the provider-specific API request.
+//! 4. The provider normalizes the response into a [`GenerationOutput`].
+//!
+//! Application-specific concerns such as CLI model selection and system-prompt
 //! file locations remain outside this crate.
 
 mod code;
