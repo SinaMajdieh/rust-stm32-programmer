@@ -1,6 +1,7 @@
 use std::{io, path::Path};
 
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumIter, EnumString};
 
 use crate::{
     FirmwareError, Project,
@@ -13,7 +14,20 @@ use crate::{
 /// This type is intended for configuration and serialization. Use
 /// [`create_target`] to construct the concrete target implementation
 /// corresponding to a target kind.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    Default,
+    Display,
+    EnumIter,
+    EnumString,
+)]
+#[strum(serialize_all = "UPPERCASE")]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 pub enum TargetKind {
@@ -26,7 +40,20 @@ pub enum TargetKind {
 ///
 /// The selected template determines the project files and build configuration
 /// used when generating a [`Project`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    Default,
+    Display,
+    EnumIter,
+    EnumString,
+)]
+#[strum(serialize_all = "UPPERCASE")]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 pub enum TemplateKind {
