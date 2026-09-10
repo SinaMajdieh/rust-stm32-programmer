@@ -1,0 +1,61 @@
+import { Palette } from "../../styling/style.slint";
+
+export component ProjectAction inherits Rectangle {
+    in property <string> title;
+    in property <string> subtitle;
+    in property <string> icon;
+    in property <bool> enabled: true;
+
+    callback clicked();
+
+    width: 180px;
+    height: 112px;
+
+    background: touch-area.pressed
+        ? Palette.surface-hover
+        : touch-area.has-hover
+            ? Palette.surface-hover
+            : Palette.surface;
+
+    border-radius: 4px;
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 6px;
+        alignment: center;
+
+        Text {
+            text: root.icon;
+            font-size: 22px;
+            color: Palette.text-primary;
+            horizontal-alignment: center;
+        }
+
+        Text {
+            text: root.title;
+            font-size: 15px;
+            font-weight: 600;
+            color: Palette.text-primary;
+            horizontal-alignment: center;
+        }
+
+        Text {
+            text: root.subtitle;
+            font-size: 12px;
+            color: Palette.text-secondary;
+            horizontal-alignment: center;
+        }
+    }
+
+    touch_area := TouchArea {
+
+
+        enabled: root.enabled;
+
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    opacity: root.enabled ? 1.0 : 0.45;
+}

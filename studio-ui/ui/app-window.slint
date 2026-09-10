@@ -1,153 +1,10 @@
 import { Palette, Font } from "styling/style.slint";
-import { ComboBox } from "std-widgets.slint";
-
-// ─────────────────────────────────────────────────────────────
-// Reusable components
-// ─────────────────────────────────────────────────────────────
-
-component LabeledComboBox inherits VerticalLayout {
-    in property <string> label;
-    in property <[string]> model;
-    in-out property <int> current-index: 0;
-
-    spacing: 8px;
-    cross-axis-alignment: stretch;
-
-    Text {
-        text: root.label;
-        vertical-alignment: center;
-        horizontal-alignment: left;
-
-        font-weight: 400;
-        font-size: 13px;
-        color: Palette.text-secondary;
-    }
-
-    ComboBox {
-        model: root.model;
-        current-index <=> root.current-index;
-    }
-}
-
-
-// ─────────────────────────────────────────────────────────────
-// App Bar
-// ─────────────────────────────────────────────────────────────
-
-component StudioAppBar inherits Rectangle {
-    height: 48px;
-    background: Palette.surface;
-
-    HorizontalLayout {
-        padding-left: 16px;
-        padding-right: 16px;
-
-        alignment: start;
-        cross-axis-alignment: center;
-
-        Text {
-            text: "STM32 Studio";
-
-            vertical-alignment: center;
-            horizontal-alignment: center;
-
-            color: Palette.text-primary;
-            font-size: 15px;
-            font-weight: 600;
-        }
-    }
-}
-
-
-// ─────────────────────────────────────────────────────────────
-// Generate Firmware Panel
-// ─────────────────────────────────────────────────────────────
-
-component GenerateFirmwarePanel inherits Rectangle {
-    in property <[string]> targets;
-    in property <[string]> templates;
-    in property <[string]> models;
-
-    in-out property <int> target-index: 0;
-    in-out property <int> template-index: 0;
-    in-out property <int> model-index: 0;
-
-    VerticalLayout {
-        width: 640px;
-
-        alignment: center;
-        cross-axis-alignment: center;
-
-        padding-top: 10px;
-        padding-bottom: 10px;
-        spacing: 16px;
-
-        VerticalLayout {
-            alignment: start;
-            cross-axis-alignment: stretch;
-
-            padding-left: 10px;
-            padding-right: 10px;
-            padding-top: 10px;
-            padding-bottom: 10px;
-
-            spacing: 16px;
-
-            Text {
-                text: "Generate Firmware";
-
-                vertical-alignment: center;
-                horizontal-alignment: center;
-
-                font-weight: 600;
-                font-size: 20px;
-                color: Palette.text-secondary;
-            }
-
-            Text {
-                text: "Configure your target and describe the firmware you want to generate.";
-
-                vertical-alignment: center;
-                horizontal-alignment: center;
-
-                font-weight: 400;
-                font-size: 13px;
-                color: Palette.text-secondary;
-            }
-
-            HorizontalLayout {
-                spacing: 12px;
-
-                LabeledComboBox {
-                    label: "Target";
-                    model: root.targets;
-                    current-index <=> root.target-index;
-                }
-
-                LabeledComboBox {
-                    label: "Template";
-                    model: root.templates;
-                    current-index <=> root.template-index;
-                }
-
-                LabeledComboBox {
-                    label: "Model";
-                    model: root.models;
-                    current-index <=> root.model-index;
-                }
-            }
-        }
-    }
-}
-
-
-// ─────────────────────────────────────────────────────────────
-// Main Window
-// ─────────────────────────────────────────────────────────────
+import { ComboBox, TextEdit, VerticalBox, Button } from "std-widgets.slint";
+import { Project } from "pages/projects/projects.slint";
 
 export component AppWindow inherits Window {
-    preferred-width: 1440px;
-    preferred-height: 900px;
+    preferred-width: 800px;
+    preferred-height: 500px;
 
     min-width: 720px;
     min-height: 450px;
@@ -160,57 +17,28 @@ export component AppWindow inherits Window {
     default-font-size: 13px;
     default-font-weight: 400;
 
-    in property <[string]> targets;
-    in property <[string]> templates;
-    in property <[string]> models;
-
-    in-out property <int> target-index: 0;
-    in-out property <int> template-index: 0;
-    in-out property <int> model-index: 0;
-
-    // The callbacks now send the actual selected string.
-    callback target-changed(string);
-    callback template-changed(string);
-    callback model-changed(string);
-
-    // ─────────────────────────────────────────────────────────
-    // Selection changes
-    // ─────────────────────────────────────────────────────────
-
-    changed target-index => {
-        if target-index >= 0 && target-index < targets.length {
-            target-changed(targets[target-index]);
-        }
-    }
-
-    changed template-index => {
-        if template-index >= 0 && template-index < templates.length {
-            template-changed(templates[template-index]);
-        }
-    }
-
-    changed model-index => {
-        if model-index >= 0 && model-index < models.length {
-            model-changed(models[model-index]);
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────
-    // Layout
-    // ─────────────────────────────────────────────────────────
+    callback new-project();
+    callback open-project();
+    callback open-recent-project(string);
 
     VerticalLayout {
-        StudioAppBar {}
+        HorizontalLayout {
+            alignment: center;
+            cross-axis-alignment: center;
 
-        Rectangle {
-            GenerateFirmwarePanel {
-                targets: root.targets;
-                templates: root.templates;
-                models: root.models;
+            padding: 20px;
 
-                target-index <=> root.target-index;
-                template-index <=> root.template-index;
-                model-index <=> root.model-index;
+            Project {
+                max-width: 750px;
+                horizontal-stretch: 0;
+
+                border-color: Palette.border;
+                border-width: 1px;
+                border-radius: 4px;
+
+                new-project => { new-project(); }
+                open-project => { open-project(); }
+                open-recent-project(path) => { open-recent-project(path); }
             }
         }
     }

@@ -1,0 +1,101 @@
+import { Palette } from "../../styling/style.slint";
+import { ProjectAction } from "./project_button.slint";
+import { RecentProjectItem } from "./recent_project_item.slint";
+
+export component Project inherits Rectangle {
+    preferred-width: 750px;
+    preferred-height: 450px;
+
+    background: Palette.background;
+
+    callback new-project();
+    callback open-project();
+    callback open-recent-project(string);
+
+
+    VerticalLayout {
+        HorizontalLayout {
+            padding: 20px;
+            spacing: 16px;
+
+            vertical-stretch: 0;
+            alignment: center;
+
+            ProjectAction {
+                title: "New Project";
+                subtitle: "Create a new project";
+                icon: "+";
+
+                clicked => {
+                    root.new-project();
+                }
+            }
+
+            ProjectAction {
+                title: "Open Project";
+                subtitle: "Open an existing project";
+                icon: "↗";
+
+                clicked => {
+                    root.open-project();
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // Recent projects
+        // ─────────────────────────────────────────
+
+        VerticalLayout {
+            padding: 16px;
+            spacing: 8px;
+            alignment: start;
+            vertical-stretch: 0;
+
+            Text {
+                text: "Recent Projects";
+                font-size: 15px;
+                font-weight: 600;
+                color: Palette.text-secondary;
+            }
+
+            RecentProjectItem {
+                name: "STM32 Blinky";
+                path: "~/Projects/stm32-blinky";
+                target: "STM32F103C8T6";
+                last-opened: "Just now";
+
+                clicked => {
+                    root.open-recent-project(self.path);
+                }
+            }
+
+            RecentProjectItem {
+                name: "Motor Controller";
+                path: "~/Projects/motor-controller";
+                target: "STM32F103C8T6";
+                last-opened: "Yesterday";
+
+                clicked => {
+                    root.open-recent-project(self.path);
+                }
+            }
+
+            RecentProjectItem {
+                name: "Temperature Sensor";
+                path: "~/Projects/temperature-sensor";
+                target: "STM32F103C8T6";
+                last-opened: "3 days ago";
+
+                clicked => {
+                    root.open-recent-project(self.path);
+                }
+            }
+        }
+
+        // Consume remaining space.
+        // Rectangle {
+        //     vertical-stretch: 1;
+        // }
+    }
+}

@@ -5,6 +5,7 @@ edition = "2024"
 build = "build.rs"
 
 [dependencies]
+backend = { path = "../backend" }
 firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
 serde = { version = "1", features = ["derive"] }
 slint = "1.17.1"
