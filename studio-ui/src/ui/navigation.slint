@@ -1,0 +1,10 @@
+import { Screen } from "screen.slint";
+
+export global Navigation {
+    in-out property <Screen> current-screen: Screen.Project;
+    callback go-to-screen(Screen);
+
+    public function go-to(screen: Screen) {
+        Navigation.go-to-screen(screen);
+    }
+}

@@ -1,17 +1,15 @@
 import { Palette } from "../../styling/style.slint";
-import { ProjectAction } from "./project_button.slint";
-import { RecentProjectItem } from "./recent_project_item.slint";
+import { ProjectButton } from "./project-button.slint";
+import { RecentProjectItem } from "./recent-project-item.slint";
+import { Navigation } from "../../navigation.slint";
+import { Screen } from "../../screen.slint";
+import { ProjectAction } from "project-action.slint";
 
 export component Project inherits Rectangle {
     preferred-width: 750px;
     preferred-height: 450px;
 
     background: Palette.background;
-
-    callback new-project();
-    callback open-project();
-    callback open-recent-project(string);
-
 
     VerticalLayout {
         HorizontalLayout {
@@ -21,23 +19,23 @@ export component Project inherits Rectangle {
             vertical-stretch: 0;
             alignment: center;
 
-            ProjectAction {
+            ProjectButton {
                 title: "New Project";
                 subtitle: "Create a new project";
                 icon: "+";
 
                 clicked => {
-                    root.new-project();
+                    ProjectAction.new-project();
                 }
             }
 
-            ProjectAction {
+            ProjectButton {
                 title: "Open Project";
                 subtitle: "Open an existing project";
                 icon: "↗";
 
                 clicked => {
-                    root.open-project();
+                    ProjectAction.open-project();
                 }
             }
         }
@@ -66,7 +64,7 @@ export component Project inherits Rectangle {
                 last-opened: "Just now";
 
                 clicked => {
-                    root.open-recent-project(self.path);
+                    ProjectAction.open-recent-project(self.path);
                 }
             }
 
@@ -77,7 +75,7 @@ export component Project inherits Rectangle {
                 last-opened: "Yesterday";
 
                 clicked => {
-                    root.open-recent-project(self.path);
+                    ProjectAction.open-recent-project(self.path);
                 }
             }
 
@@ -88,7 +86,7 @@ export component Project inherits Rectangle {
                 last-opened: "3 days ago";
 
                 clicked => {
-                    root.open-recent-project(self.path);
+                    ProjectAction.open-recent-project(self.path);
                 }
             }
         }

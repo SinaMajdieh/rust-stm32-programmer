@@ -7,5 +7,5 @@ fn main() {
     // let config = slint_build::CompilerConfiguration::new()
     //     .with_library_paths([("material".into(), material_path)].into_iter().collect());
 
-    slint_build::compile("ui/app-window.slint").unwrap();
+    slint_build::compile("src/ui/app-window.slint").unwrap();
 }

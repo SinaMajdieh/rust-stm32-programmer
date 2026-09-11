@@ -1,0 +1,28 @@
+import { Palette, Font } from "styling/style.slint";
+import { ScreenHost } from "screen-host.slint";
+
+export { Navigation } from "navigation.slint";
+export { Screen } from "screen.slint";
+export { ProjectAction } from "screens/projects/project-action.slint";
+
+export component AppWindow inherits Window {
+    preferred-width: 800px;
+    preferred-height: 500px;
+
+    min-width: 720px;
+    min-height: 450px;
+
+    title: "STM32 Studio";
+
+    background: Palette.background;
+
+    default-font-family: Font.font-ui;
+    default-font-size: 13px;
+    default-font-weight: 400;
+
+    ScreenHost {
+        width: 100%;
+        height: 100%;
+    }
+
+}
