@@ -25,6 +25,7 @@ impl Projects {
         self.attach_new_project(&app);
         self.attach_open_project(&app);
         self.attach_open_recent_project(&app);
+        self.attach_open(&app);
     }
 
     fn attach_new_project(&self, app: &AppWindow) {
@@ -49,5 +50,13 @@ impl Projects {
 
                 todo_log!("Implement opening recent project: {}", path.display());
             });
+    }
+
+    fn attach_open(&self, app: &AppWindow) {
+        let navigator = self.navigator.clone();
+
+        app.global::<ProjectAction>().on_open(move || {
+            navigator.go_to(Screen::Project);
+        });
     }
 }

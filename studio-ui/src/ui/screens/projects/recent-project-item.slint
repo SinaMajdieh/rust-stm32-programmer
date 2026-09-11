@@ -1,4 +1,4 @@
-import { Palette } from "../../styling/style.slint";
+import { AppPalette } from "../../styling/style.slint";
 
 export component RecentProjectItem inherits Rectangle {
     in property <string> name;
@@ -13,10 +13,10 @@ export component RecentProjectItem inherits Rectangle {
     height: 68px;
 
     background: touch-area.pressed
-        ? Palette.surface-hover
+        ? AppPalette.surface-hover
         : touch-area.has-hover
-            ? Palette.surface-hover
-            : Palette.surface;
+            ? AppPalette.surface-hover
+            : AppPalette.surface;
 
     border-radius: 4px;
 
@@ -29,12 +29,12 @@ export component RecentProjectItem inherits Rectangle {
             width: 36px;
             height: 36px;
 
-            background: Palette.background;
+            background: AppPalette.background;
             border-radius: 4px;
 
             Text {
                 text: "▣";
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
                 font-size: 16px;
                 horizontal-alignment: center;
                 vertical-alignment: center;
@@ -48,14 +48,14 @@ export component RecentProjectItem inherits Rectangle {
 
             Text {
                 text: root.name;
-                color: Palette.text-primary;
+                color: AppPalette.text-primary;
                 font-size: 14px;
                 font-weight: 600;
             }
 
             Text {
                 text: root.path;
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
                 font-size: 12px;
             }
         }
@@ -70,14 +70,14 @@ export component RecentProjectItem inherits Rectangle {
 
             Text {
                 text: root.target;
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
                 font-size: 12px;
                 horizontal-alignment: right;
             }
 
             Text {
                 text: root.last-opened;
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
                 font-size: 11px;
                 horizontal-alignment: right;
             }

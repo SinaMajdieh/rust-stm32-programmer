@@ -1,4 +1,4 @@
-import { Palette } from "../../styling/style.slint";
+import { AppPalette } from "../../styling/style.slint";
 import { ProjectButton } from "./project-button.slint";
 import { RecentProjectItem } from "./recent-project-item.slint";
 import { Navigation } from "../../navigation.slint";
@@ -9,7 +9,7 @@ export component Project inherits Rectangle {
     preferred-width: 750px;
     preferred-height: 450px;
 
-    background: Palette.background;
+    background: AppPalette.background;
 
     VerticalLayout {
         HorizontalLayout {
@@ -54,7 +54,7 @@ export component Project inherits Rectangle {
                 text: "Recent Projects";
                 font-size: 15px;
                 font-weight: 600;
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
             }
 
             RecentProjectItem {

@@ -1,5 +1,7 @@
-import { Palette, Font } from "styling/style.slint";
+import { Font } from "styling/style.slint";
+import { Palette } from "std-widgets.slint";
 import { ScreenHost } from "screen-host.slint";
+import { ProjectAction } from "screens/projects/project-action.slint";
 
 export { Navigation } from "navigation.slint";
 export { Screen } from "screen.slint";
@@ -19,6 +21,18 @@ export component AppWindow inherits Window {
     default-font-family: Font.font-ui;
     default-font-size: 13px;
     default-font-weight: 400;
+
+    MenuBar {
+        Menu {
+            title: "File";
+            MenuItem {
+                title: "Projects";
+                shortcut: @keys(Control + P);
+                activated => { ProjectAction.open() }
+            }
+            MenuSeparator {}
+        }
+    }
 
     ScreenHost {
         width: 100%;

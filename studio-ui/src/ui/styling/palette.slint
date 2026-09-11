@@ -1,10 +1,16 @@
-export global Palette {
-    out property<color> background: #101216;
-    out property<color> surface: #171A20;
+import { Palette } from "std-widgets.slint";
+
+export global AppPalette {
+    // out property<color> background: #101216;
+    out property<color> background: Palette.background;
+    // out property<color> surface: #171A20;
+    out property<color> surface: Palette.control-background;
     out property<color> surface-2: #181c21;
     out property<color> surface-3: #1e2329;
-    out property <color> surface-hover: #1D2128;
-    out property<color> border: #292E37;
+    // out property <color> surface-hover: #1D2128;
+    out property <color> surface-hover: Palette.alternate-background;
+    // out property<color> border: #292E37;
+    out property<color> border: Palette.border;
     out property<color> border-strong: #343b45;
 
     out property<color> text-primary: #E8EAED;

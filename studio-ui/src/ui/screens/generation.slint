@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { TextEdit, Button, ComboBox } from "std-widgets.slint";
-import { Palette } from "../styling/style.slint";
+import { AppPalette } from "../styling/style.slint";
 component LabeledComboBox inherits VerticalLayout {
     in property <string> label;
     in property <[string]> model;
@@ -19,7 +19,7 @@ component LabeledComboBox inherits VerticalLayout {
 
         font-weight: 400;
         font-size: 13px;
-        color: Palette.text-secondary;
+        color: AppPalette.text-secondary;
     }
 
     ComboBox {
@@ -33,29 +33,29 @@ component LabeledComboBox inherits VerticalLayout {
 // App Bar
 // ─────────────────────────────────────────────────────────────
 
-component StudioAppBar inherits Rectangle {
-    height: 48px;
-    background: Palette.surface;
+// component StudioAppBar inherits Rectangle {
+//     height: 48px;
+//     background: Palette.surface;
 
-    HorizontalLayout {
-        padding-left: 16px;
-        padding-right: 16px;
+//     HorizontalLayout {
+//         padding-left: 16px;
+//         padding-right: 16px;
 
-        alignment: start;
-        cross-axis-alignment: center;
+//         alignment: start;
+//         cross-axis-alignment: center;
 
-        Text {
-            text: "STM32 Studio";
+//         Text {
+//             text: "STM32 Studio";
 
-            vertical-alignment: center;
-            horizontal-alignment: center;
+//             vertical-alignment: center;
+//             horizontal-alignment: center;
 
-            color: Palette.text-primary;
-            font-size: 15px;
-            font-weight: 600;
-        }
-    }
-}
+//             color: Palette.text-primary;
+//             font-size: 15px;
+//             font-weight: 600;
+//         }
+//     }
+// }
 
 
 // ─────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ component GenerateFirmwarePanel inherits Rectangle {
 
                 font-weight: 600;
                 font-size: 20px;
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
             }
 
             Text {
@@ -114,7 +114,7 @@ component GenerateFirmwarePanel inherits Rectangle {
 
                 font-weight: 400;
                 font-size: 13px;
-                color: Palette.text-secondary;
+                color: AppPalette.text-secondary;
             }
 
             HorizontalLayout {
@@ -220,7 +220,7 @@ export component Generation inherits Rectangle {
     // // ─────────────────────────────────────────────────────────
 
     VerticalLayout {
-        StudioAppBar {}
+        // StudioAppBar {}
 
         Rectangle {
             GenerateFirmwarePanel {
