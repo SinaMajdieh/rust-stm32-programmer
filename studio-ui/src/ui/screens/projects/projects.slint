@@ -12,6 +12,7 @@ export component Project inherits Rectangle {
     background: AppPalette.background;
 
     VerticalLayout {
+        alignment: start;
         HorizontalLayout {
             padding: 20px;
             spacing: 16px;
@@ -25,7 +26,7 @@ export component Project inherits Rectangle {
                 icon: "+";
 
                 clicked => {
-                    ProjectAction.new-project();
+                    Navigation.go-to(Screen.NewProject);
                 }
             }
 
@@ -35,7 +36,7 @@ export component Project inherits Rectangle {
                 icon: "↗";
 
                 clicked => {
-                    ProjectAction.open-project();
+                    ProjectAction.open-project-dialogue();
                 }
             }
         }
@@ -44,52 +45,52 @@ export component Project inherits Rectangle {
         // Recent projects
         // ─────────────────────────────────────────
 
-        VerticalLayout {
-            padding: 16px;
-            spacing: 8px;
-            alignment: start;
-            vertical-stretch: 0;
+        // VerticalLayout {
+        //     padding: 16px;
+        //     spacing: 8px;
+        //     alignment: start;
+        //     vertical-stretch: 0;
 
-            Text {
-                text: "Recent Projects";
-                font-size: 15px;
-                font-weight: 600;
-                color: AppPalette.text-secondary;
-            }
+        //     Text {
+        //         text: "Recent Projects";
+        //         font-size: 15px;
+        //         font-weight: 600;
+        //         color: AppPalette.text-secondary;
+        //     }
 
-            RecentProjectItem {
-                name: "STM32 Blinky";
-                path: "~/Projects/stm32-blinky";
-                target: "STM32F103C8T6";
-                last-opened: "Just now";
+        //     RecentProjectItem {
+        //         name: "STM32 Blinky";
+        //         path: "~/Projects/stm32-blinky";
+        //         target: "STM32F103C8T6";
+        //         last-opened: "Just now";
 
-                clicked => {
-                    ProjectAction.open-recent-project(self.path);
-                }
-            }
+        //         clicked => {
+        //             ProjectAction.open-recent-project(self.path);
+        //         }
+        //     }
 
-            RecentProjectItem {
-                name: "Motor Controller";
-                path: "~/Projects/motor-controller";
-                target: "STM32F103C8T6";
-                last-opened: "Yesterday";
+        //     RecentProjectItem {
+        //         name: "Motor Controller";
+        //         path: "~/Projects/motor-controller";
+        //         target: "STM32F103C8T6";
+        //         last-opened: "Yesterday";
 
-                clicked => {
-                    ProjectAction.open-recent-project(self.path);
-                }
-            }
+        //         clicked => {
+        //             ProjectAction.open-recent-project(self.path);
+        //         }
+        //     }
 
-            RecentProjectItem {
-                name: "Temperature Sensor";
-                path: "~/Projects/temperature-sensor";
-                target: "STM32F103C8T6";
-                last-opened: "3 days ago";
+        //     RecentProjectItem {
+        //         name: "Temperature Sensor";
+        //         path: "~/Projects/temperature-sensor";
+        //         target: "STM32F103C8T6";
+        //         last-opened: "3 days ago";
 
-                clicked => {
-                    ProjectAction.open-recent-project(self.path);
-                }
-            }
-        }
+        //         clicked => {
+        //             ProjectAction.open-recent-project(self.path);
+        //         }
+        //     }
+        // }
 
         // Consume remaining space.
         // Rectangle {

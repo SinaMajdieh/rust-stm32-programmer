@@ -11,9 +11,6 @@ export component AppWindow inherits Window {
     preferred-width: 800px;
     preferred-height: 500px;
 
-    min-width: 720px;
-    min-height: 450px;
-
     title: "STM32 Studio";
 
     background: Palette.background;
@@ -25,18 +22,16 @@ export component AppWindow inherits Window {
     MenuBar {
         Menu {
             title: "File";
+
             MenuItem {
                 title: "Projects";
                 shortcut: @keys(Control + P);
-                activated => { ProjectAction.open() }
+                activated => { ProjectAction.open(); }
             }
+
             MenuSeparator {}
         }
     }
 
-    ScreenHost {
-        width: 100%;
-        height: 100%;
-    }
-
+    ScreenHost {}
 }

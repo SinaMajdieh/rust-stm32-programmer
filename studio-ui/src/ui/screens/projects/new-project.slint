@@ -1,0 +1,124 @@
+import { AppPalette } from "../../styling/style.slint";
+import { LabeledComboBox } from "../../components/combobox.slint";
+import { Button, LineEdit } from "std-widgets.slint";
+import { AppData } from "../../app-data.slint";
+
+export component NewProjectDialog inherits Rectangle {
+    callback browse-location();
+    callback cancel();
+    callback create-project();
+
+    in-out property <string> project-name;
+    in-out property <string> location;
+
+    in-out property <int> firmware-target-index: 0;
+    in-out property <int> template-index: 0;
+
+    property <[string]> firmware-targets: AppData.targets;
+    property <[string]> templates: AppData.templates;
+
+    background: AppPalette.background;
+    HorizontalLayout {
+        alignment: center;
+        VerticalLayout {
+            padding: 28px;
+            spacing: 24px;
+            preferred-width: 600px;
+            alignment: start;
+
+            VerticalLayout {
+                spacing: 6px;
+                height: 50px;
+
+                Text {
+                    text: "New Project";
+                    font-size: 22px;
+                    font-weight: 600;
+                    color: AppPalette.text-primary;
+                }
+
+                Text {
+                    text: "Create a new STM32 Studio project.";
+                    font-size: 13px;
+                    color: AppPalette.text-secondary;
+                }
+            }
+
+            VerticalLayout {
+                spacing: 20px;
+
+                VerticalLayout {
+                    spacing: 8px;
+
+                    Text {
+                        text: "Project Name";
+                        color: AppPalette.text-secondary;
+                    }
+
+                    LineEdit {
+                        text <=> root.project-name;
+                        placeholder-text: "MyProject";
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: 8px;
+
+                    Text {
+                        text: "Location";
+                        color: AppPalette.text-secondary;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 8px;
+
+                        LineEdit {
+                            text <=> root.location;
+                            placeholder-text: "Choose project location...";
+                        }
+
+                        Button {
+                            text: "Browse";
+                            clicked => { root.browse-location(); }
+                        }
+                    }
+                }
+
+                LabeledComboBox {
+                    label: "Firmware Target";
+                    description: "The microcontroller and firmware platform this project will target.";
+                    model: root.firmware-targets;
+                    current-index <=> root.firmware-target-index;
+                }
+
+                LabeledComboBox {
+                    label: "Template";
+                    description: "Choose the starting firmware template for your project.";
+                    model: root.templates;
+                    current-index <=> root.template-index;
+                }
+            }
+
+            Rectangle {
+                vertical-stretch: 1;
+            }
+
+            HorizontalLayout {
+                alignment: end;
+                spacing: 8px;
+
+                Button {
+                    text: "Cancel";
+                    clicked => { root.cancel(); }
+                }
+
+                Button {
+                    text: "Create Project";
+                    primary: true;
+                    clicked => { root.create-project(); }
+                }
+            }
+        }
+
+    }
+}

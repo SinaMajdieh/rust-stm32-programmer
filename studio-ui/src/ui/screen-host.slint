@@ -1,27 +1,24 @@
 import { Navigation } from "navigation.slint";
-import { Project } from "screens/projects/projects.slint";
 import { Screen } from "screen.slint";
-import { Palette } from "std-widgets.slint";
+
 import { Generation } from "screens/generation.slint";
+import { NewProjectDialog } from "screens/projects/new-project.slint";
+import { Project } from "screens/projects/projects.slint";
 
-export component ScreenHost  inherits Rectangle {
+export component ScreenHost inherits Rectangle {
     background: transparent;
-    if Navigation.current-screen == Screen.Project : VerticalLayout {
-        HorizontalLayout {
-            alignment: center;
-            cross-axis-alignment: center;
 
-            padding: 20px;
+    VerticalLayout {
+        if Navigation.current-screen == Screen.Project : Project {
+            horizontal-stretch: 0;
+        }
 
-            Project {
-                max-width: 750px;
-                horizontal-stretch: 0;
-
-                border-color: Palette.border;
-                border-width: 1px;
-                border-radius: 4px;
+        if Navigation.current-screen == Screen.NewProject : NewProjectDialog {
+            cancel => {
+                Navigation.go-to(Screen.Project);
             }
         }
+
+        if Navigation.current-screen == Screen.Generation : Generation {}
     }
-    if Navigation.current-screen == Screen.Generation : Generation {}
 }

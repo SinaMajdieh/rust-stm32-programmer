@@ -5501,6 +5501,7 @@ version = "0.1.0"
 dependencies = [
  "backend",
  "firmware-targets",
+ "rfd",
  "serde",
  "slint",
  "slint-build",

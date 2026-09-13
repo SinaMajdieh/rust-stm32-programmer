@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use slint::{ComponentHandle, Weak};
 
@@ -23,8 +23,8 @@ impl Projects {
         };
 
         self.attach_new_project(&app);
+        self.attach_open_project_dialogue(&app);
         self.attach_open_project(&app);
-        self.attach_open_recent_project(&app);
         self.attach_open(&app);
     }
 
@@ -37,19 +37,24 @@ impl Projects {
         });
     }
 
-    fn attach_open_project(&self, app: &AppWindow) {
-        app.global::<ProjectAction>().on_open_project(|| {
-            todo_log!("Implement opening an existing project");
+    fn attach_open_project_dialogue(&self, app: &AppWindow) {
+        app.global::<ProjectAction>().on_open_project_dialogue(|| {
+            let Some(path) = rfd::FileDialog::new()
+                .set_title("Choose STM32 Studio Project")
+                .pick_folder()
+            else {
+                return;
+            };
+
+            Self::open_project(path);
         });
     }
 
-    fn attach_open_recent_project(&self, app: &AppWindow) {
-        app.global::<ProjectAction>()
-            .on_open_recent_project(|path| {
-                let path = PathBuf::from(path.to_string());
-
-                todo_log!("Implement opening recent project: {}", path.display());
-            });
+    fn attach_open_project(&self, app: &AppWindow) {
+        app.global::<ProjectAction>().on_open_project(|path| {
+            let path = PathBuf::from(path.to_string());
+            Self::open_project(path);
+        });
     }
 
     fn attach_open(&self, app: &AppWindow) {
@@ -58,5 +63,12 @@ impl Projects {
         app.global::<ProjectAction>().on_open(move || {
             navigator.go_to(Screen::Project);
         });
+    }
+}
+
+impl Projects {
+    fn open_project(path: impl AsRef<Path>) {
+        let project_dir = path.as_ref();
+        todo_log!("Implement opening project: {}", project_dir.display());
     }
 }
