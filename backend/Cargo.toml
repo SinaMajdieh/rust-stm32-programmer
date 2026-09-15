@@ -6,5 +6,6 @@ edition = "2024"
 [dependencies]
 firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
 generation = { path = "../generation", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }
 thiserror = "2.0.20"
 toml = "0.9"

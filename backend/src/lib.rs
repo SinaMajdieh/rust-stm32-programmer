@@ -10,6 +10,7 @@
 
 pub mod actions;
 pub mod hex;
+pub mod project;
 pub mod report;
 
 mod error;

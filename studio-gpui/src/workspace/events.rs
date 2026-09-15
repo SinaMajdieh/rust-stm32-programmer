@@ -1,22 +1,22 @@
 use gpui_kit::{Context, Window};
 
-use crate::{project::FormEvent, welcome::WelcomeEvent};
+use crate::home::{HomeEvent, NewProjectEvent};
 
 use super::Workspace;
 
 impl Workspace {
     pub(super) fn handle_welcome_event(
         &mut self,
-        event: &WelcomeEvent,
+        event: &HomeEvent,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
         match event {
-            WelcomeEvent::NewProject => {
+            HomeEvent::NewProject => {
                 self.open_new_project(window, cx);
             }
 
-            WelcomeEvent::OpenProject => {
+            HomeEvent::OpenProject => {
                 self.open_project(window, cx);
             }
         }
@@ -24,16 +24,16 @@ impl Workspace {
 
     pub(super) fn handle_project_event(
         &mut self,
-        event: &FormEvent,
+        event: &NewProjectEvent,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
         match event {
-            FormEvent::Cancel => {
+            NewProjectEvent::Cancel => {
                 self.deactivate(cx);
             }
 
-            FormEvent::Create(project) => {
+            NewProjectEvent::Create(project) => {
                 self.create_project(project, window, cx);
             }
         }

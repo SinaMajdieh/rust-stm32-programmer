@@ -731,6 +731,7 @@ version = "0.1.0"
 dependencies = [
  "firmware-targets",
  "generation",
+ "serde",
  "thiserror 2.0.20",
  "toml 0.9.12+spec-1.1.0",
 ]
@@ -8478,6 +8479,7 @@ dependencies = [
 name = "studio-gpui"
 version = "0.1.0"
 dependencies = [
+ "backend",
  "firmware-targets",
  "gpui-kit",
  "rfd",

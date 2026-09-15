@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+backend = { path = "../backend" }
 firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
 gpui-kit = "0.6.1"
 rfd = "0.17.2"

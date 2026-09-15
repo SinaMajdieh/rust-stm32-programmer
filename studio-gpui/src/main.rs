@@ -1,6 +1,6 @@
+mod home;
 pub mod project;
 mod studio;
-mod welcome;
 mod workspace;
 
 use std::path::PathBuf;

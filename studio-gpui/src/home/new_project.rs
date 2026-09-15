@@ -1,3 +1,4 @@
+use backend::project::Project;
 use firmware_targets::{TargetKind, TemplateKind};
 
 use gpui_kit::{
@@ -18,14 +19,12 @@ use gpui_kit::{
 use std::path::PathBuf;
 use strum::IntoEnumIterator;
 
-use crate::project::model::Project;
-
-pub enum FormEvent {
+pub enum NewProjectEvent {
     Cancel,
     Create(Project),
 }
 
-pub struct NewProjectView {
+pub struct NewProject {
     name: Entity<InputState>,
     location: Entity<InputState>,
     target: Entity<SelectState<Vec<TargetOption>>>,
@@ -33,7 +32,7 @@ pub struct NewProjectView {
     error: Option<String>,
 }
 
-impl EventEmitter<FormEvent> for NewProjectView {}
+impl EventEmitter<NewProjectEvent> for NewProject {}
 
 #[derive(Clone)]
 struct TargetOption(TargetKind);
@@ -65,7 +64,7 @@ impl SelectItem for TemplateOption {
     }
 }
 
-impl NewProjectView {
+impl NewProject {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let name = cx.new(|cx| InputState::new(window, cx).default_value("MyProject"));
 
@@ -130,26 +129,31 @@ impl NewProjectView {
             .selected_value()
             .expect("NewProject template should always have a selection");
 
-        let request = Project {
-            name: self.name.read(cx).value().trim().to_owned(),
-            location: PathBuf::from(self.location.read(cx).value().as_str()),
-            target,
-            template,
-        };
+        let project = Project::new()
+            .with_name(self.name.read(cx).value().trim().to_owned())
+            .with_root(PathBuf::from(self.location.read(cx).value().as_str()))
+            .with_target(target)
+            .with_template(template);
+        // let request = Project {
+        //     name: self.name.read(cx).value().trim().to_owned(),
+        //     location: PathBuf::from(self.location.read(cx).value().as_str()),
+        //     target,
+        //     template,
+        // };
 
-        if let Err(error) = request.validate() {
-            self.error = Some(error);
-            cx.notify();
-            return;
-        }
+        // if let Err(error) = request.validate() {
+        //     self.error = Some(error);
+        //     cx.notify();
+        //     return;
+        // }
 
         self.error = None;
 
-        cx.emit(FormEvent::Create(request));
+        cx.emit(NewProjectEvent::Create(project));
     }
 }
 
-impl Render for NewProjectView {
+impl Render for NewProject {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let error = self.error.clone();
 
@@ -332,7 +336,7 @@ impl Render for NewProjectView {
                                         cx.listener(
                                             |_, _, _, cx| {
                                                 cx.emit(
-                                                    FormEvent::Cancel,
+                                                    NewProjectEvent::Cancel,
                                                 );
                                             },
                                         ),

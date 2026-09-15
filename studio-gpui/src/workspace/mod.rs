@@ -1,10 +1,14 @@
 mod events;
+mod home;
 mod navigation;
 mod projects;
-mod welcome;
+
+use std::fmt::Display;
 
 use gpui_kit::{
-    AnyView, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window, div,
+    AnyView, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window,
+    component::{Root, WindowExt},
+    div,
     prelude::FluentBuilder,
 };
 
@@ -21,18 +25,35 @@ impl Workspace {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let mut workspace = Self { views: Vec::new() };
 
-        workspace.open_welcome(window, cx);
+        workspace.open_home(window, cx);
 
         workspace
+    }
+
+    pub fn show_error(
+        window: &mut Window,
+        cx: &mut Context<Self>,
+        title: impl Into<String>,
+        error: impl Display,
+    ) {
+        let title = title.into();
+        let message = error.to_string();
+        window.open_alert_dialog(cx, move |alert, _, _| {
+            alert
+                .title(title.clone())
+                .description(message.clone())
+                .on_ok(|_, _, _| true)
+        });
     }
 }
 
 impl Render for Workspace {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .size_full()
             .when_some(self.views.last(), |this, entry| {
                 this.child(entry.view.clone())
             })
+            .children(Root::render_dialog_layer(window, cx))
     }
 }

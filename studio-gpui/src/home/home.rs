@@ -1,21 +1,21 @@
 use gpui_kit::{base::StyledExt, component::ActiveTheme, prelude::*, *};
 
-pub enum WelcomeEvent {
+pub enum HomeEvent {
     NewProject,
     OpenProject,
 }
 
-pub struct Welcome;
+pub struct Home;
 
-impl EventEmitter<WelcomeEvent> for Welcome {}
+impl EventEmitter<HomeEvent> for Home {}
 
-impl Welcome {
+impl Home {
     pub fn new() -> Self {
         Self
     }
 }
 
-impl Render for Welcome {
+impl Render for Home {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.theme();
 
@@ -41,7 +41,7 @@ impl Render for Welcome {
                         .cursor_pointer()
                         .hover(|this| this.bg(theme.muted))
                         .on_click(cx.listener(|_, _, _, cx| {
-                            cx.emit(WelcomeEvent::NewProject);
+                            cx.emit(HomeEvent::NewProject);
                         }))
                         .child(div().text_2xl().text_color(theme.foreground).child("+"))
                         .child(
@@ -76,7 +76,7 @@ impl Render for Welcome {
                         .cursor_pointer()
                         .hover(|this| this.bg(theme.muted))
                         .on_click(cx.listener(|_, _, _, cx| {
-                            cx.emit(WelcomeEvent::OpenProject);
+                            cx.emit(HomeEvent::OpenProject);
                         }))
                         .child(div().text_2xl().text_color(theme.foreground).child("↗"))
                         .child(
