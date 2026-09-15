@@ -1,0 +1,10 @@
+[package]
+name = "studio-gpui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
+gpui-kit = "0.6.1"
+rfd = "0.17.2"
+strum = { version = "0.27" }
