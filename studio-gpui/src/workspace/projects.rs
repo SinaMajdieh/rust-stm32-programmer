@@ -27,7 +27,13 @@ impl Workspace {
                 println!("Project created: {:#?}", project);
                 self.open_home(window, cx);
             }
-            Err(error) => Self::show_error(window, cx, "Creating Project Failed", error),
+            Err(error) => Self::show_alert(
+                window,
+                cx,
+                "Faild to creat Project",
+                error.user_message(),
+                Some(error.to_string()),
+            ),
         }
 
         // Eventually:
@@ -49,7 +55,13 @@ impl Workspace {
         let path = path.join("Project.toml");
         match Project::open(path) {
             Ok(project) => println!("Project opened: {:#?}", project),
-            Err(error) => Self::show_error(window, cx, "Opening Project Failed", error),
+            Err(error) => Self::show_alert(
+                window,
+                cx,
+                "Faild to open Project",
+                error.user_message(),
+                Some(error.to_string()),
+            ),
         }
         // ProjectManager::open(...)
         //

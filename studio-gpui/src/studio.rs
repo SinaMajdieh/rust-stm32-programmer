@@ -18,6 +18,9 @@ impl Studio {
 
 impl Render for Studio {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().size_full().child(self.workspace.clone())
+        div()
+            .font_family("Inter")
+            .size_full()
+            .child(self.workspace.clone())
     }
 }

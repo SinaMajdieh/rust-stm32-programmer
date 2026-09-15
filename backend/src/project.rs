@@ -81,3 +81,30 @@ pub enum ProjectError {
     #[error("Failed to serialize: {0}")]
     TomlSerialize(#[from] toml::ser::Error),
 }
+
+impl ProjectError {
+    pub fn user_message(&self) -> String {
+        match self {
+            Self::Read(error) => match error.kind() {
+                std::io::ErrorKind::NotFound => "The project file could not be found.".into(),
+                std::io::ErrorKind::PermissionDenied => {
+                    "You don't have permission to read the project file.".into()
+                }
+                _ => "The project file could not be read.".into(),
+            },
+
+            Self::Write(error) => match error.kind() {
+                std::io::ErrorKind::PermissionDenied => {
+                    "You don't have permission to save the project file.".into()
+                }
+                _ => "The project file could not be saved.".into(),
+            },
+
+            Self::InvalidProjectPath => "The selected project path is invalid.".into(),
+
+            Self::TomlDeserialize(_) => "The project file contains invalid configuration.".into(),
+
+            Self::TomlSerialize(_) => "The project could not be saved.".into(),
+        }
+    }
+}

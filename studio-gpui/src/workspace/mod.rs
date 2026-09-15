@@ -3,14 +3,14 @@ mod home;
 mod navigation;
 mod projects;
 
-use std::fmt::Display;
-
 use gpui_kit::{
-    AnyView, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window,
+    AnyView, AppContext, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window,
     component::{Root, WindowExt},
     div,
     prelude::FluentBuilder,
 };
+
+use crate::alert::AlertContent;
 
 pub struct Workspace {
     views: Vec<ViewEntry>,
@@ -30,18 +30,25 @@ impl Workspace {
         workspace
     }
 
-    pub fn show_error(
+    pub fn show_alert(
         window: &mut Window,
         cx: &mut Context<Self>,
         title: impl Into<String>,
-        error: impl Display,
+        message: impl Into<String>,
+        details: Option<String>,
     ) {
         let title = title.into();
-        let message = error.to_string();
+        let message = message.into();
+
+        let content = cx.new(|_| AlertContent::new(message, details));
+
         window.open_alert_dialog(cx, move |alert, _, _| {
+            let title = title.clone();
+            let content = content.clone();
+
             alert
-                .title(title.clone())
-                .description(message.clone())
+                .title(title)
+                .content(move |dialog, _, _| dialog.child(content.clone()))
                 .on_ok(|_, _, _| true)
         });
     }

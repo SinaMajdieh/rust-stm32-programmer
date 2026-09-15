@@ -1,3 +1,4 @@
+mod alert;
 mod home;
 pub mod project;
 mod studio;
