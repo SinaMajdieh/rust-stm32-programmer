@@ -1,18 +1,20 @@
 [package]
 name = "studio-ui"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 build = "build.rs"
 
 [dependencies]
-backend = { path = "../backend" }
-firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
-rfd = "0.17.2"
-serde = { version = "1", features = ["derive"] }
+backend.workspace = true
+firmware-targets.workspace = true
+rfd.workspace = true
+serde.workspace = true
 slint = "1.17.1"
-strum = { version = "0.27" }
-thiserror = "2.0.20"
-toml = "0.9"
+strum.workspace = true
+thiserror.workspace = true
+toml.workspace = true
 
 [build-dependencies]
 slint-build = "1.17.1"

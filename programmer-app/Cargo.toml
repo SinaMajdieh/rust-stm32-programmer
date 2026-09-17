@@ -1,11 +1,13 @@
 [package]
 name = "programmer-app"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
-backend = { path = "../backend", version = "0.1.0" }
-rfd = "0.17.2"
+backend.workspace = true
+rfd.workspace = true
 slint = "1.17.1"
 
 [build-dependencies]

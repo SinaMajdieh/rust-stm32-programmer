@@ -1,11 +1,13 @@
 [package]
 name = "studio-gpui"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
-backend = { path = "../backend" }
-firmware-targets = { path = "../firmware-targets", version = "0.1.0" }
-gpui-kit = "0.6.1"
-rfd = "0.17.2"
-strum = { version = "0.27" }
+backend.workspace = true
+firmware-targets.workspace = true
+gpui-kit = "=0.6.1"
+rfd.workspace = true
+strum.workspace = true

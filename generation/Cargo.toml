@@ -1,11 +1,13 @@
 [package]
 name = "generation"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
 async-openai = { version = "0.41.3", features = ["chat-completion"] }
-ollama-client = { path = "../ollama-client", version = "0.1.0" }
-serde = { version = "1", features = ["derive"] }
-thiserror = "2.0.20"
-tokio = "1.53.1"
+ollama-client.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
