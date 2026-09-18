@@ -1,45 +1,51 @@
 mod alert;
-mod home;
-pub mod project;
+mod projects;
 mod studio;
 mod workspace;
 
 use std::path::PathBuf;
 
+use gpui_kit::assets::AllAssets;
 use gpui_kit::{
     component::{Root, Theme, ThemeRegistry},
     *,
 };
+use tracing_subscriber::EnvFilter;
 
 use crate::studio::Studio;
 
 fn main() {
-    gpui_kit::application().run(|cx: &mut App| {
-        gpui_kit::init(cx);
-        init_theme(cx);
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
+    gpui_kit::application()
+        .with_assets(AllAssets)
+        .run(|cx: &mut App| {
+            gpui_kit::init(cx);
+            init_theme(cx);
 
-        let bounds = Bounds::centered(None, size(px(800.0), px(582.0)), cx);
+            let bounds = Bounds::centered(None, size(px(800.0), px(582.0)), cx);
 
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                titlebar: Some(TitlebarOptions {
-                    title: Some("STM32 Studio".into()),
-                    appears_transparent: false,
+            cx.open_window(
+                WindowOptions {
+                    window_bounds: Some(WindowBounds::Windowed(bounds)),
+                    titlebar: Some(TitlebarOptions {
+                        title: Some("STM32 Studio".into()),
+                        appears_transparent: false,
+                        ..Default::default()
+                    }),
+                    window_min_size: Some(size(px(640.0), px(540.0))),
                     ..Default::default()
-                }),
-                window_min_size: Some(size(px(640.0), px(540.0))),
-                ..Default::default()
-            },
-            |window, cx| {
-                let studio = cx.new(|cx| Studio::new(window, cx));
-                cx.new(|cx| Root::new(studio, window, cx))
-            },
-        )
-        .expect("failed to open STM32 Studio");
+                },
+                |window, cx| {
+                    let studio = cx.new(|cx| Studio::new(window, cx));
+                    cx.new(|cx| Root::new(studio, window, cx))
+                },
+            )
+            .expect("failed to open STM32 Studio");
 
-        cx.activate(true);
-    });
+            cx.activate(true);
+        });
 }
 
 pub fn init_theme(cx: &mut App) {

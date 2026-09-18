@@ -1,8 +1,9 @@
 use gpui_kit::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, Styled, Window, div,
 };
+use gpui_navigation::{NavPath, Navigator};
 
-use crate::workspace::Workspace;
+use crate::workspace::{Workspace, WorkspaceRoute};
 
 pub struct Studio {
     workspace: Entity<Workspace>,
@@ -10,8 +11,9 @@ pub struct Studio {
 
 impl Studio {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let workspace = cx.new(|cx| Workspace::new(window, cx));
-
+        let workspace = cx.new(|_| Workspace::new());
+        let _ = Navigator::install(&workspace, cx);
+        Navigator::go(NavPath::root(WorkspaceRoute::Projects), window, cx);
         Self { workspace }
     }
 }

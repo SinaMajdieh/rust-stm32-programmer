@@ -59,7 +59,7 @@ impl Project {
     }
     pub fn save(&self) -> Result<(), ProjectError> {
         let contents = toml::to_string_pretty(self)?;
-        fs::write(&self.root.join(Self::PROJECT_FILE), contents).map_err(ProjectError::Write)?;
+        fs::write(self.root.join(Self::PROJECT_FILE), contents).map_err(ProjectError::Write)?;
         Ok(())
     }
 }

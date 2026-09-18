@@ -1,6 +1,5 @@
 use gpui_kit::{
-    Context, InteractiveElement, IntoElement, MouseButton, ParentElement, Render, Styled, Window,
-    div, prelude::FluentBuilder,
+    App, AppContext, Context, InteractiveElement, IntoElement, MouseButton, ParentElement, Render, Styled, Window, component::WindowExt, div, prelude::FluentBuilder,
 };
 
 pub struct AlertContent {
@@ -64,4 +63,27 @@ impl Render for AlertContent {
                 )
             })
     }
+}
+
+pub fn show_alert(
+    window: &mut Window,
+    cx: &mut App,
+    title: impl Into<String>,
+    message: impl Into<String>,
+    details: Option<String>,
+) {
+    let title = title.into();
+    let message = message.into();
+
+    let content = cx.new(|_| AlertContent::new(message, details));
+
+    window.open_alert_dialog(cx, move |alert, _, _| {
+        let title = title.clone();
+        let content = content.clone();
+
+        alert
+            .title(title)
+            .content(move |dialog, _, _| dialog.child(content.clone()))
+            .on_ok(|_, _, _| true)
+    });
 }

@@ -15,14 +15,12 @@ use gpui_kit::{
     prelude::*,
     *,
 };
+use gpui_navigation::Navigator;
 
 use std::path::PathBuf;
 use strum::IntoEnumIterator;
 
-pub enum NewProjectEvent {
-    Cancel,
-    Create(Project),
-}
+use crate::projects::services::create_project;
 
 pub struct NewProject {
     name: Entity<InputState>,
@@ -31,8 +29,6 @@ pub struct NewProject {
     template: Entity<SelectState<Vec<TemplateOption>>>,
     error: Option<String>,
 }
-
-impl EventEmitter<NewProjectEvent> for NewProject {}
 
 #[derive(Clone)]
 struct TargetOption(TargetKind);
@@ -116,7 +112,7 @@ impl NewProject {
         cx.notify();
     }
 
-    fn submit(&mut self, cx: &mut Context<Self>) {
+    fn submit(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let target = *self
             .target
             .read(cx)
@@ -134,22 +130,7 @@ impl NewProject {
             .with_root(PathBuf::from(self.location.read(cx).value().as_str()))
             .with_target(target)
             .with_template(template);
-        // let request = Project {
-        //     name: self.name.read(cx).value().trim().to_owned(),
-        //     location: PathBuf::from(self.location.read(cx).value().as_str()),
-        //     target,
-        //     template,
-        // };
-
-        // if let Err(error) = request.validate() {
-        //     self.error = Some(error);
-        //     cx.notify();
-        //     return;
-        // }
-
-        self.error = None;
-
-        cx.emit(NewProjectEvent::Create(project));
+        create_project(&project, window, cx);
     }
 }
 
@@ -334,10 +315,8 @@ impl Render for NewProject {
                                     .label("Cancel")
                                     .on_click(
                                         cx.listener(
-                                            |_, _, _, cx| {
-                                                cx.emit(
-                                                    NewProjectEvent::Cancel,
-                                                );
+                                            |_, _, window, cx| {
+                                                Navigator::back(window, cx);
                                             },
                                         ),
                                     ),
@@ -348,8 +327,8 @@ impl Render for NewProject {
                                     .label("Create Project")
                                     .on_click(
                                         cx.listener(
-                                            |this, _, _, cx| {
-                                                this.submit(cx);
+                                            |this, _, window, cx| {
+                                                this.submit(window, cx);
                                             },
                                         ),
                                     ),

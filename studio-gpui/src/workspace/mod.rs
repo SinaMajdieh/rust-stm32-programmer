@@ -1,16 +1,17 @@
-mod events;
-mod home;
 mod navigation;
+// mod pipeline;
 mod projects;
 
 use gpui_kit::{
-    AnyView, AppContext, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window,
-    component::{Root, WindowExt},
-    div,
-    prelude::FluentBuilder,
+    AnyView, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window,
+    component::Root, div, prelude::FluentBuilder,
 };
+use gpui_navigation::{RouteSegment, Router, RouterHandle};
 
-use crate::alert::AlertContent;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, RouteSegment)]
+pub enum WorkspaceRoute {
+    Projects,
+}
 
 pub struct Workspace {
     views: Vec<ViewEntry>,
@@ -22,35 +23,8 @@ struct ViewEntry {
 }
 
 impl Workspace {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let mut workspace = Self { views: Vec::new() };
-
-        workspace.open_home(window, cx);
-
-        workspace
-    }
-
-    pub fn show_alert(
-        window: &mut Window,
-        cx: &mut Context<Self>,
-        title: impl Into<String>,
-        message: impl Into<String>,
-        details: Option<String>,
-    ) {
-        let title = title.into();
-        let message = message.into();
-
-        let content = cx.new(|_| AlertContent::new(message, details));
-
-        window.open_alert_dialog(cx, move |alert, _, _| {
-            let title = title.clone();
-            let content = content.clone();
-
-            alert
-                .title(title)
-                .content(move |dialog, _, _| dialog.child(content.clone()))
-                .on_ok(|_, _, _| true)
-        });
+    pub fn new() -> Self {
+        Self { views: Vec::new() }
     }
 }
 
@@ -62,5 +36,19 @@ impl Render for Workspace {
                 this.child(entry.view.clone())
             })
             .children(Root::render_dialog_layer(window, cx))
+    }
+}
+
+impl Router for Workspace {
+    type Route = WorkspaceRoute;
+    fn route(
+        &mut self,
+        route: &Self::Route,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Option<RouterHandle> {
+        match route {
+            WorkspaceRoute::Projects => Some(self.open_projects(window, cx).into()),
+        }
     }
 }

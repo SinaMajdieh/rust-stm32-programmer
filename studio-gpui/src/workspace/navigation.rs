@@ -19,10 +19,10 @@ impl Workspace {
         cx.notify();
     }
 
-    pub(super) fn deactivate(&mut self, cx: &mut Context<Self>) {
-        if self.views.len() > 1 {
-            self.views.pop();
-            cx.notify();
-        }
-    }
+    // pub(super) fn deactivate(&mut self, cx: &mut Context<Self>) {
+    //     if self.views.len() > 1 {
+    //         self.views.pop();
+    //         cx.notify();
+    //     }
+    // }
 }
