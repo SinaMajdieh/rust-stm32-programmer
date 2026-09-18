@@ -25,21 +25,34 @@ pub(super) fn create_project(project: &Project, window: &mut Window, cx: &mut Ap
 }
 
 pub fn open_project(window: &mut Window, cx: &mut App) {
-    let Some(path) = rfd::FileDialog::new()
-        .set_title("Choose project location")
-        .pick_folder()
-    else {
-        return;
-    };
-    let path = path.join("Project.toml");
-    match Project::open(path) {
-        Ok(project) => println!("Project opened: {:#?}", project),
-        Err(error) => show_alert(
-            window,
-            cx,
-            "Faild to open Project",
-            error.user_message(),
-            Some(error.to_string()),
-        ),
-    }
+    window
+        .spawn(cx, async move |cx| {
+            let Some(path) = rfd::AsyncFileDialog::new()
+                .set_title("Choose project location")
+                .pick_folder()
+                .await
+            else {
+                return;
+            };
+
+            let path = path.path().join("Project.toml");
+
+            match Project::open(path) {
+                Ok(project) => {
+                    println!("Project opened: {project:#?}");
+                }
+                Err(error) => {
+                    let _ = cx.update(|window, cx| {
+                        show_alert(
+                            window,
+                            cx,
+                            "Failed to open Project",
+                            error.user_message(),
+                            Some(error.to_string()),
+                        );
+                    });
+                }
+            }
+        })
+        .detach();
 }

@@ -95,21 +95,32 @@ impl NewProject {
     }
 
     fn browse(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let Some(path) = rfd::FileDialog::new()
-            .set_title("Choose project location")
-            .pick_folder()
-        else {
-            return;
-        };
+        let entity = cx.entity().downgrade();
 
-        let path = path.to_string_lossy().into_owned();
+        window
+            .spawn(cx, async move |cx| {
+                let Some(path) = rfd::AsyncFileDialog::new()
+                    .set_title("Choose project location")
+                    .pick_folder()
+                    .await
+                else {
+                    return;
+                };
 
-        self.location.update(cx, |input, cx| {
-            input.set_value(path, window, cx);
-        });
+                let path = path.path().to_string_lossy().into_owned();
 
-        self.error = None;
-        cx.notify();
+                let _ = cx.update(|window, cx| {
+                    let _ = entity.update(cx, |this, cx| {
+                        this.location.update(cx, |input, cx| {
+                            input.set_value(path, window, cx);
+                        });
+
+                        this.error = None;
+                        cx.notify();
+                    });
+                });
+            })
+            .detach();
     }
 
     fn submit(&mut self, window: &mut Window, cx: &mut Context<Self>) {
