@@ -3088,6 +3088,7 @@ dependencies = [
 [[package]]
 name = "gpui-navigation"
 version = "0.1.0"
+source = "git+https://github.com/SinaMajdieh/gpui-navigation.git#9e404881b553f24e09913c5c355f804846b46a0b"
 dependencies = [
  "gpui-kit",
  "gpui-navigation-derive",
@@ -3098,6 +3099,7 @@ dependencies = [
 [[package]]
 name = "gpui-navigation-derive"
 version = "0.1.0"
+source = "git+https://github.com/SinaMajdieh/gpui-navigation.git#9e404881b553f24e09913c5c355f804846b46a0b"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",

@@ -9,7 +9,10 @@ license.workspace = true
 backend.workspace = true
 firmware-targets.workspace = true
 gpui-kit = "=0.6.1"
-gpui-navigation = { path = "../../gpui-navigation/gpui-navigation", version = "0.1.0" }
+gpui-navigation = {
+  package = "gpui-navigation",
+  git = "https://github.com/SinaMajdieh/gpui-navigation.git",
+}
 rfd.workspace = true
 strum.workspace = true
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
