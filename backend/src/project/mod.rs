@@ -7,6 +7,8 @@ use firmware_targets::{TargetKind, TemplateKind};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+pub type Result<T> = std::result::Result<T, ProjectError>;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct Project {
     #[serde(skip)]
@@ -29,8 +31,8 @@ impl Project {
         self
     }
 
-    pub fn with_name(mut self, name: String) -> Self {
-        self.name = name;
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = name.into();
         self
     }
 
@@ -44,7 +46,7 @@ impl Project {
         self
     }
 
-    pub fn open(source: impl AsRef<Path>) -> Result<Self, ProjectError> {
+    pub fn open(source: impl AsRef<Path>) -> Result<Self> {
         let source = source.as_ref();
         let contents = fs::read_to_string(source).map_err(ProjectError::Read)?;
         let root = source
@@ -57,15 +59,24 @@ impl Project {
             ..toml::from_str(&contents)?
         })
     }
-    pub fn save(&self) -> Result<(), ProjectError> {
+
+    pub fn save(&self) -> Result<()> {
         let contents = toml::to_string_pretty(self)?;
         fs::write(self.root.join(Self::PROJECT_FILE), contents).map_err(ProjectError::Write)?;
         Ok(())
+    }
+
+    pub fn create(&self) -> Result<()> {
+        fs::create_dir_all(&self.root).map_err(ProjectError::CreateDirectory)?;
+        self.save()
     }
 }
 
 #[derive(Debug, Error)]
 pub enum ProjectError {
+    #[error("Failed to create project directory: {0}")]
+    CreateDirectory(#[source] std::io::Error),
+
     #[error("Failed to read project file: {0}")]
     Read(#[source] std::io::Error),
 
@@ -85,6 +96,13 @@ pub enum ProjectError {
 impl ProjectError {
     pub fn user_message(&self) -> String {
         match self {
+            Self::CreateDirectory(error) => match error.kind() {
+                std::io::ErrorKind::PermissionDenied => {
+                    "You don't have permission to create the project directory.".into()
+                }
+                std::io::ErrorKind::AlreadyExists => "The project directory already exists.".into(),
+                _ => "The project directory could not be created.".into(),
+            },
             Self::Read(error) => match error.kind() {
                 std::io::ErrorKind::NotFound => "The project file could not be found.".into(),
                 std::io::ErrorKind::PermissionDenied => {

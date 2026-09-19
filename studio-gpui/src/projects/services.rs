@@ -5,7 +5,7 @@ use gpui_navigation::{NavPath, Navigator};
 use crate::{alert::show_alert, projects::ProjectsRoute, workspace::WorkspaceRoute};
 
 pub(super) fn create_project(project: &Project, window: &mut Window, cx: &mut App) {
-    match project.save() {
+    match project.create() {
         Ok(_) => {
             println!("Project created: {:#?}", project);
             Navigator::go(

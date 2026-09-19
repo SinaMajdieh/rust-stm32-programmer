@@ -1,6 +1,6 @@
 mod home;
-mod services;
 mod new_project;
+mod services;
 
 pub use home::Home;
 pub use new_project::NewProject;
