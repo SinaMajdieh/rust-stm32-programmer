@@ -1,7 +1,7 @@
 use gpui_kit::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, Styled, Window, div,
 };
-use gpui_navigation::{NavPath, Navigator};
+use gpui_navigation::{Navigator, nav_path};
 
 use crate::workspace::{Workspace, WorkspaceRoute};
 
@@ -13,7 +13,7 @@ impl Studio {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let workspace = cx.new(|_| Workspace::new());
         let _ = Navigator::install(&workspace, cx);
-        Navigator::go(NavPath::root(WorkspaceRoute::Projects), window, cx);
+        Navigator::go(nav_path![WorkspaceRoute::Projects], window, cx);
         Self { workspace }
     }
 }

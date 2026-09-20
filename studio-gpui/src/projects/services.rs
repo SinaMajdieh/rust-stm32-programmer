@@ -1,6 +1,6 @@
 use backend::project::Project;
 use gpui_kit::{App, Window};
-use gpui_navigation::{NavPath, Navigator};
+use gpui_navigation::{Navigator, nav_path};
 
 use crate::{alert::show_alert, projects::ProjectsRoute, workspace::WorkspaceRoute};
 
@@ -9,7 +9,7 @@ pub(super) fn create_project(project: &Project, window: &mut Window, cx: &mut Ap
         Ok(_) => {
             println!("Project created: {:#?}", project);
             Navigator::go(
-                NavPath::root(WorkspaceRoute::Projects).push(ProjectsRoute::Home),
+                nav_path![WorkspaceRoute::Projects, ProjectsRoute::Home],
                 window,
                 cx,
             );

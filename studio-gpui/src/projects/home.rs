@@ -1,5 +1,5 @@
-use gpui_kit::{base::StyledExt, component::ActiveTheme, prelude::*, *};
-use gpui_navigation::{NavPath, Navigator};
+use gpui_kit::{assets::IconName, base::StyledExt, component::ActiveTheme, prelude::*, *};
+use gpui_navigation::{Navigator, nav_path};
 
 use crate::{
     projects::{ProjectsRoute, services::open_project},
@@ -64,7 +64,6 @@ fn header(cx: &mut Context<Home>) -> impl IntoElement {
 
 fn create_project_card(cx: &mut Context<Home>) -> impl IntoElement {
     let theme = cx.theme();
-
     div()
         .id("create-project")
         .v_flex()
@@ -82,12 +81,12 @@ fn create_project_card(cx: &mut Context<Home>) -> impl IntoElement {
         .hover(|this| this.bg(theme.muted))
         .on_click(cx.listener(|_, _, window, cx| {
             Navigator::go(
-                NavPath::root(WorkspaceRoute::Projects).push(ProjectsRoute::NewProject),
+                nav_path![WorkspaceRoute::Projects, ProjectsRoute::NewProject],
                 window,
                 cx,
             );
         }))
-        .child(div().text_2xl().text_color(theme.foreground).child("+"))
+        .child(div().text_2xl().child(IconName::Plus))
         .child(
             div()
                 .font_semibold()
@@ -124,7 +123,7 @@ fn open_project_card(cx: &mut Context<Home>) -> impl IntoElement {
         .on_click(cx.listener(|_, _, window, cx| {
             open_project(window, cx);
         }))
-        .child(div().text_2xl().text_color(theme.foreground).child("↗"))
+        .child(div().text_2xl().child(IconName::FolderOpen))
         .child(
             div()
                 .font_semibold()
