@@ -11,7 +11,7 @@ use std::{path::Path, process::ExitCode, time::Instant};
 
 use backend::{
     Error, GenerationOutput, LlmGenerator,
-    project::{GenerationRequest, Project},
+    project::{GenerationRequest, Project, ProjectError},
 };
 use clap::Parser;
 use firmware_targets::{TargetKind, TemplateKind};
@@ -96,13 +96,13 @@ async fn generate(
     let llm = config.llm;
 
     let model = model.unwrap_or(llm.selected_model.as_str());
-    let system_prompt = llm.system_prompt()?;
-    let generator = LlmGenerator::from_config(llm.generator)?;
-
     let prompt = prompt_parts.join(" ");
+    let system_prompt = llm.system_prompt()?;
+
+    let generator = LlmGenerator::from_config(llm.generator)?;
     let request = GenerationRequest::new(model, prompt, Some(system_prompt));
 
-    let mut project = Project::new().with_name(project);
+    let mut project = Project::new().with_root(project).with_name(project);
 
     let output = {
         let _spinner = Spinner::start("Generating code");
@@ -110,12 +110,11 @@ async fn generate(
         project.generation().map(|generation| generation.result())
     };
 
-    project.create()?;
+    project.create().map_err(ProjectError::Io)?;
 
     if let Some(output) = output {
-        print_generation(&output);
+        print_generation(output);
     }
-    // save_source(project, &output.code)?;
 
     Ok(())
 }
@@ -129,20 +128,9 @@ fn build(
 ) -> Result<(), Error> {
     let (target, template) = resolve_firmware(target, template)?;
 
-    build_project_with_target(project, target, template)
-}
-
-/// Builds a project using a concrete target and template.
-///
-/// Displays a progress spinner while the build is running and prints the
-/// elapsed build time after completion.
-fn build_project_with_target(
-    project: &str,
-    target: TargetKind,
-    template: TemplateKind,
-) -> Result<(), Error> {
     let start = Instant::now();
-    let mut project = Project::open(project)?
+    let mut project = Project::open_from_dir(project)
+        .map_err(ProjectError::Io)?
         .with_target(target)
         .with_template(template);
 
@@ -152,7 +140,7 @@ fn build_project_with_target(
     };
 
     println!("Build finished in {} ms.", start.elapsed().as_millis());
-
+    project.save().map_err(ProjectError::Io)?;
     Ok(())
 }
 
@@ -160,16 +148,10 @@ fn build_project_with_target(
 fn program_firmware(target: Option<TargetKind>, project: impl AsRef<Path>) -> Result<(), Error> {
     let (target, _) = resolve_firmware(target, None)?;
 
-    program_with_target(target, project)
-}
-
-/// Programs a firmware ELF using the specified target.
-///
-/// Displays a progress spinner while programming and prints the elapsed
-/// programming time after completion.
-fn program_with_target(target: TargetKind, project: impl AsRef<Path>) -> Result<(), Error> {
     let start = Instant::now();
-    let mut project = Project::open(project)?.with_target(target);
+    let mut project = Project::open_from_dir(project)
+        .map_err(ProjectError::Io)?
+        .with_target(target);
     {
         let _spinner = Spinner::start("Programming");
         project.program()?;
@@ -179,6 +161,8 @@ fn program_with_target(target: TargetKind, project: impl AsRef<Path>) -> Result<
         "Programming finished in {} ms.",
         start.elapsed().as_millis()
     );
+
+    project.save().map_err(ProjectError::Io)?;
 
     Ok(())
 }

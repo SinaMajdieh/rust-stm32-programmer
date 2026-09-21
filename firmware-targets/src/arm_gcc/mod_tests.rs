@@ -45,7 +45,7 @@ fn failed_tool_commands_use_stdout_when_stderr_is_empty() {
 
     assert!(matches!(
         error,
-        BuildError::CommandFailed {
+        CompileError::CommandFailed {
             stage: BuildStage::Link,
             diagnostics,
             ..

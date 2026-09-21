@@ -22,7 +22,7 @@ mod config;
 mod link;
 mod objcopy;
 
-pub use builder::{BuildArtifacts, CompileError, BuildStage};
+pub use builder::{BuildArtifacts, BuildStage, CompileError};
 pub use config::ArmGccConfig;
 
 pub(crate) use builder::ArmGcc;

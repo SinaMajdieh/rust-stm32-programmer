@@ -6,7 +6,6 @@ members = [
   "firmware-targets",
   "generation",
   "ollama-client",
-  "programmer-app",
   "studio-gpui",
   "studio-ui",
 ]

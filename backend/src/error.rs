@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-
 use generation::GenerationError;
 
-use crate::project::{ProjectBuildError, ProjectIoError, ProjectProgrammingError};
+use crate::project::{ProjectBuildError, ProjectError, ProjectProgrammingError};
 
 /// Result type for operations spanning multiple core subsystems.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -19,7 +17,7 @@ pub enum Error {
     Config(#[from] ConfigError),
 
     #[error(transparent)]
-    ProjectIo(#[from] ProjectIoError),
+    Project(#[from] ProjectError),
 
     /// LLM source-code generation failed.
     #[error("Generation failed: {0}")]
@@ -32,24 +30,6 @@ pub enum Error {
     /// Programming a firmware image failed.
     #[error("Programming error: {0}")]
     Programming(#[from] ProjectProgrammingError),
-}
-
-/// An error produced while programming firmware.
-///
-/// The error retains the firmware path along with the underlying programming
-/// error so callers can identify which firmware image failed to be programmed.
-#[derive(Debug, thiserror::Error)]
-pub enum ProgrammingError {
-    /// The target programmer failed to program the specified firmware.
-    #[error("Failed to program firmware `{firmware}`\n{source:#?}")]
-    Program {
-        /// Path to the firmware image that could not be programmed.
-        firmware: PathBuf,
-
-        /// Underlying programming error.
-        #[source]
-        source: firmware_targets::programmer::ProgrammingError,
-    },
 }
 
 /// Errors produced by configuration operations.

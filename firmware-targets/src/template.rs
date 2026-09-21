@@ -46,14 +46,7 @@ pub trait ProjectTemplate {
     fn generate(output: impl Into<PathBuf>) -> io::Result<Project> {
         let directory = output.into();
 
-        if let Some(parent) = directory
-            .parent()
-            .filter(|parent| !parent.as_os_str().is_empty())
-        {
-            fs::create_dir_all(parent)?;
-        }
-
-        fs::create_dir(&directory)?;
+        fs::create_dir_all(&directory)?;
         Self::template().extract(&directory)?;
 
         let sources = Self::built_in_sources()

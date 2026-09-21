@@ -13,6 +13,7 @@ pub struct GenerationRequest {
     pub prompt: String,
 
     /// Optional system prompt.
+    #[serde(skip)]
     pub system_prompt: Option<String>,
 }
 

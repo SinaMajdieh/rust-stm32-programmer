@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Intel HEX file validation.
 //!
 //! This module validates Intel HEX records without modifying the input file.

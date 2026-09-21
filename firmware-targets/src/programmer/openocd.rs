@@ -6,7 +6,7 @@
 use std::{path::PathBuf, process::Command, time::Instant};
 
 use crate::programmer::{
-    EraseMode, ProgrammingError, ProgramRequest, ProgramResult, Programmer, ResetMode,
+    EraseMode, ProgramRequest, ProgramResult, Programmer, ProgrammingError, ResetMode,
 };
 
 /// Configuration for an OpenOCD programming backend.

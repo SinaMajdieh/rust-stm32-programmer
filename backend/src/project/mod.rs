@@ -103,6 +103,12 @@ impl Project {
         Ok(project)
     }
 
+    /// Opens a project from a folder.
+    pub fn open_from_dir(path: impl AsRef<Path>) -> Result<Self, ProjectIoError> {
+        let path = path.as_ref();
+        Self::open(path.join(Self::PROJECT_FILE))
+    }
+
     /// Saves the project to [`Self::PROJECT_FILE`].
     pub fn save(&self) -> Result<(), ProjectIoError> {
         self.ensure_root()?;
@@ -145,8 +151,6 @@ impl Project {
             .await?;
 
         self.generation = Some(Generation::new(request, output));
-        self.build = None;
-        self.upload = None;
 
         Ok(())
     }
@@ -181,6 +185,9 @@ impl Project {
                 target: target_name.clone(),
             })?;
 
+        fs::remove_dir_all(&self.root)
+            .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
+
         let mut generated_project = target
             .generate_project(self.template, &self.root)
             .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
@@ -194,7 +201,6 @@ impl Project {
         })?;
 
         self.build = Some(Build::new(generation.revision(), artifacts));
-        self.upload = None;
 
         Ok(())
     }

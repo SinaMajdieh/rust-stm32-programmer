@@ -18,8 +18,8 @@ pub(super) fn create_project(project: &Project, window: &mut Window, cx: &mut Ap
             window,
             cx,
             "Faild to creat Project",
-            error.user_message(),
-            Some(error.to_string()),
+            error.to_string(),
+            None,
         ),
     }
 }
@@ -47,8 +47,8 @@ pub fn open_project(window: &mut Window, cx: &mut App) {
                             window,
                             cx,
                             "Failed to open Project",
-                            error.user_message(),
-                            Some(error.to_string()),
+                            error.to_string(),
+                            None,
                         );
                     });
                 }
