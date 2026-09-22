@@ -13,7 +13,7 @@ pub(super) static TEMPLATE: Dir<'static> =
 
 /// Source files supplied by the LL template and built as part of the
 /// generated project.
-pub(super) const BUILT_IN_SOURCES: &[&str] = &["src/startup.s"];
+pub(super) const BUILT_IN_SOURCES: &[&str] = &["src/main.c", "src/startup.s"];
 
 /// An STM32F103C8 project template based on the STM32 Low-Layer approach.
 ///

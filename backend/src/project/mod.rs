@@ -185,15 +185,12 @@ impl Project {
                 target: target_name.clone(),
             })?;
 
-        fs::remove_dir_all(&self.root)
-            .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
-
         let mut generated_project = target
             .generate_project(self.template, &self.root)
             .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
 
         generated_project
-            .add_source("main.c", generation.code())
+            .write_source("src/main.c", generation.code())
             .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
 
         let artifacts = generated_project.compile().map_err(|source| {

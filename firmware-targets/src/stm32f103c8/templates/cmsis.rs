@@ -14,8 +14,11 @@ pub(super) static TEMPLATE: Dir<'static> =
 
 /// Source files supplied by the CMSIS template and built as part of the
 /// generated project.
-pub(super) const BUILT_IN_SOURCES: &[&str] =
-    &["src/startup_stm32f103xb.s", "src/system_stm32f1xx.c"];
+pub(super) const BUILT_IN_SOURCES: &[&str] = &[
+    "src/startup_stm32f103xb.s",
+    "src/system_stm32f1xx.c",
+    "src/main.c",
+];
 
 /// An STM32F103C8 project template based on CMSIS.
 ///
