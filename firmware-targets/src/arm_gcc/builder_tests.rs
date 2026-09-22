@@ -25,7 +25,7 @@ fn build_stages_have_stable_user_facing_names() {
 
 #[test]
 fn unsupported_source_errors_name_the_file_and_supported_extensions() {
-    let error = BuildError::UnsupportedSource {
+    let error = CompileError::UnsupportedSource {
         path: PathBuf::from("src/main.rs"),
     };
 
@@ -38,7 +38,7 @@ fn unsupported_source_errors_name_the_file_and_supported_extensions() {
 
 #[test]
 fn io_errors_are_displayed_and_exposed_as_the_error_source() {
-    let error = BuildError::from(std::io::Error::other("toolchain unavailable"));
+    let error = CompileError::from(std::io::Error::other("toolchain unavailable"));
 
     assert_eq!(error.to_string(), "toolchain unavailable");
     assert!(std::error::Error::source(&error).is_some());

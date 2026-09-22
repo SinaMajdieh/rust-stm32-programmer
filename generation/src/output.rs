@@ -6,7 +6,8 @@
 use std::time::Duration;
 
 /// Result of a successful generation request.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenerationOutput {
     /// Generated source code.
     pub code: String,
@@ -16,7 +17,8 @@ pub struct GenerationOutput {
 }
 
 /// Statistics collected during generation.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenerationStatistics {
     /// Number of prompt tokens, when reported by the provider.
     pub prompt_tokens: Option<u64>,

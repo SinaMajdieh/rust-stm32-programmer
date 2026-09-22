@@ -4,7 +4,7 @@ use std::{
 };
 
 use firmware_targets::{
-    BuildArtifacts, FirmwareError, Target, TemplateKind, programmer::ProgramResult,
+    BuildArtifacts, BuildError, Target, TemplateKind, programmer::ProgramResult,
 };
 
 use crate::ProgrammingError;
@@ -13,7 +13,7 @@ use crate::ProgrammingError;
 ///
 /// The project directory is created if it does not already exist. If
 /// `main.c` already exists, its contents are replaced.
-pub fn save_source(project: impl AsRef<Path>, code: &str) -> Result<(), FirmwareError> {
+pub fn save_source(project: impl AsRef<Path>, code: &str) -> Result<(), BuildError> {
     let directory = project.as_ref();
 
     fs::create_dir_all(directory)?;
@@ -38,7 +38,7 @@ pub fn build_project(
     target: impl Target,
     template: TemplateKind,
     project: impl AsRef<Path>,
-) -> Result<BuildArtifacts, FirmwareError> {
+) -> Result<BuildArtifacts, BuildError> {
     let directory = project.as_ref();
     let source_path = directory.join("main.c");
 

@@ -10,10 +10,11 @@ mod spinner;
 use std::{path::Path, process::ExitCode, time::Instant};
 
 use backend::{
-    Error, GenerationOutput, GenerationRequest, LlmGenerator, build_project, program, save_source,
+    Error, GenerationOutput, LlmGenerator,
+    project::{GenerationRequest, Project},
 };
 use clap::Parser;
-use firmware_targets::{BuildArtifacts, TargetKind, TemplateKind, create_target};
+use firmware_targets::{TargetKind, TemplateKind};
 
 use cli::{Cli, Command};
 use config::Config;
@@ -47,7 +48,7 @@ async fn run() -> Result<(), Error> {
             project,
         } => build(&project, target, template).map(|_| ()),
 
-        Command::Program { target, firmware } => program_firmware(target, firmware),
+        Command::Program { target, project } => program_firmware(target, project),
 
         Command::Run {
             model,
@@ -57,11 +58,10 @@ async fn run() -> Result<(), Error> {
             prompt,
         } => {
             generate(&project, model.as_deref(), &prompt).await?;
+            build(&project, target, template)?;
+            program_firmware(target, &project)?;
 
-            let (target, template) = resolve_firmware(target, template)?;
-            let artifacts = build_project_with_target(&project, target, template)?;
-
-            program_with_target(target, artifacts.elf())
+            Ok(())
         }
     }
 }
@@ -100,15 +100,22 @@ async fn generate(
     let generator = LlmGenerator::from_config(llm.generator)?;
 
     let prompt = prompt_parts.join(" ");
-    let request = GenerationRequest::new(model, &prompt, Some(&system_prompt));
+    let request = GenerationRequest::new(model, prompt, Some(system_prompt));
+
+    let mut project = Project::new().with_name(project);
 
     let output = {
         let _spinner = Spinner::start("Generating code");
-        generator.generate(request).await?
+        project.generate(request, &generator).await?;
+        project.generation().map(|generation| generation.result())
     };
 
-    print_generation(&output);
-    save_source(project, &output.code)?;
+    project.create()?;
+
+    if let Some(output) = output {
+        print_generation(&output);
+    }
+    // save_source(project, &output.code)?;
 
     Ok(())
 }
@@ -119,7 +126,7 @@ fn build(
     project: &str,
     target: Option<TargetKind>,
     template: Option<TemplateKind>,
-) -> Result<BuildArtifacts, Error> {
+) -> Result<(), Error> {
     let (target, template) = resolve_firmware(target, template)?;
 
     build_project_with_target(project, target, template)
@@ -133,40 +140,39 @@ fn build_project_with_target(
     project: &str,
     target: TargetKind,
     template: TemplateKind,
-) -> Result<BuildArtifacts, Error> {
+) -> Result<(), Error> {
     let start = Instant::now();
+    let mut project = Project::open(project)?
+        .with_target(target)
+        .with_template(template);
 
-    let artifacts = {
+    {
         let _spinner = Spinner::start("Building");
-        let target = create_target(&target)?;
-
-        build_project(target, template, project)?
+        project.build()?;
     };
 
     println!("Build finished in {} ms.", start.elapsed().as_millis());
 
-    Ok(artifacts)
+    Ok(())
 }
 
 /// Programs an existing firmware ELF using the configured or overridden target.
-fn program_firmware(target: Option<TargetKind>, firmware: impl AsRef<Path>) -> Result<(), Error> {
+fn program_firmware(target: Option<TargetKind>, project: impl AsRef<Path>) -> Result<(), Error> {
     let (target, _) = resolve_firmware(target, None)?;
 
-    program_with_target(target, firmware)
+    program_with_target(target, project)
 }
 
 /// Programs a firmware ELF using the specified target.
 ///
 /// Displays a progress spinner while programming and prints the elapsed
 /// programming time after completion.
-fn program_with_target(target: TargetKind, firmware: impl AsRef<Path>) -> Result<(), Error> {
+fn program_with_target(target: TargetKind, project: impl AsRef<Path>) -> Result<(), Error> {
     let start = Instant::now();
-
+    let mut project = Project::open(project)?.with_target(target);
     {
         let _spinner = Spinner::start("Programming");
-        let target = create_target(&target)?;
-
-        program(target, firmware)?;
+        project.program()?;
     }
 
     println!(

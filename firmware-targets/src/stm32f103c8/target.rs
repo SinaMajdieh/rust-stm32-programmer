@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::{
     ProjectTemplate, Target, TemplateKind,
-    programmer::{OpenOcd, OpenOcdConfig, ProgramError, ProgramRequest, ProgramResult, Programmer},
+    programmer::{OpenOcd, OpenOcdConfig, ProgrammingError, ProgramRequest, ProgramResult, Programmer},
     stm32f103c8::templates::{Cmsis, Hal, Ll},
 };
 
@@ -47,7 +47,7 @@ impl Target for Stm32f103c8 {
     /// Programs a firmware image using the default programming options.
     ///
     /// This is a convenience wrapper around [`Target::program_with`].
-    fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgramError> {
+    fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgrammingError> {
         self.program_with(ProgramRequest::new(firmware.as_ref()))
     }
 }
@@ -73,7 +73,7 @@ impl<P: Programmer> Stm32f103c8<P> {
     ///
     /// This method delegates the operation to the configured
     /// [`Programmer`] implementation.
-    pub fn program_with(&self, request: ProgramRequest) -> Result<ProgramResult, ProgramError> {
+    pub fn program_with(&self, request: ProgramRequest) -> Result<ProgramResult, ProgrammingError> {
         self.programmer.program(&request)
     }
 }

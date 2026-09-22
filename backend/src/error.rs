@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
-use firmware_targets::FirmwareError;
 use generation::GenerationError;
+
+use crate::project::{ProjectBuildError, ProjectIoError, ProjectProgrammingError};
 
 /// Result type for operations spanning multiple core subsystems.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -17,17 +18,20 @@ pub enum Error {
     #[error("Configuration error: {0}")]
     Config(#[from] ConfigError),
 
+    #[error(transparent)]
+    ProjectIo(#[from] ProjectIoError),
+
     /// LLM source-code generation failed.
     #[error("Generation failed: {0}")]
     Generation(#[from] GenerationError),
 
     /// A firmware project operation failed.
     #[error("Firmware error: {0}")]
-    Firmware(#[from] FirmwareError),
+    Firmware(#[from] ProjectBuildError),
 
     /// Programming a firmware image failed.
     #[error("Programming error: {0}")]
-    Programming(#[from] ProgrammingError),
+    Programming(#[from] ProjectProgrammingError),
 }
 
 /// An error produced while programming firmware.
@@ -44,7 +48,7 @@ pub enum ProgrammingError {
 
         /// Underlying programming error.
         #[source]
-        source: firmware_targets::programmer::ProgramError,
+        source: firmware_targets::programmer::ProgrammingError,
     },
 }
 

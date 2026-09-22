@@ -5,7 +5,7 @@ use std::{
     process::Command,
 };
 
-use super::{ArmGccConfig, BuildError, BuildStage, run};
+use super::{ArmGccConfig, CompileError, BuildStage, run};
 
 /// Output produced by the linker stage.
 pub(super) struct LinkOutput {
@@ -25,7 +25,7 @@ pub(super) fn objects(
     config: &ArmGccConfig,
     project_root: &Path,
     objects: &[PathBuf],
-) -> Result<LinkOutput, BuildError> {
+) -> Result<LinkOutput, CompileError> {
     let build_directory = project_root.join("build");
     fs::create_dir_all(&build_directory)?;
 

@@ -22,7 +22,7 @@ mod config;
 mod link;
 mod objcopy;
 
-pub use builder::{BuildArtifacts, BuildError, BuildStage};
+pub use builder::{BuildArtifacts, CompileError, BuildStage};
 pub use config::ArmGccConfig;
 
 pub(crate) use builder::ArmGcc;
@@ -35,7 +35,7 @@ use std::{path::Path, process::Command};
 /// Standard error is preferred as the diagnostic source. If the command does
 /// not write anything to standard error, standard output is used instead.
 /// This accommodates tools that report diagnostics through either stream.
-fn run(command: &mut Command, stage: BuildStage, path: &Path) -> Result<(), BuildError> {
+fn run(command: &mut Command, stage: BuildStage, path: &Path) -> Result<(), CompileError> {
     let output = command.output()?;
 
     if output.status.success() {
@@ -48,7 +48,7 @@ fn run(command: &mut Command, stage: BuildStage, path: &Path) -> Result<(), Buil
         String::from_utf8_lossy(&output.stderr).into_owned()
     };
 
-    Err(BuildError::CommandFailed {
+    Err(CompileError::CommandFailed {
         stage,
         path: path.to_path_buf(),
         status: output.status,

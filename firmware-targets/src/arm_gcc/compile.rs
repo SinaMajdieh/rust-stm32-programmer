@@ -5,7 +5,7 @@ use std::{
     process::Command,
 };
 
-use super::{ArmGccConfig, BuildError, BuildStage, run};
+use super::{ArmGccConfig, CompileError, BuildStage, run};
 
 /// Compiles all supported source files into object files.
 ///
@@ -16,7 +16,7 @@ pub(super) fn sources(
     config: &ArmGccConfig,
     project_root: &Path,
     sources: &[PathBuf],
-) -> Result<Vec<PathBuf>, BuildError> {
+) -> Result<Vec<PathBuf>, CompileError> {
     let build_directory = project_root.join("build");
     fs::create_dir_all(&build_directory)?;
 
@@ -36,9 +36,9 @@ fn compile_source(
     project_root: &Path,
     source: &Path,
     build_directory: &Path,
-) -> Result<PathBuf, BuildError> {
+) -> Result<PathBuf, CompileError> {
     if !is_supported_source(source) {
-        return Err(BuildError::UnsupportedSource {
+        return Err(CompileError::UnsupportedSource {
             path: source.to_path_buf(),
         });
     }
@@ -90,10 +90,10 @@ fn command(config: &ArmGccConfig, project_root: &Path, source: &Path, object: &P
 ///
 /// The source filename is retained and `.o` is appended, placing the result
 /// directly in the build directory.
-fn object_path(source: &Path, build_directory: &Path) -> Result<PathBuf, BuildError> {
+fn object_path(source: &Path, build_directory: &Path) -> Result<PathBuf, CompileError> {
     let file_name = source
         .file_name()
-        .ok_or_else(|| BuildError::UnsupportedSource {
+        .ok_or_else(|| CompileError::UnsupportedSource {
             path: source.to_path_buf(),
         })?;
 

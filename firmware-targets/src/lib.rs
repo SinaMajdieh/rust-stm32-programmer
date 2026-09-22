@@ -25,8 +25,8 @@ mod template;
 /// Project templates for supported microcontroller targets.
 pub mod stm32f103c8;
 
-pub use arm_gcc::{ArmGccConfig, BuildArtifacts, BuildError, BuildStage};
-pub use error::FirmwareError;
+pub use arm_gcc::{ArmGccConfig, BuildArtifacts, CompileError, BuildStage};
+pub use error::BuildError;
 pub use project::Project;
 pub use target::{Target, TargetKind, TemplateKind, create_target};
 pub use template::ProjectTemplate;

@@ -8,6 +8,10 @@ license.workspace = true
 [dependencies]
 async-openai = { version = "0.41.3", features = ["chat-completion"] }
 ollama-client.workspace = true
-serde.workspace = true
+serde = { workspace = true, optional = true }
 thiserror.workspace = true
 tokio.workspace = true
+
+[features]
+default = []
+serde = ["dep:serde"]

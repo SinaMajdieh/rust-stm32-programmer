@@ -2,7 +2,7 @@
 
 use std::{error::Error, fs, io, path::Path};
 
-use firmware_targets::{ArmGccConfig, BuildError, BuildStage, Project};
+use firmware_targets::{ArmGccConfig, CompileError, BuildStage, Project};
 use tempfile::tempdir;
 
 fn config() -> ArmGccConfig {
@@ -96,7 +96,7 @@ fn public_build_errors_and_stages_have_clear_contracts() {
     assert_eq!(BuildStage::ConvertToHex.to_string(), "convert to Intel HEX");
     assert_eq!(BuildStage::ConvertToBinary.to_string(), "convert to binary");
 
-    let error = BuildError::from(io::Error::other("missing compiler"));
+    let error = CompileError::from(io::Error::other("missing compiler"));
     assert_eq!(error.to_string(), "missing compiler");
     assert!(Error::source(&error).is_some());
 }

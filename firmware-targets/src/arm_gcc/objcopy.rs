@@ -3,7 +3,7 @@ use std::{
     process::Command,
 };
 
-use super::{ArmGccConfig, BuildError, BuildStage, run};
+use super::{ArmGccConfig, CompileError, BuildStage, run};
 
 /// Output format supported by the firmware image conversion stage.
 #[derive(Clone, Copy)]
@@ -47,19 +47,19 @@ impl OutputFormat {
 /// Converts an ELF firmware image into an Intel HEX image.
 ///
 /// The output is written next to the ELF file using the `.hex` extension.
-pub(super) fn to_hex(config: &ArmGccConfig, elf: &Path) -> Result<PathBuf, BuildError> {
+pub(super) fn to_hex(config: &ArmGccConfig, elf: &Path) -> Result<PathBuf, CompileError> {
     convert(config, elf, OutputFormat::IntelHex)
 }
 
 /// Converts an ELF firmware image into a raw binary image.
 ///
 /// The output is written next to the ELF file using the `.bin` extension.
-pub(super) fn to_binary(config: &ArmGccConfig, elf: &Path) -> Result<PathBuf, BuildError> {
+pub(super) fn to_binary(config: &ArmGccConfig, elf: &Path) -> Result<PathBuf, CompileError> {
     convert(config, elf, OutputFormat::Binary)
 }
 
 /// Runs `objcopy` to convert an ELF image into the requested firmware format.
-fn convert(config: &ArmGccConfig, elf: &Path, format: OutputFormat) -> Result<PathBuf, BuildError> {
+fn convert(config: &ArmGccConfig, elf: &Path, format: OutputFormat) -> Result<PathBuf, CompileError> {
     let output = elf.with_extension(format.extension());
 
     let mut command = Command::new(config.objcopy());

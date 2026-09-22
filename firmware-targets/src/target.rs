@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString};
 
 use crate::{
-    FirmwareError, Project,
-    programmer::{ProgramError, ProgramResult},
+    Project,
+    programmer::{ProgramResult, ProgrammingError},
     stm32f103c8::Stm32f103c8,
 };
 
@@ -95,15 +95,15 @@ pub trait Target {
     ///
     /// Returns a [`ProgramError`] if the firmware cannot be found, the
     /// programmer cannot be started, or programming fails.
-    fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgramError>;
+    fn program(&self, firmware: impl AsRef<Path>) -> Result<ProgramResult, ProgrammingError>;
 }
 
 /// Creates the target implementation corresponding to `target_kind`.
 ///
 /// This function maps the configuration-level [`TargetKind`] to its concrete
 /// target implementation.
-pub fn create_target(target_kind: &TargetKind) -> Result<impl Target, FirmwareError> {
+pub fn create_target(target_kind: &TargetKind) -> Option<impl Target> {
     match target_kind {
-        TargetKind::Stm32f103c8 => Ok(Stm32f103c8::new()),
+        TargetKind::Stm32f103c8 => Some(Stm32f103c8::new()),
     }
 }

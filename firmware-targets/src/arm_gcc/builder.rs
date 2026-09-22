@@ -4,6 +4,7 @@ use std::{
     process::ExitStatus,
 };
 
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use super::{ArmGccConfig, compile, link, objcopy};
@@ -12,7 +13,7 @@ use super::{ArmGccConfig, compile, link, objcopy};
 ///
 /// The artifacts consist of the linked ELF image, Intel HEX and raw binary
 /// firmware images, and the linker map file.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BuildArtifacts {
     elf: PathBuf,
     hex: PathBuf,
@@ -82,7 +83,7 @@ impl fmt::Display for BuildStage {
 
 /// An error produced while building firmware.
 #[derive(Debug, Error)]
-pub enum BuildError {
+pub enum CompileError {
     /// A filesystem operation or external process could not be started.
     #[error(transparent)]
     Io(#[from] io::Error),
@@ -147,7 +148,7 @@ impl<'a> ArmGcc<'a> {
     /// The build artifacts are written to the project's `build` directory.
     /// Compilation, linking, and image conversion are performed by the
     /// corresponding stages of the build pipeline.
-    pub(crate) fn build(&self) -> Result<BuildArtifacts, BuildError> {
+    pub(crate) fn build(&self) -> Result<BuildArtifacts, CompileError> {
         self.config.validate_project_layout(self.project_root)?;
 
         let objects = compile::sources(self.config, self.project_root, self.sources)?;

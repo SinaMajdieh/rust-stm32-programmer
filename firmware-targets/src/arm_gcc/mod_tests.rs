@@ -15,7 +15,7 @@ fn failed_tool_commands_capture_stderr_and_build_context() {
         .expect_err("a failing command must return a build error");
 
     match error {
-        BuildError::CommandFailed {
+        CompileError::CommandFailed {
             stage,
             path,
             status,
@@ -56,7 +56,7 @@ fn failed_tool_commands_use_stdout_when_stderr_is_empty() {
 #[cfg(unix)]
 #[test]
 fn command_failed_display_includes_trimmed_diagnostics() {
-    let error = BuildError::CommandFailed {
+    let error = CompileError::CommandFailed {
         stage: BuildStage::ConvertToHex,
         path: PathBuf::from("build/firmware.hex"),
         status: std::process::ExitStatus::from_raw(256),

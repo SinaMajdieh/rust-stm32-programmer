@@ -49,8 +49,8 @@ pub enum Command {
         #[arg(long)]
         target: Option<TargetKind>,
 
-        /// Firmware ELF file to program.
-        firmware: String,
+        /// Project directory containing the generated source.
+        project: String,
     },
 
     /// Generate, build, and program firmware.

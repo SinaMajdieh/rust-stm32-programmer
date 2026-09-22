@@ -1,4 +1,4 @@
-use crate::{ArmGccConfig, BuildArtifacts, BuildError, arm_gcc::ArmGcc};
+use crate::{ArmGccConfig, BuildArtifacts, CompileError, arm_gcc::ArmGcc};
 
 use std::{
     fs::OpenOptions,
@@ -128,7 +128,7 @@ impl Project {
     /// - a source file cannot be compiled;
     /// - the linker fails; or
     /// - an output image cannot be generated.
-    pub fn compile(&self) -> Result<BuildArtifacts, BuildError> {
+    pub fn compile(&self) -> Result<BuildArtifacts, CompileError> {
         ArmGcc::new(&self.build_config, &self.directory, &self.sources).build()
     }
 

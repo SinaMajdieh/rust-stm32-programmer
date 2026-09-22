@@ -129,7 +129,7 @@ pub trait Programmer {
 
 /// An error produced while programming firmware.
 #[derive(Debug, thiserror::Error)]
-pub enum ProgramError {
+pub enum ProgrammingError {
     /// The requested firmware image does not exist.
     #[error("firmware image does not exist: {}", .0.display())]
     FirmwareNotFound(PathBuf),
@@ -159,4 +159,4 @@ pub enum ProgramError {
 }
 
 /// The result type used by the programming API.
-pub type Result<T> = std::result::Result<T, ProgramError>;
+pub type Result<T> = std::result::Result<T, ProgrammingError>;

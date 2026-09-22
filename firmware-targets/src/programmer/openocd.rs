@@ -6,7 +6,7 @@
 use std::{path::PathBuf, process::Command, time::Instant};
 
 use crate::programmer::{
-    EraseMode, ProgramError, ProgramRequest, ProgramResult, Programmer, ResetMode,
+    EraseMode, ProgrammingError, ProgramRequest, ProgramResult, Programmer, ResetMode,
 };
 
 /// Configuration for an OpenOCD programming backend.
@@ -99,11 +99,11 @@ impl OpenOcd {
 }
 
 impl Programmer for OpenOcd {
-    fn program(&self, request: &ProgramRequest) -> Result<ProgramResult, ProgramError> {
+    fn program(&self, request: &ProgramRequest) -> Result<ProgramResult, ProgrammingError> {
         let firmware = &request.firmware;
 
         if !firmware.exists() {
-            return Err(ProgramError::FirmwareNotFound(firmware.to_owned()));
+            return Err(ProgrammingError::FirmwareNotFound(firmware.to_owned()));
         }
 
         let start = Instant::now();
@@ -122,10 +122,10 @@ impl Programmer for OpenOcd {
 
         let output = command
             .output()
-            .map_err(|source| ProgramError::Spawn { source })?;
+            .map_err(|source| ProgrammingError::Spawn { source })?;
 
         if !output.status.success() {
-            return Err(ProgramError::Failed {
+            return Err(ProgrammingError::Failed {
                 code: output.status.code(),
                 stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
                 stderr: String::from_utf8_lossy(&output.stderr).into_owned(),

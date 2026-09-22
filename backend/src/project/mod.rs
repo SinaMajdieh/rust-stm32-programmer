@@ -3,126 +3,266 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use firmware_targets::{TargetKind, TemplateKind};
+use ::generation::LlmGenerator;
+use firmware_targets::{BuildError, Target, TargetKind, TemplateKind, create_target};
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 
-pub type Result<T> = std::result::Result<T, ProjectError>;
+mod build;
+mod error;
+mod generation;
+mod program;
+mod revision;
+mod stage;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+pub use error::{ProjectBuildError, ProjectError, ProjectIoError, ProjectProgrammingError};
+pub use generation::GenerationRequest;
+
+use crate::project::{build::Build, generation::Generation, program::Program, stage::Stage};
+
+/// A firmware project and the state produced by its pipeline stages.
+///
+/// The project pipeline is:
+///
+///
+/// generation -> build -> programming
+///
+#[derive(Debug, Deserialize, Serialize, Default)]
+
 pub struct Project {
+    /// Directory containing the project configuration and generated files.
     #[serde(skip)]
     pub root: PathBuf,
 
+    /// Human-readable project name.
     pub name: String,
+
+    /// Firmware target used to generate, build, and program the project.
     pub target: TargetKind,
+
+    /// Template used to generate the firmware project.
     pub template: TemplateKind,
+
+    generation: Option<Generation>,
+    build: Option<Build>,
+    upload: Option<Program>,
 }
 
 impl Project {
+    /// Name of the project configuration file.
     pub const PROJECT_FILE: &str = "Project.toml";
 
+    /// Creates an empty project.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Sets the project root directory.
     pub fn with_root(mut self, root: impl AsRef<Path>) -> Self {
         self.root = root.as_ref().to_path_buf();
         self
     }
 
+    /// Sets the project name.
     pub fn with_name(mut self, name: impl Into<String>) -> Self {
         self.name = name.into();
         self
     }
 
+    /// Sets the firmware target.
     pub fn with_target(mut self, target: TargetKind) -> Self {
         self.target = target;
         self
     }
 
+    /// Sets the project template.
     pub fn with_template(mut self, template: TemplateKind) -> Self {
         self.template = template;
         self
     }
 
-    pub fn open(source: impl AsRef<Path>) -> Result<Self> {
-        let source = source.as_ref();
-        let contents = fs::read_to_string(source).map_err(ProjectError::Read)?;
-        let root = source
+    /// Opens a project from a `Project.toml` file.
+    pub fn open(path: impl AsRef<Path>) -> Result<Self, ProjectIoError> {
+        let path = path.as_ref();
+
+        let contents = fs::read_to_string(path).map_err(|source| ProjectIoError::Read {
+            path: path.to_path_buf(),
+            source,
+        })?;
+
+        let root = path
             .parent()
-            .ok_or(ProjectError::InvalidProjectPath)?
+            .filter(|parent| !parent.as_os_str().is_empty())
+            .ok_or_else(|| ProjectIoError::InvalidPath {
+                path: path.to_path_buf(),
+            })?
             .to_path_buf();
 
-        Ok(Project {
-            root,
-            ..toml::from_str(&contents)?
-        })
+        let mut project: Self = toml::from_str(&contents)?;
+        project.root = root;
+
+        Ok(project)
     }
 
-    pub fn save(&self) -> Result<()> {
+    /// Saves the project to [`Self::PROJECT_FILE`].
+    pub fn save(&self) -> Result<(), ProjectIoError> {
+        self.ensure_root()?;
+
+        let path = self.project_file();
         let contents = toml::to_string_pretty(self)?;
-        fs::write(self.root.join(Self::PROJECT_FILE), contents).map_err(ProjectError::Write)?;
+
+        fs::write(&path, contents).map_err(|source| ProjectIoError::Write { path, source })?;
+
         Ok(())
     }
 
-    pub fn create(&self) -> Result<()> {
-        fs::create_dir_all(&self.root).map_err(ProjectError::CreateDirectory)?;
+    /// Creates the project directory and saves the project configuration.
+    pub fn create(&self) -> Result<(), ProjectIoError> {
+        self.ensure_root()?;
+
+        fs::create_dir_all(&self.root).map_err(|source| ProjectIoError::CreateDirectory {
+            path: self.root.clone(),
+            source,
+        })?;
+
         self.save()
     }
-}
 
-#[derive(Debug, Error)]
-pub enum ProjectError {
-    #[error("Failed to create project directory: {0}")]
-    CreateDirectory(#[source] std::io::Error),
+    /// Generates firmware source code using the supplied language model.
+    ///
+    /// Generating new source invalidates the existing build and programming
+    /// result because both were produced from older source code.
+    pub async fn generate(
+        &mut self,
+        request: GenerationRequest,
+        generator: &LlmGenerator,
+    ) -> Result<(), ::generation::GenerationError> {
+        let output = generator
+            .generate(::generation::GenerationRequest::new(
+                &request.model,
+                &request.prompt,
+                request.system_prompt.as_deref(),
+            ))
+            .await?;
 
-    #[error("Failed to read project file: {0}")]
-    Read(#[source] std::io::Error),
+        self.generation = Some(Generation::new(request, output));
+        self.build = None;
+        self.upload = None;
 
-    #[error("Failed to write project file: {0}")]
-    Write(#[source] std::io::Error),
+        Ok(())
+    }
 
-    #[error("Project file has no parent directory")]
-    InvalidProjectPath,
+    /// Returns the generated source code, if available.
+    pub fn generated_code(&self) -> Option<&str> {
+        self.generation.as_ref().map(|generation| generation.code())
+    }
 
-    #[error("Invalid TOML: {0}")]
-    TomlDeserialize(#[from] toml::de::Error),
+    pub fn generation(&self) -> Option<&Generation> {
+        self.generation.as_ref()
+    }
 
-    #[error("Failed to serialize: {0}")]
-    TomlSerialize(#[from] toml::ser::Error),
-}
+    /// Returns whether generated source code is available.
+    pub fn has_generation(&self) -> bool {
+        self.generation.is_some()
+    }
 
-impl ProjectError {
-    pub fn user_message(&self) -> String {
-        match self {
-            Self::CreateDirectory(error) => match error.kind() {
-                std::io::ErrorKind::PermissionDenied => {
-                    "You don't have permission to create the project directory.".into()
-                }
-                std::io::ErrorKind::AlreadyExists => "The project directory already exists.".into(),
-                _ => "The project directory could not be created.".into(),
-            },
-            Self::Read(error) => match error.kind() {
-                std::io::ErrorKind::NotFound => "The project file could not be found.".into(),
-                std::io::ErrorKind::PermissionDenied => {
-                    "You don't have permission to read the project file.".into()
-                }
-                _ => "The project file could not be read.".into(),
-            },
+    /// Builds the currently generated firmware source.
+    ///
+    /// A successful build invalidates the previous programming result.
+    pub fn build(&mut self) -> Result<(), ProjectBuildError> {
+        let generation = self
+            .generation
+            .as_ref()
+            .ok_or(ProjectBuildError::GenerationMissing)?;
 
-            Self::Write(error) => match error.kind() {
-                std::io::ErrorKind::PermissionDenied => {
-                    "You don't have permission to save the project file.".into()
-                }
-                _ => "The project file could not be saved.".into(),
-            },
+        let target_name = format!("{:?}", self.target);
 
-            Self::InvalidProjectPath => "The selected project path is invalid.".into(),
+        let target =
+            create_target(&self.target).ok_or_else(|| ProjectBuildError::TargetUnsupported {
+                target: target_name.clone(),
+            })?;
 
-            Self::TomlDeserialize(_) => "The project file contains invalid configuration.".into(),
+        let mut generated_project = target
+            .generate_project(self.template, &self.root)
+            .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
 
-            Self::TomlSerialize(_) => "The project could not be saved.".into(),
+        generated_project
+            .add_source("main.c", generation.code())
+            .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
+
+        let artifacts = generated_project.compile().map_err(|source| {
+            ProjectBuildError::firmware(&target_name, BuildError::Compile(source))
+        })?;
+
+        self.build = Some(Build::new(generation.revision(), artifacts));
+        self.upload = None;
+
+        Ok(())
+    }
+
+    /// Returns whether the current build belongs to the current generation.
+    pub fn has_valid_build(&self) -> bool {
+        let Some(generation) = self.generation.as_ref() else {
+            return false;
+        };
+
+        self.build
+            .as_ref()
+            .is_some_and(|build| build.is_valid_for(generation.revision()))
+    }
+
+    /// Programs the current firmware build onto the target device.
+    pub fn program(&mut self) -> Result<(), ProjectProgrammingError> {
+        let build = self
+            .build
+            .as_ref()
+            .ok_or(ProjectProgrammingError::BuildMissing)?;
+
+        if !self.has_valid_build() {
+            return Err(ProjectProgrammingError::BuildOutdated);
         }
+
+        let target_name = format!("{:?}", self.target);
+
+        let target = create_target(&self.target).ok_or_else(|| {
+            ProjectProgrammingError::TargetUnsupported {
+                target: target_name.clone(),
+            }
+        })?;
+
+        target.program(build.artifacts().elf()).map_err(|source| {
+            ProjectProgrammingError::Firmware {
+                target: target_name,
+                source,
+            }
+        })?;
+
+        self.upload = Some(Program::new(build.revision()));
+
+        Ok(())
+    }
+
+    /// Returns whether the current programming result belongs to the current
+    /// build.
+    pub fn has_valid_program(&self) -> bool {
+        let Some(build) = self.build.as_ref() else {
+            return false;
+        };
+
+        self.upload
+            .as_ref()
+            .is_some_and(|upload| self.has_valid_build() && upload.is_valid_for(build.revision()))
+    }
+
+    /// Returns the path to the project configuration file.
+    pub fn project_file(&self) -> PathBuf {
+        self.root.join(Self::PROJECT_FILE)
+    }
+
+    fn ensure_root(&self) -> Result<(), ProjectIoError> {
+        if self.root.as_os_str().is_empty() {
+            return Err(ProjectIoError::MissingRoot);
+        }
+
+        Ok(())
     }
 }
