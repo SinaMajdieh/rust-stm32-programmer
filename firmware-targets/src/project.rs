@@ -161,12 +161,8 @@ impl Project {
         file_name: impl AsRef<Path>,
         source: &str,
     ) -> io::Result<&mut Self> {
-        println!(
-            "sources: {:#?}\nlooking for: {:?}",
-            self.sources(),
-            file_name.as_ref()
-        );
         let path = self.source(&file_name)?;
+        
         if self.sources().contains(&path) {
             self.update_soure(file_name, source)?;
         } else {
