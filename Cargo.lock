@@ -8866,6 +8866,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "programmer-app"
 version = "0.1.0"
 dependencies = [
@@ -8892,6 +8893,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 2ee98421cce4dc6c5210a417565f08ecf0a927ab
 name = "pulldown-cmark"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

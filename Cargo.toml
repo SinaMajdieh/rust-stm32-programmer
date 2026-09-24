@@ -1,5 +1,6 @@
 [workspace]
 members = [
+<<<<<<< HEAD
     "backend",
     "cli",
     "firmware-targets",
@@ -9,6 +10,15 @@ members = [
     "studio-dioxus",
     "studio-gpui",
     "studio-ui", "studio-dioxus",
+=======
+  "backend",
+  "cli",
+  "firmware-targets",
+  "generation",
+  "ollama-client",
+  "studio-gpui",
+  "studio-ui",
+>>>>>>> 2ee98421cce4dc6c5210a417565f08ecf0a927ab
 ]
 resolver = "3"
 

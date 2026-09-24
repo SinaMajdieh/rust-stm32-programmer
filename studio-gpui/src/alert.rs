@@ -1,5 +1,6 @@
 use gpui_kit::{
-    App, AppContext, Context, InteractiveElement, IntoElement, MouseButton, ParentElement, Render, Styled, Window, component::WindowExt, div, prelude::FluentBuilder,
+    App, AppContext, Context, InteractiveElement, IntoElement, MouseButton, ParentElement, Render,
+    Styled, Window, component::WindowExt, div, prelude::FluentBuilder,
 };
 
 pub struct AlertContent {

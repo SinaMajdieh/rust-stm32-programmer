@@ -2,7 +2,7 @@
 
 use std::{error::Error, fs, io, path::Path};
 
-use firmware_targets::{ArmGccConfig, CompileError, BuildStage, Project};
+use firmware_targets::{ArmGccConfig, BuildStage, CompileError, Project};
 use tempfile::tempdir;
 
 fn config() -> ArmGccConfig {

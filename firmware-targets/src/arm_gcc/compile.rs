@@ -5,7 +5,7 @@ use std::{
     process::Command,
 };
 
-use super::{ArmGccConfig, CompileError, BuildStage, run};
+use super::{ArmGccConfig, BuildStage, CompileError, run};
 
 /// Compiles all supported source files into object files.
 ///

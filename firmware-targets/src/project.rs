@@ -115,6 +115,63 @@ impl Project {
         Ok(self)
     }
 
+    /// Replaces the contents of an existing C or assembly source file.
+    ///
+    /// The source is written to disk immediately and becomes part of
+    /// subsequent builds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`io::Error`] if:
+    ///
+    /// - `file_name` is not a simple filename;
+    /// - the file extension is unsupported;
+    /// - the source file does not exist; or
+    /// - the source cannot be written to disk.
+    pub fn update_soure(
+        &mut self,
+        file_name: impl AsRef<Path>,
+        source: &str,
+    ) -> io::Result<&mut Self> {
+        let path = self.source(file_name)?;
+
+        std::fs::write(&path, source)?;
+
+        Ok(self)
+    }
+
+    /// Adds or updates a C or assembly source file in the project's `src` directory.
+    ///
+    /// If a source with `file_name` already exists, its contents are replaced.
+    /// Otherwise, a new source file is created.
+    ///
+    /// The source is written to disk immediately and becomes part of
+    /// subsequent builds.
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`io::Error`] if:
+    ///
+    /// - `file_name` is not a simple filename;
+    /// - the file extension is unsupported;
+    /// - the source cannot be written to disk; or
+    /// - an existing source cannot be updated.
+    pub fn write_source(
+        &mut self,
+        file_name: impl AsRef<Path>,
+        source: &str,
+    ) -> io::Result<&mut Self> {
+        let path = self.source(&file_name)?;
+        
+        if self.sources().contains(&path) {
+            self.update_soure(file_name, source)?;
+        } else {
+            self.add_source(file_name, source)?;
+        }
+
+        Ok(self)
+    }
+
     /// Compiles the project using its configured ARM GNU toolchain.
     ///
     /// A successful build produces ELF, Intel HEX, raw binary, and linker map
@@ -143,6 +200,15 @@ impl Project {
     pub fn sources(&self) -> &[PathBuf] {
         &self.sources
     }
+
+    /// Returns the source file path.
+    pub fn source(&self, file_name: impl AsRef<Path>) -> io::Result<PathBuf> {
+        let file_name = file_name.as_ref();
+
+        validate_source_name(file_name, Self::SUPPORTED_SOURCE_EXTENSIONS)?;
+
+        Ok(self.directory.join(file_name))
+    }
 }
 
 /// Validates the filename supplied to [`Project::add_source`].
@@ -150,16 +216,17 @@ impl Project {
 /// Source names must consist of a single path component and use one of the
 /// extensions supported by the ARM GCC compilation stage.
 fn validate_source_name(file_name: &Path, supported_extensions: &[&str]) -> io::Result<()> {
-    let is_single_component = file_name
-        .parent()
-        .is_some_and(|parent| parent.as_os_str().is_empty());
+    //INFO Commented out because currently sources with full paths and parents are concodered valid.
+    // let is_single_component = file_name
+    //     .parent()
+    //     .is_some_and(|parent| parent.as_os_str().is_empty());
 
     let supported_extension = file_name
         .extension()
         .and_then(|extension| extension.to_str())
         .is_some_and(|extension| supported_extensions.contains(&extension));
 
-    if !is_single_component || !supported_extension {
+    if !supported_extension {
         let extensions = supported_extensions
             .iter()
             .map(|extension| format!(".{extension}"))

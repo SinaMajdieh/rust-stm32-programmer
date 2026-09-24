@@ -3,7 +3,7 @@ use std::{
     process::Command,
 };
 
-use super::{ArmGccConfig, CompileError, BuildStage, run};
+use super::{ArmGccConfig, BuildStage, CompileError, run};
 
 /// Output format supported by the firmware image conversion stage.
 #[derive(Clone, Copy)]
@@ -59,7 +59,11 @@ pub(super) fn to_binary(config: &ArmGccConfig, elf: &Path) -> Result<PathBuf, Co
 }
 
 /// Runs `objcopy` to convert an ELF image into the requested firmware format.
-fn convert(config: &ArmGccConfig, elf: &Path, format: OutputFormat) -> Result<PathBuf, CompileError> {
+fn convert(
+    config: &ArmGccConfig,
+    elf: &Path,
+    format: OutputFormat,
+) -> Result<PathBuf, CompileError> {
     let output = elf.with_extension(format.extension());
 
     let mut command = Command::new(config.objcopy());

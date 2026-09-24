@@ -2,7 +2,9 @@ use std::path::Path;
 
 use crate::{
     ProjectTemplate, Target, TemplateKind,
-    programmer::{OpenOcd, OpenOcdConfig, ProgrammingError, ProgramRequest, ProgramResult, Programmer},
+    programmer::{
+        OpenOcd, OpenOcdConfig, ProgramRequest, ProgramResult, Programmer, ProgrammingError,
+    },
     stm32f103c8::templates::{Cmsis, Hal, Ll},
 };
 

@@ -31,6 +31,7 @@ pub(super) const BUILT_IN_SOURCES: &[&str] = &[
     "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c",
     "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c",
     "src/system_stm32f1xx.c",
+    "src/main.c",
     "startup_stm32f103xb.s",
 ];
 

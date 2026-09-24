@@ -5,7 +5,7 @@ use std::{
     process::Command,
 };
 
-use super::{ArmGccConfig, CompileError, BuildStage, run};
+use super::{ArmGccConfig, BuildStage, CompileError, run};
 
 /// Output produced by the linker stage.
 pub(super) struct LinkOutput {
