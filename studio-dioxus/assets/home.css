@@ -1,0 +1,99 @@
+/* ==========================================================================
+   Home Screen View (Desktop Centered)
+   ========================================================================== */
+.home-view {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background);
+}
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    max-width: 600px;
+}
+
+/* Header */
+.home-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+
+.home-title {
+    color: var(--foreground);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+}
+
+.home-subtitle {
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Action Cards */
+.home-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.action-card {
+    width: 210px;
+    height: 160px;
+    background: var(--muted-background, #1f1f23);
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.action-card:hover {
+    background: var(--secondary-hover-background, #27272a);
+    border-color: var(--ring, #3f3f46);
+}
+
+.action-card:active {
+    transform: scale(0.985);
+}
+
+.card-icon {
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.card-title {
+    color: var(--foreground);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.card-description {
+    color: var(--muted-foreground);
+    font-size: 12px;
+}

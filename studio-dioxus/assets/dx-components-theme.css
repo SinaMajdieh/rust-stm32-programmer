@@ -1,0 +1,77 @@
+/*
+ * Dioxus Components theme
+ * STM32 Studio
+ */
+
+html,
+body {
+    --dark: initial;
+    --light: ;
+}
+
+:root {
+    /*
+     * Surfaces
+     *
+     * Dioxus Components uses primary-color-* as a surface
+     * hierarchy. Map those levels onto the existing Studio surfaces.
+     */
+
+    --primary-color: var(--background);
+    --primary-color-1: var(--background);
+    --primary-color-2: var(--secondary-background);
+    --primary-color-3: var(--muted-background);
+    --primary-color-4: var(--secondary-hover-background);
+    --primary-color-5: var(--popover-background);
+    --primary-color-6: var(--border);
+    --primary-color-7: var(--input-border);
+
+    /*
+     * Foreground
+     *
+     * The numbered values are progressively less prominent text.
+     */
+
+    --secondary-color: var(--foreground);
+    --secondary-color-1: var(--foreground);
+    --secondary-color-2: var(--secondary-foreground);
+    --secondary-color-3: var(--secondary-foreground);
+    --secondary-color-4: var(--secondary-foreground);
+    --secondary-color-5: var(--muted-foreground);
+    --secondary-color-6: var(--muted-foreground);
+
+    /*
+     * Focus
+     */
+
+    --focused-border-color: var(--ring);
+
+    /*
+     * Success
+     */
+
+    --primary-success-color: var(--success-background);
+    --secondary-success-color: var(--success-foreground);
+
+    /*
+     * Warning
+     */
+
+    --primary-warning-color: var(--warning-background);
+    --secondary-warning-color: var(--warning-foreground);
+
+    /*
+     * Error
+     */
+
+    --primary-error-color: var(--danger-background);
+    --secondary-error-color: var(--danger-foreground);
+    --contrast-error-color: var(--danger-foreground);
+
+    /*
+     * Information
+     */
+
+    --primary-info-color: var(--info-background);
+    --secondary-info-color: var(--info-foreground);
+}

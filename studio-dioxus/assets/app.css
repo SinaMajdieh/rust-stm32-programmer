@@ -1,0 +1,59 @@
+/* ==========================================================================
+   Bundled Inter Font
+   ========================================================================== */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: block; /* prevents text flash during native startup */
+    src: url('/assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('woff2-variations'),
+         url('/assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('woff2');
+}
+/* ==========================================================================
+   Desktop Native Shell Reset
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+    background-color: var(--background, #18181b);
+    color: var(--foreground, #e4e4e7);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", sans-serif;
+    font-size: var(--font-size, 13px);
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+/* Base Window Container */
+.desktop-app-window {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--background);
+}
+
+/* Scrollbar Elimination for WebViews */
+::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}

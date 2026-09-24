@@ -1,0 +1,313 @@
+/* ==========================================================================
+   New Project Dialog
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Component Tokens
+   -------------------------------------------------------------------------- */
+
+.dialog-page {
+  --dialog-max-width: 512px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Page
+   -------------------------------------------------------------------------- */
+
+.dialog-page {
+  width: 100%;
+  min-height: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  box-sizing: border-box;
+
+  background: var(--background);
+  color: var(--foreground);
+
+  font-family: inherit;
+  user-select: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Dialog
+   -------------------------------------------------------------------------- */
+
+.dialog-container {
+  width: 100%;
+  max-width: var(--dialog-max-width);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+
+  padding: var(--space-32) var(--space-24);
+
+  box-sizing: border-box;
+}
+
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.dialog-title {
+  margin: 0;
+
+  color: var(--foreground);
+
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+}
+
+.dialog-subtitle {
+  margin: 0;
+
+  color: var(--muted-foreground);
+
+  font-size: 16px;
+  line-height: 24px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Form
+   -------------------------------------------------------------------------- */
+
+.dialog-form {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+
+
+/* --------------------------------------------------------------------------
+   Form Group
+   -------------------------------------------------------------------------- */
+
+.form-group {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.form-label {
+  color: var(--foreground);
+
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.form-hint {
+  margin: 0;
+
+  color: var(--muted-foreground);
+
+  font-size: 12px;
+  line-height: 18px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Location
+   -------------------------------------------------------------------------- */
+
+.location-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.location-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.input input{
+    width: 100%;
+    transition: box-shadow 100ms ease-out;
+}
+
+.input input:focus-visible,
+.input input:hover:not(:disabled):focus-visible {
+    box-shadow:
+        inset 0 0 0 1px var(--accent-foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Firmware Configuration
+   -------------------------------------------------------------------------- */
+
+   .firmware-config-card {
+       width: 100%;
+
+       display: flex;
+
+       box-sizing: border-box;
+
+       overflow: visible;
+
+       /*border: 1px solid var(--border);*/
+       border-radius: var(--radius);
+
+       background: var(--popover-background);
+       background-color: transparent;
+
+   }
+
+   .config-col {
+       flex: 1 1 0;
+       min-width: 0;
+
+       display: flex;
+       flex-direction: column;
+       gap: var(--space-12);
+
+       position: relative;
+   }
+
+   .config-col-label {
+       margin: 0;
+
+       color: var(--muted-foreground);
+
+       font-size: 14px;
+       line-height: 20px;
+       font-weight: 500;
+   }
+
+
+   /* --------------------------------------------------------------------------
+      Connected Selects
+      -------------------------------------------------------------------------- */
+
+   .select {
+       width: 100%;
+   }
+
+   .select > button {
+       width: 100%;
+   }
+
+   .select-left > button {
+       width: 100%;
+       border-radius: 0.5rem 0 0 0.5rem;
+   }
+
+   .select-right > button {
+       width: 100%;
+       border-radius: 0 0.5rem 0.5rem 0;
+   }
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.gpui-btn-secondary {
+  background: var(--secondary-background) !important;
+  color: var(--secondary-foreground) !important;
+
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+
+  font-weight: 500 !important;
+}
+
+.gpui-btn-secondary:hover {
+  background: var(--secondary-hover-background) !important;
+  border-color: var(--border) !important;
+}
+
+.gpui-btn-primary {
+  background: var(--primary-background) !important;
+  color: var(--primary-foreground) !important;
+
+  border: none !important;
+  border-radius: var(--radius) !important;
+
+  font-weight: 500 !important;
+}
+
+.gpui-btn-primary:hover {
+  background: var(--primary-hover-background) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   Error
+   -------------------------------------------------------------------------- */
+
+.error-container {
+  width: 100%;
+  min-height: var(--space-32);
+
+  display: flex;
+  align-items: center;
+}
+
+.error-badge {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+
+  padding: var(--space-8) var(--space-12);
+
+  box-sizing: border-box;
+
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--danger-background) 40%,
+      transparent
+    );
+
+  border-radius: var(--radius);
+
+  background: color-mix(
+    in oklab,
+    var(--danger-background) 15%,
+    transparent
+  );
+
+  color: var(--danger-background);
+
+  font-size: 14px;
+  line-height: 20px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Actions
+   -------------------------------------------------------------------------- */
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-8);
+
+  margin-top: var(--space-8);
+}

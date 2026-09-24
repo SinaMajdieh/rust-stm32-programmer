@@ -1,0 +1,273 @@
+:root {
+    /* Typography */
+    --font-size: 14px;
+    --mono-font-size: 13px;
+
+    /* Shape */
+    --radius: 5px;
+    --radius-lg: 7px;
+
+    /* Core */
+    --background: #1e1e1e;
+    --foreground: #e4e4e4;
+
+    --border: #3a3a3a;
+    --input-border: #414141;
+    --ring: #59caf1;
+
+    /* Accent */
+    --accent-background: #303030;
+    --accent-foreground: #e4e4e4;
+
+    /* Muted */
+    --muted-background: #282828;
+    --muted-foreground: #999b9e;
+
+    /* Secondary */
+    --secondary-background: #282828;
+    --secondary-foreground: #e4e4e4;
+    --secondary-hover-background: #303030;
+    --secondary-active-background: #363636;
+
+    /* Primary */
+    --primary-background: #59caf1;
+    --primary-foreground: #142129;
+    --primary-hover-background: #7ad6f5;
+    --primary-active-background: #45b9e2;
+
+    /* Semantic */
+    --danger-background: #f28b82;
+    --danger-foreground: #241313;
+    --danger-hover-background: #f5a19a;
+    --danger-active-background: #e77a72;
+
+    --success-background: #65b88a;
+    --success-foreground: #102218;
+    --success-hover-background: #7bc49b;
+    --success-active-background: #55a879;
+
+    --warning-background: #d8a84e;
+    --warning-foreground: #241c0d;
+    --warning-hover-background: #e2b966;
+    --warning-active-background: #c99a3e;
+
+    --info-background: #59caf1;
+    --info-foreground: #142129;
+    --info-hover-background: #7ad6f5;
+    --info-active-background: #45b9e2;
+
+    /* Containers */
+    --popover-background: #252525;
+    --popover-foreground: #e4e4e4;
+
+    --list-background: #1e1e1e;
+    --list-active-background: #263b43;
+    --list-active-border: #59caf1;
+    --list-hover-background: #303030;
+    --list-even-background: #242424;
+
+    --selection-background: #355766;
+
+    /* Sidebar */
+    --sidebar-background: #202020;
+    --sidebar-foreground: #d5d7d9;
+    --sidebar-border: #353535;
+    --sidebar-accent-background: #303030;
+    --sidebar-accent-foreground: #e4e4e4;
+    --sidebar-primary-background: #59caf1;
+    --sidebar-primary-foreground: #142129;
+
+    /* Group box */
+    --group-box-background: #252525;
+    --group-box-foreground: #d5d7d9;
+    --group-box-title-foreground: #e4e4e4;
+
+    /* Tabs */
+    --tab-bar-background: #202020;
+    --tab-background: #252525;
+    --tab-active-background: #1e1e1e;
+    --tab-active-foreground: #e4e4e4;
+    --tab-foreground: #999b9e;
+
+    /* Window */
+    --title-bar-background: #202020;
+    --title-bar-border: #353535;
+    --status-bar-background: #252525;
+
+    /* Scrollbar */
+    --scrollbar-background: #1e1e1e00;
+    --scrollbar-thumb-background: #555555;
+    --scrollbar-thumb-hover-background: #686868;
+
+    /* Switch */
+    --switch-background: #3a3a3a;
+    --switch-thumb-background: #dde1e4;
+
+    /* Links */
+    --link: #59caf1;
+    --link-hover: #7ad6f5;
+    --link-active: #9be0f7;
+
+    /* Base colors */
+    --blue: #59caf1;
+    --blue-light: #7ad6f5;
+    --cyan: #59caf1;
+    --cyan-light: #8bdef6;
+    --green: #65b88a;
+    --green-light: #83c7a2;
+    --magenta: #b184c1;
+    --magenta-light: #c39ad0;
+    --red: #f28b82;
+    --red-light: #f5a19a;
+    --yellow: #d8a84e;
+    --yellow-light: #e2b966;
+}
+
+[data-theme="light"] {
+    /* Core */
+    --background: #f4f5f6;
+    --foreground: #202124;
+
+    --border: #d5d8db;
+    --input-border: #c9cdd1;
+    --ring: #3faed5;
+
+    /* Accent */
+    --accent-background: #e5e8ea;
+    --accent-foreground: #202124;
+
+    /* Muted */
+    --muted-background: #e9ebed;
+    --muted-foreground: #6d7277;
+
+    /* Secondary */
+    --secondary-background: #e6e8ea;
+    --secondary-foreground: #25282b;
+    --secondary-hover-background: #dde0e3;
+    --secondary-active-background: #d5d8db;
+
+    /* Primary */
+    --primary-background: #3aaed6;
+    --primary-foreground: #10242d;
+    --primary-hover-background: #4fbce2;
+    --primary-active-background: #2f9fc7;
+
+    /* Semantic */
+    --danger-background: #d96b67;
+    --danger-foreground: #ffffff;
+    --danger-hover-background: #c95d59;
+    --danger-active-background: #b9504c;
+
+    --success-background: #3e9b69;
+    --success-foreground: #ffffff;
+    --success-hover-background: #348a5c;
+    --success-active-background: #2d7a50;
+
+    --warning-background: #d69b3a;
+    --warning-foreground: #ffffff;
+    --warning-hover-background: #c58c31;
+    --warning-active-background: #b27d2a;
+
+    --info-background: #3aaed6;
+    --info-foreground: #10242d;
+    --info-hover-background: #4fbce2;
+    --info-active-background: #2f9fc7;
+
+    /* Containers */
+    --popover-background: #ffffff;
+    --popover-foreground: #202124;
+
+    --list-background: #f4f5f6;
+    --list-active-background: #dceff5;
+    --list-active-border: #3aaed6;
+    --list-hover-background: #e8eaec;
+    --list-even-background: #f0f1f2;
+
+    --selection-background: #b9ddea;
+
+    /* Sidebar */
+    --sidebar-background: #eceeef;
+    --sidebar-foreground: #303438;
+    --sidebar-border: #d5d8db;
+    --sidebar-accent-background: #ddeff5;
+    --sidebar-accent-foreground: #202124;
+    --sidebar-primary-background: #3aaed6;
+    --sidebar-primary-foreground: #10242d;
+
+    /* Group box */
+    --group-box-background: #eceeef;
+    --group-box-foreground: #303438;
+    --group-box-title-foreground: #202124;
+
+    /* Tabs */
+    --tab-bar-background: #e9ebed;
+    --tab-background: #e9ebed;
+    --tab-active-background: #f4f5f6;
+    --tab-active-foreground: #202124;
+    --tab-foreground: #6d7277;
+
+    /* Window */
+    --title-bar-background: #eceeef;
+    --title-bar-border: #d5d8db;
+    --status-bar-background: #e9ebed;
+
+    /* Scrollbar */
+    --scrollbar-background: #f4f5f600;
+    --scrollbar-thumb-background: #c4c8cc;
+    --scrollbar-thumb-hover-background: #aeb3b8;
+
+    /* Switch */
+    --switch-background: #c7cbcf;
+    --switch-thumb-background: #ffffff;
+
+    /* Links */
+    --link: #238db5;
+    --link-hover: #19779b;
+    --link-active: #146783;
+
+    /* Base colors */
+    --blue: #238db5;
+    --blue-light: #4fbce2;
+    --cyan: #3aaed6;
+    --cyan-light: #71cbe8;
+    --green: #3e9b69;
+    --green-light: #67b98a;
+    --magenta: #9b6297;
+    --magenta-light: #ba88b6;
+    --red: #d96b67;
+    --red-light: #e68d89;
+    --yellow: #c28e2e;
+    --yellow-light: #d9ab55;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    background: var(--background);
+    color: var(--foreground);
+
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    font-size: var(--font-size);
+}
+
+body {
+    min-width: 640px;
+    min-height: 540px;
+}
