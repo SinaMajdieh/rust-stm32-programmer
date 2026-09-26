@@ -2,36 +2,28 @@ mod home;
 mod new_project;
 mod services;
 
-use gpui_kit::{
-    AppContext, Context, Entity, IntoElement, Render, Styled, Window,
-    base::{NavMotion, NavStack, NavStackState},
-};
+use gpui_kit::{AppContext, Context, IntoElement, Render, Styled, Window};
+use gpui_navigation::Navigator;
 pub use home::Home;
 pub use new_project::NewProject;
 
-pub struct Projects {
-    stack: Entity<NavStackState>,
-}
+pub struct Projects;
 
 impl Projects {
     pub fn new(cx: &mut Context<Self>) -> Self {
-        let stack = cx.new(|_| NavStackState::new());
-
-        let home = cx.new(|_| Home::new(stack.downgrade()));
-
-        stack.update(cx, |stack, cx| {
-            stack.push(home, NavMotion::Immediate, cx);
-        });
-
-        Self { stack }
+        let home = cx.new(|_| Home::new());
+        Navigator::new().scope("projects").push(home, cx).unwrap();
+        Self
     }
 }
 
 impl Render for Projects {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        NavStack::new(&self.stack)
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        Navigator::new()
+            .scope("projects")
+            .stack(cx)
+            .unwrap()
             .size_full()
             .overflow_hidden()
-            .item(|page, _, _| page.into_any_element())
     }
 }

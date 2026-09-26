@@ -10,7 +10,6 @@ backend.workspace = true
 firmware-targets.workspace = true
 gpui-kit = "0.6.6"
 gpui-navigation = {
-  package = "gpui-navigation",
   git = "https://github.com/SinaMajdieh/gpui-navigation.git",
 }
 rfd.workspace = true

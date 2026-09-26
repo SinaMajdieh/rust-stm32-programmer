@@ -1,3 +1,4 @@
+#![allow(unused)]
 mod editor;
 mod stage;
 mod stepper;

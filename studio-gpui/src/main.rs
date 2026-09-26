@@ -11,6 +11,7 @@ use gpui_kit::{
     component::{Root, Theme, ThemeRegistry},
     *,
 };
+use gpui_navigation::{Navigator, NavigatorConfig};
 use tracing_subscriber::EnvFilter;
 
 use crate::studio::Studio;
@@ -39,6 +40,8 @@ fn main() {
                     ..Default::default()
                 },
                 |window, cx| {
+                    Navigator::install(cx, NavigatorConfig::default())
+                        .expect("failed to install navigator");
                     let studio = cx.new(|cx| Studio::new(window, cx));
                     cx.new(|cx| Root::new(studio, window, cx))
                 },

@@ -1,36 +1,22 @@
-use gpui_kit::{
-    assets::IconName,
-    base::{NavMotion, NavStackState, StyledExt},
-    component::ActiveTheme,
-    prelude::*,
-    *,
-};
+use gpui_kit::{assets::IconName, base::StyledExt, component::ActiveTheme, prelude::*, *};
+use gpui_navigation::Navigator;
 
 use crate::projects::{NewProject, services::open_project};
 
-pub struct Home {
-    stack: WeakEntity<NavStackState>,
-}
+pub struct Home;
 
 impl Home {
-    pub fn new(stack: WeakEntity<NavStackState>) -> Self {
-        Self { stack }
+    pub fn new() -> Self {
+        Self
     }
 
     fn open_project(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        open_project(self.stack.clone(), window, cx);
+        open_project(window, cx);
     }
 
     fn new_project(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let Some(stack) = self.stack.upgrade() else {
-            return;
-        };
-
-        let page = cx.new(|cx| NewProject::new(stack.downgrade(), window, cx));
-
-        stack.update(cx, |stack, cx| {
-            stack.push(page, NavMotion::Immediate, cx);
-        });
+        let page = cx.new(|cx| NewProject::new(window, cx));
+        Navigator::new().scope("projects").push(page, cx).unwrap();
     }
 }
 

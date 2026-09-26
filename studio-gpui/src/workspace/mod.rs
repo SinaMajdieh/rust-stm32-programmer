@@ -1,33 +1,25 @@
-use gpui_kit::{
-    AppContext, Context, Entity, IntoElement, Render, Styled, Window,
-    base::{NavMotion, NavStack, NavStackState},
-};
+use gpui_kit::{AppContext, Context, IntoElement, Render, Styled, Window};
+use gpui_navigation::Navigator;
 
 use crate::projects::Projects;
 
-pub struct Workspace {
-    stack: Entity<NavStackState>,
-}
+pub struct Workspace;
 
 impl Workspace {
     pub fn new(cx: &mut Context<Self>) -> Self {
-        let stack = cx.new(|_| NavStackState::new());
-
         let page = cx.new(Projects::new);
-
-        stack.update(cx, |stack, cx| {
-            stack.push(page, NavMotion::Immediate, cx);
-        });
-
-        Self { stack }
+        Navigator::new().scope("workspace").push(page, cx).unwrap();
+        Self
     }
 }
 
 impl Render for Workspace {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        NavStack::new(&self.stack)
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        Navigator::new()
+            .scope("workspace")
+            .stack(cx)
+            .unwrap()
             .size_full()
             .overflow_hidden()
-            .item(|page, _, _| page.into_any_element())
     }
 }

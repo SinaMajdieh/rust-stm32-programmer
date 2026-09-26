@@ -1,7 +1,7 @@
 use backend::project::Project;
 use firmware_targets::{TargetKind, TemplateKind};
 use gpui_kit::{
-    base::{NavMotion, NavStackState, StyledExt, h_flex, v_flex},
+    base::{StyledExt, h_flex, v_flex},
     component::{
         ActiveTheme, IndexPath,
         alert::Alert,
@@ -14,13 +14,13 @@ use gpui_kit::{
     prelude::*,
     *,
 };
+use gpui_navigation::Navigator;
 use std::path::PathBuf;
 use strum::IntoEnumIterator;
 
 use crate::projects::services::create_project;
 
 pub struct NewProject {
-    stack: WeakEntity<NavStackState>,
     name: Entity<InputState>,
     location: Entity<InputState>,
     target: Entity<SelectState<Vec<TargetOption>>>,
@@ -55,11 +55,7 @@ impl SelectItem for TemplateOption {
 }
 
 impl NewProject {
-    pub fn new(
-        stack: WeakEntity<NavStackState>,
-        window: &mut Window,
-        cx: &mut Context<Self>,
-    ) -> Self {
+    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let name = cx.new(|cx| InputState::new(window, cx).default_value("MyProject"));
         let location =
             cx.new(|cx| InputState::new(window, cx).placeholder("Choose project location..."));
@@ -83,7 +79,6 @@ impl NewProject {
         });
 
         Self {
-            stack,
             name,
             location,
             target,
@@ -126,6 +121,7 @@ impl NewProject {
             .read(cx)
             .selected_value()
             .expect("Target missing");
+
         let template = *self
             .template
             .read(cx)
@@ -138,18 +134,11 @@ impl NewProject {
             .with_target(target)
             .with_template(template);
 
-        create_project(project, self.stack.clone(), window, cx);
+        create_project(project, window, cx);
     }
 
     fn cancel(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
-        let stack = self.stack.clone();
-        let Some(stack) = stack.upgrade() else {
-            return;
-        };
-
-        stack.update(cx, |stack, cx| {
-            stack.pop(NavMotion::Immediate, cx);
-        });
+        Navigator::new().scope("projects").back(cx).unwrap();
     }
 }
 
