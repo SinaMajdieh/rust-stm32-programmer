@@ -1,33 +1,46 @@
-use gpui_kit::{assets::IconName, base::StyledExt, component::ActiveTheme, prelude::*, *};
-use gpui_navigation::{Navigator, nav_path};
-
-use crate::{
-    projects::{ProjectsRoute, services::open_project},
-    workspace::WorkspaceRoute,
+use gpui_kit::{
+    assets::IconName,
+    base::{NavMotion, NavStackState, StyledExt},
+    component::ActiveTheme,
+    prelude::*,
+    *,
 };
 
-// pub enum HomeEvent {
-//     NewProject,
-//     OpenProject,
-// }
+use crate::projects::{NewProject, services::open_project};
 
-pub struct Home;
-
-// impl EventEmitter<HomeEvent> for Home {}
+pub struct Home {
+    stack: WeakEntity<NavStackState>,
+}
 
 impl Home {
-    pub fn new() -> Self {
-        Self
+    pub fn new(stack: WeakEntity<NavStackState>) -> Self {
+        Self { stack }
+    }
+
+    fn open_project(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        open_project(self.stack.clone(), window, cx);
+    }
+
+    fn new_project(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(stack) = self.stack.upgrade() else {
+            return;
+        };
+
+        let page = cx.new(|cx| NewProject::new(stack.downgrade(), window, cx));
+
+        stack.update(cx, |stack, cx| {
+            stack.push(page, NavMotion::Immediate, cx);
+        });
     }
 }
 
 impl Render for Home {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
+            .size_full()
             .v_flex()
             .items_center()
-            .w_full()
-            .pt_12()
+            .justify_center()
             .child(header(cx))
             .child(
                 div()
@@ -64,6 +77,7 @@ fn header(cx: &mut Context<Home>) -> impl IntoElement {
 
 fn create_project_card(cx: &mut Context<Home>) -> impl IntoElement {
     let theme = cx.theme();
+
     div()
         .id("create-project")
         .v_flex()
@@ -79,14 +93,10 @@ fn create_project_card(cx: &mut Context<Home>) -> impl IntoElement {
         .border_color(theme.border)
         .cursor_pointer()
         .hover(|this| this.bg(theme.muted))
-        .on_click(cx.listener(|_, _, window, cx| {
-            Navigator::go(
-                nav_path![WorkspaceRoute::Projects, ProjectsRoute::NewProject],
-                window,
-                cx,
-            );
+        .on_click(cx.listener(|this, _, window, cx| {
+            this.new_project(window, cx);
         }))
-        .child(div().text_2xl().child(IconName::Plus))
+        .child(div().p_4().text_2xl().child(IconName::Plus))
         .child(
             div()
                 .font_semibold()
@@ -120,10 +130,10 @@ fn open_project_card(cx: &mut Context<Home>) -> impl IntoElement {
         .border_color(theme.border)
         .cursor_pointer()
         .hover(|this| this.bg(theme.muted))
-        .on_click(cx.listener(|_, _, window, cx| {
-            open_project(window, cx);
+        .on_click(cx.listener(|this, _, window, cx| {
+            this.open_project(window, cx);
         }))
-        .child(div().text_2xl().child(IconName::FolderOpen))
+        .child(div().p_4().text_2xl().child(IconName::FolderOpen))
         .child(
             div()
                 .font_semibold()

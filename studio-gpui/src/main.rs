@@ -1,4 +1,5 @@
 mod alert;
+mod editor;
 mod projects;
 mod studio;
 mod workspace;

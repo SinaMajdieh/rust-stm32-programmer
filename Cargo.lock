@@ -4425,9 +4425,9 @@ dependencies = [
 
 [[package]]
 name = "gpui-kit"
-version = "0.6.1"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a74f10f4499d99378c73c0251541a5d92bde45cb83dd658f0618fb32769d5898"
+checksum = "42732dc20f50926278b2abf7a99d427a7741ab28bca6bfb49685f9ce3a53a1c7"
 dependencies = [
  "gpui-base",
  "gpui-component",
@@ -4455,7 +4455,7 @@ dependencies = [
 [[package]]
 name = "gpui-navigation"
 version = "0.1.0"
-source = "git+https://github.com/SinaMajdieh/gpui-navigation.git#b2551bd35c87e7c9935f8501486dd7d4c3adb632"
+source = "git+https://github.com/SinaMajdieh/gpui-navigation.git#932111c39ffeb03de9041db318ce479ef086b45a"
 dependencies = [
  "gpui-kit",
  "gpui-navigation-derive",
@@ -4466,7 +4466,7 @@ dependencies = [
 [[package]]
 name = "gpui-navigation-derive"
 version = "0.1.0"
-source = "git+https://github.com/SinaMajdieh/gpui-navigation.git#b2551bd35c87e7c9935f8501486dd7d4c3adb632"
+source = "git+https://github.com/SinaMajdieh/gpui-navigation.git#932111c39ffeb03de9041db318ce479ef086b45a"
 dependencies = [
  "proc-macro-crate 3.5.0",
  "proc-macro2",
@@ -5701,6 +5701,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "icons"
+version = "0.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bef9cd5a133bca0976306e662e0fe8f8433f7d5a46c808e701f9391cd4606e7"
+dependencies = [
+ "dioxus",
+ "strum 0.28.0",
+ "tw_merge",
 ]
 
 [[package]]
@@ -10841,8 +10852,10 @@ dependencies = [
  "dioxus-icons",
  "dioxus-primitives",
  "firmware-targets",
+ "icons",
  "rfd",
  "strum 0.27.2",
+ "tw_merge",
 ]
 
 [[package]]
@@ -11911,6 +11924,15 @@ dependencies = [
  "sha1",
  "thiserror 2.0.21",
  "utf-8",
+]
+
+[[package]]
+name = "tw_merge"
+version = "0.1.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce1e887eb679c1f4e57fa9ac9c06f0dd9a300b63642b42d147db568b3bae7428"
+dependencies = [
+ "nom 7.1.3",
 ]
 
 [[package]]

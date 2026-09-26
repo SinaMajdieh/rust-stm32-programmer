@@ -8,7 +8,7 @@ license.workspace = true
 [dependencies]
 backend.workspace = true
 firmware-targets.workspace = true
-gpui-kit = "=0.6.1"
+gpui-kit = "0.6.6"
 gpui-navigation = {
   package = "gpui-navigation",
   git = "https://github.com/SinaMajdieh/gpui-navigation.git",

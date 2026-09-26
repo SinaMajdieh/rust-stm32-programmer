@@ -1,54 +1,33 @@
-mod navigation;
-// mod pipeline;
-mod projects;
-
 use gpui_kit::{
-    AnyView, Context, IntoElement, ParentElement, Render, Styled, Subscription, Window,
-    component::Root, div, prelude::FluentBuilder,
+    AppContext, Context, Entity, IntoElement, Render, Styled, Window,
+    base::{NavMotion, NavStack, NavStackState},
 };
-use gpui_navigation::{RouteSegment, Router, RouterHandle};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, RouteSegment)]
-pub enum WorkspaceRoute {
-    Projects,
-}
+use crate::projects::Projects;
 
 pub struct Workspace {
-    views: Vec<ViewEntry>,
-}
-
-struct ViewEntry {
-    view: AnyView,
-    _subscription: Option<Subscription>,
+    stack: Entity<NavStackState>,
 }
 
 impl Workspace {
-    pub fn new() -> Self {
-        Self { views: Vec::new() }
+    pub fn new(cx: &mut Context<Self>) -> Self {
+        let stack = cx.new(|_| NavStackState::new());
+
+        let page = cx.new(Projects::new);
+
+        stack.update(cx, |stack, cx| {
+            stack.push(page, NavMotion::Immediate, cx);
+        });
+
+        Self { stack }
     }
 }
 
 impl Render for Workspace {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        div()
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        NavStack::new(&self.stack)
             .size_full()
-            .when_some(self.views.last(), |this, entry| {
-                this.child(entry.view.clone())
-            })
-            .children(Root::render_dialog_layer(window, cx))
-    }
-}
-
-impl Router for Workspace {
-    type Route = WorkspaceRoute;
-    fn route(
-        &mut self,
-        route: &Self::Route,
-        window: &mut Window,
-        cx: &mut Context<Self>,
-    ) -> Option<RouterHandle> {
-        match route {
-            WorkspaceRoute::Projects => Some(self.open_projects(window, cx).into()),
-        }
+            .overflow_hidden()
+            .item(|page, _, _| page.into_any_element())
     }
 }

@@ -1,18 +1,29 @@
+use std::ops::Deref;
+
 use backend::project::Project;
-use gpui_kit::{App, Window};
-use gpui_navigation::{Navigator, nav_path};
+use gpui_kit::{
+    App, AppContext, WeakEntity, Window,
+    base::{NavMotion, NavStackState},
+};
 
-use crate::{alert::show_alert, projects::ProjectsRoute, workspace::WorkspaceRoute};
+use crate::{alert::show_alert, editor::Editor};
 
-pub(super) fn create_project(project: &Project, window: &mut Window, cx: &mut App) {
+pub(super) fn create_project(
+    project: Project,
+    stack: WeakEntity<NavStackState>,
+    window: &mut Window,
+    cx: &mut App,
+) {
     match project.create() {
         Ok(_) => {
             println!("Project created: {:#?}", project);
-            Navigator::go(
-                nav_path![WorkspaceRoute::Projects, ProjectsRoute::Home],
-                window,
-                cx,
-            );
+            let Some(stack) = stack.upgrade() else {
+                return;
+            };
+            let editor = cx.new(|cx| Editor::new(project, cx));
+            stack.update(cx, |stack, cx| {
+                stack.replace(editor, NavMotion::Immediate, cx);
+            });
         }
         Err(error) => show_alert(
             window,
@@ -24,7 +35,7 @@ pub(super) fn create_project(project: &Project, window: &mut Window, cx: &mut Ap
     }
 }
 
-pub fn open_project(window: &mut Window, cx: &mut App) {
+pub fn open_project(stack: WeakEntity<NavStackState>, window: &mut Window, cx: &mut App) {
     window
         .spawn(cx, async move |cx| {
             let Some(path) = rfd::AsyncFileDialog::new()
@@ -40,6 +51,13 @@ pub fn open_project(window: &mut Window, cx: &mut App) {
             match Project::open(path) {
                 Ok(project) => {
                     println!("Project opened: {project:#?}");
+                    let Some(stack) = stack.upgrade() else {
+                        return;
+                    };
+                    let editor = cx.new(|cx| Editor::new(project, cx));
+                    stack.update(cx, |stack, cx| {
+                        stack.replace(editor, NavMotion::Animated, cx);
+                    });
                 }
                 Err(error) => {
                     let _ = cx.update(|window, cx| {

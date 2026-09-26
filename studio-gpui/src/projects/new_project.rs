@@ -1,7 +1,7 @@
 use backend::project::Project;
 use firmware_targets::{TargetKind, TemplateKind};
 use gpui_kit::{
-    base::{StyledExt, h_flex, v_flex},
+    base::{NavMotion, NavStackState, StyledExt, h_flex, v_flex},
     component::{
         ActiveTheme, IndexPath,
         alert::Alert,
@@ -14,13 +14,13 @@ use gpui_kit::{
     prelude::*,
     *,
 };
-use gpui_navigation::Navigator;
 use std::path::PathBuf;
 use strum::IntoEnumIterator;
 
 use crate::projects::services::create_project;
 
 pub struct NewProject {
+    stack: WeakEntity<NavStackState>,
     name: Entity<InputState>,
     location: Entity<InputState>,
     target: Entity<SelectState<Vec<TargetOption>>>,
@@ -55,7 +55,11 @@ impl SelectItem for TemplateOption {
 }
 
 impl NewProject {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+    pub fn new(
+        stack: WeakEntity<NavStackState>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
         let name = cx.new(|cx| InputState::new(window, cx).default_value("MyProject"));
         let location =
             cx.new(|cx| InputState::new(window, cx).placeholder("Choose project location..."));
@@ -79,6 +83,7 @@ impl NewProject {
         });
 
         Self {
+            stack,
             name,
             location,
             target,
@@ -133,7 +138,18 @@ impl NewProject {
             .with_target(target)
             .with_template(template);
 
-        create_project(&project, window, cx);
+        create_project(project, self.stack.clone(), window, cx);
+    }
+
+    fn cancel(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
+        let stack = self.stack.clone();
+        let Some(stack) = stack.upgrade() else {
+            return;
+        };
+
+        stack.update(cx, |stack, cx| {
+            stack.pop(NavMotion::Immediate, cx);
+        });
     }
 }
 
@@ -142,6 +158,8 @@ impl Render for NewProject {
         v_flex()
             .id("new-project")
             .size_full()
+            .items_center()
+            .justify_center()
             .overflow_y_scroll()
             .child(
                 v_flex()
@@ -249,7 +267,7 @@ impl NewProject {
             .child(
                 Button::new("cancel")
                     .label("Cancel")
-                    .on_click(|_, window, cx| Navigator::back(window, cx)),
+                    .on_click(cx.listener(|this, _, window, cx| this.cancel(window, cx))),
             )
             .child(
                 Button::new("create")
