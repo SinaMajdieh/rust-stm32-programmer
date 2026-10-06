@@ -2,17 +2,14 @@ use backend::project::Project;
 use gpui_kit::{App, AppContext, Window};
 use gpui_navigation::Navigator;
 
-use crate::{alert::show_alert, editor::Editor};
+use crate::{alert::show_alert, editor::Editor, workspace::WorkspaceScope};
 
 pub(super) fn create_project(project: Project, window: &mut Window, cx: &mut App) {
     match project.create() {
         Ok(_) => {
             println!("Project created: {:#?}", project);
-            let editor = cx.new(|cx| Editor::new(project, cx));
-            Navigator::new()
-                .scope("workspace")
-                .replace(editor, cx)
-                .unwrap();
+            let editor = cx.new(|cx| Editor::new(project, window, cx));
+            Navigator::new().scope(WorkspaceScope).replace(editor, cx);
         }
         Err(error) => show_alert(
             window,
@@ -40,12 +37,9 @@ pub fn open_project(window: &mut Window, cx: &mut App) {
             match Project::open(path) {
                 Ok(project) => {
                     println!("Project opened: {project:#?}");
-                    let editor = cx.new(|cx| Editor::new(project, cx));
-                    let _ = cx.update(|_, cx| {
-                        Navigator::new()
-                            .scope("workspace")
-                            .replace(editor, cx)
-                            .unwrap();
+                    let _ = cx.update(|window, cx| {
+                        let editor = cx.new(|cx| Editor::new(project, window, cx));
+                        Navigator::new().scope(WorkspaceScope).replace(editor, cx);
                     });
                 }
                 Err(error) => {

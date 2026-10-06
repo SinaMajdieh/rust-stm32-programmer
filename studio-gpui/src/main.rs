@@ -40,7 +40,7 @@ fn main() {
                     ..Default::default()
                 },
                 |window, cx| {
-                    Navigator::install(cx, NavigatorConfig::default())
+                    Navigator::try_install(cx, NavigatorConfig::default())
                         .expect("failed to install navigator");
                     let studio = cx.new(|cx| Studio::new(window, cx));
                     cx.new(|cx| Root::new(studio, window, cx))

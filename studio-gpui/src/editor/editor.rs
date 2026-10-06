@@ -4,18 +4,20 @@ use gpui_kit::{
     base::StyledExt, div,
 };
 
+use crate::editor::Generation;
+
 use super::{EditorStepper, Stage, StepperEvent};
 
 #[derive(Debug)]
 pub struct Editor {
     project: Entity<Project>,
     stepper: Entity<EditorStepper>,
-
+    generation: Entity<Generation>,
     _subscriptions: Subscription,
 }
 
 impl Editor {
-    pub fn new(project: Project, cx: &mut Context<Self>) -> Self {
+    pub fn new(project: Project, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let project = cx.new(|_| project);
 
         let stepper = cx.new(|cx| EditorStepper::new(&project, cx));
@@ -27,9 +29,12 @@ impl Editor {
                 }
             });
 
+        let generation = cx.new(|cx| Generation::new(window, cx));
+
         Self {
             project,
             stepper,
+            generation,
             _subscriptions: stepper_subscription,
         }
     }
@@ -59,7 +64,7 @@ impl Editor {
 
     fn render_stage(&self, cx: &mut Context<Self>) -> impl IntoElement {
         match self.stepper.read(cx).current_stage() {
-            Stage::Generation => div().size_full().child("Generation"),
+            Stage::Generation => div().size_full().child(self.generation.clone()),
             Stage::Build => div().size_full().child("Build"),
             Stage::Deploy => div().size_full().child("Deploy"),
         }
@@ -71,7 +76,7 @@ impl Render for Editor {
         div()
             .v_flex()
             .size_full()
-            .child(self.stepper.clone())
+            // .child(self.stepper.clone())
             .child(self.render_stage(cx))
     }
 }

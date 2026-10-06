@@ -16,7 +16,7 @@ impl Home {
 
     fn new_project(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let page = cx.new(|cx| NewProject::new(window, cx));
-        Navigator::new().scope("projects").push(page, cx).unwrap();
+        Navigator::new().current_scope().push(page, cx);
     }
 }
 

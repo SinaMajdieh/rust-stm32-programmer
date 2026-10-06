@@ -138,7 +138,7 @@ impl NewProject {
     }
 
     fn cancel(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
-        Navigator::new().scope("projects").back(cx).unwrap();
+        Navigator::new().current_scope().back(cx);
     }
 }
 
