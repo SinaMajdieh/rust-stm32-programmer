@@ -1,6 +1,7 @@
 mod alert;
 mod editor;
 mod projects;
+mod settings;
 mod studio;
 mod workspace;
 
@@ -14,6 +15,7 @@ use gpui_kit::{
 use gpui_navigation::{Navigator, NavigatorConfig};
 use tracing_subscriber::EnvFilter;
 
+use crate::settings::Settings;
 use crate::studio::Studio;
 
 fn main() {
@@ -42,6 +44,7 @@ fn main() {
                 |window, cx| {
                     Navigator::try_install(cx, NavigatorConfig::default())
                         .expect("failed to install navigator");
+                    Settings::load("config.toml", cx).expect("Could not load config");
                     let studio = cx.new(|cx| Studio::new(window, cx));
                     cx.new(|cx| Root::new(studio, window, cx))
                 },

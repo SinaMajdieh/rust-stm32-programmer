@@ -70,7 +70,7 @@ impl fmt::Display for ModelId {
 }
 
 /// Describes a model available to the application.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Model {
     /// Provider-specific model name.
     pub name: String,
@@ -86,6 +86,14 @@ impl Model {
             name: name.into(),
             provider,
         }
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn provider(&self) -> Provider {
+        self.provider
     }
 
     /// Returns the model's fully qualified identifier.

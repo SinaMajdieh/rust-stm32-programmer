@@ -8,12 +8,14 @@
 //! The crate also provides Intel HEX validation and [`Report`] values for
 //! reporting progress and status to higher-level applications.
 
+mod config;
 mod hex;
 pub mod project;
 mod report;
 
 mod error;
 
+pub use config::Config;
 pub use error::{ConfigError, Error, Result};
 pub use generation::*;
 pub use report::*;
