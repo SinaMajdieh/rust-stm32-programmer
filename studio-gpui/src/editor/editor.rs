@@ -76,7 +76,7 @@ impl Render for Editor {
         div()
             .v_flex()
             .size_full()
-            // .child(self.stepper.clone())
+            .child(self.stepper.clone())
             .child(self.render_stage(cx))
     }
 }
