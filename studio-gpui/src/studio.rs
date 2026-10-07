@@ -1,14 +1,16 @@
+use backend::project::Project;
 use gpui_kit::{AppContext, Context, IntoElement, Render, Styled, Window, div};
 use gpui_navigation::Navigator;
 
-use crate::workspace::Workspace;
+use crate::{editor::Editor, workspace::Workspace};
 
 pub struct Studio;
 
 impl Studio {
     pub fn new(_window: &mut Window, cx: &mut Context<Self>) -> Self {
         let workspace = cx.new(Workspace::new);
-        Navigator::new().push(workspace.clone(), cx);
+        let editor = cx.new(|cx| Editor::new(Project::default(), _window, cx));
+        Navigator::new().push(editor, cx);
         Self
     }
 }

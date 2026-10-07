@@ -1,7 +1,11 @@
 use backend::project::Project;
 use gpui_kit::{
-    AppContext, Context, Entity, IntoElement, ParentElement, Render, Styled, Subscription, Window,
-    base::StyledExt, div,
+    AppContext, Context, Entity, FontWeight, InteractiveElement, IntoElement, ParentElement,
+    Render, Styled, Subscription, Window,
+    assets::IconName,
+    base::{StyledExt, h_flex},
+    component::{ActiveTheme, accordion::Accordion, green_500, green_600},
+    div, px, rgb,
 };
 
 use crate::editor::Generation;
@@ -11,37 +15,20 @@ use super::{EditorStepper, Stage, StepperEvent};
 #[derive(Debug)]
 pub struct Editor {
     project: Entity<Project>,
-    stepper: Entity<EditorStepper>,
     generation: Entity<Generation>,
-    _subscriptions: Subscription,
+    active_stage: Option<Stage>,
 }
 
 impl Editor {
     pub fn new(project: Project, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let project = cx.new(|_| project);
-
-        let stepper = cx.new(|cx| EditorStepper::new(&project, cx));
-
-        let stepper_subscription =
-            cx.subscribe(&stepper, |this, _stepper, event, _cx| match event {
-                StepperEvent::StageSelected(stage) => {
-                    this.select_stage(*stage);
-                }
-            });
-
         let generation = cx.new(|cx| Generation::new(window, cx));
-
         Self {
             project,
-            stepper,
             generation,
-            _subscriptions: stepper_subscription,
+            active_stage: Some(Stage::Generation),
         }
     }
-
-    // ---------------------------------------------------------------------
-    // Workflow
-    // ---------------------------------------------------------------------
 
     fn select_stage(&mut self, stage: Stage) {
         // The EditorStepper has already verified that the stage is available.
@@ -50,33 +37,44 @@ impl Editor {
         println!("Selected stage: {stage:?}");
     }
 
-    // ---------------------------------------------------------------------
-    // Accessors
-    // ---------------------------------------------------------------------
-
     pub fn project(&self) -> &Entity<Project> {
         &self.project
-    }
-
-    // ---------------------------------------------------------------------
-    // Rendering
-    // ---------------------------------------------------------------------
-
-    fn render_stage(&self, cx: &mut Context<Self>) -> impl IntoElement {
-        match self.stepper.read(cx).current_stage() {
-            Stage::Generation => div().size_full().child(self.generation.clone()),
-            Stage::Build => div().size_full().child("Build"),
-            Stage::Deploy => div().size_full().child("Deploy"),
-        }
     }
 }
 
 impl Render for Editor {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        div()
-            .v_flex()
-            .size_full()
-            .child(self.stepper.clone())
-            .child(self.render_stage(cx))
+        let active_stage = self.active_stage;
+        div().flex().justify_center().p_8().child(
+            Accordion::new("editor-accordion")
+                .max_w_5_6()
+                .rounded_xl()
+                .border_2()
+                .on_toggle_click(cx.listener(|this, indices: &[usize], _window, cx| {
+                    this.active_stage = indices
+                        .first()
+                        .copied()
+                        .and_then(|idx| Stage::try_from(idx).ok());
+                    cx.notify();
+                }))
+                .item(|item| {
+                    item.icon(IconName::Sparkles)
+                        .title("Generation")
+                        .open(active_stage == Some(Stage::Generation))
+                        .child(self.generation.clone())
+                })
+                .item(|item| {
+                    item.icon(IconName::Cpu)
+                        .title("Build")
+                        .open(active_stage == Some(Stage::Build))
+                        .child("Build will be here soon")
+                })
+                .item(|item| {
+                    item.icon(IconName::Upload)
+                        .title("Deploy")
+                        .open(active_stage == Some(Stage::Deploy))
+                        .child("Deploy will be here soon")
+                }),
+        )
     }
 }

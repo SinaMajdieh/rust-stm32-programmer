@@ -91,7 +91,7 @@ impl Render for Generation {
         div().size_full().v_flex().items_center().p_8().child(
             div()
                 .w_full()
-                .max_w_128()
+                .max_w_5_6()
                 .v_flex()
                 .gap_4()
                 .child(
