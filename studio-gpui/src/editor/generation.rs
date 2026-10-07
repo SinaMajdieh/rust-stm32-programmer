@@ -102,30 +102,36 @@ impl Render for Generation {
                         .child("What would you like to build?"),
                 )
                 .child(
-                    Select::new(&self.models)
-                        .title_prefix("Model: ")
-                        .menu_max_h(rems(10.0)),
-                )
-                .child(
                     div()
-                        .relative()
                         .w_full()
                         .rounded_md()
                         .border_1()
                         .border_color(cx.theme().border)
                         .bg(cx.theme().background)
-                        .child(Textarea::new(&self.state).bordered(false).pb_12())
+                        .v_flex()
+                        .child(Textarea::new(&self.state).bordered(false))
                         .child(
-                            div().absolute().bottom_2().right_2().child(
-                                Button::new("generate")
-                                    .primary()
-                                    .label("Generate")
-                                    .on_click(
-                                        cx.listener(|this, _, window, cx| {
+                            div()
+                                .flex()
+                                .flex_row()
+                                .items_center()
+                                .justify_between()
+                                .p_2()
+                                .border_t_1()
+                                .border_color(cx.theme().border)
+                                .child(
+                                    Select::new(&self.models)
+                                        .title_prefix("Model: ")
+                                        .menu_max_h(rems(10.0)),
+                                )
+                                .child(
+                                    Button::new("generate")
+                                        .primary()
+                                        .label("Generate")
+                                        .on_click(cx.listener(|this, _, window, cx| {
                                             this.generate(window, cx)
-                                        }),
-                                    ),
-                            ),
+                                        })),
+                                ),
                         ),
                 ),
         )
