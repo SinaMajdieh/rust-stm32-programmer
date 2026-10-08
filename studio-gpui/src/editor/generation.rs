@@ -1,14 +1,16 @@
 use backend::{Model, project::GenerationRequest};
 use gpui_kit::{
-    AppContext, Context, Entity, IntoElement, ParentElement, Render, SharedString, Styled, Window,
+    AppContext, Context, Entity, InteractiveElement, IntoElement, ParentElement, Render,
+    SharedString, Styled, Window,
+    WindowBackgroundAppearance::Transparent,
     base::{IndexPath, StyledExt, input::TextareaState},
     component::{
-        ActiveTheme,
+        ActiveTheme, Colorize,
         button::{Button, ButtonVariants},
         input::Textarea,
         select::{SearchableVec, Select, SelectItem, SelectState},
     },
-    div, rems,
+    div, rems, transparent_black, transparent_white,
 };
 
 use crate::settings::Settings;
@@ -104,30 +106,41 @@ impl Render for Generation {
                 .child(
                     div()
                         .w_full()
-                        .rounded_md()
+                        .rounded_lg()
                         .border_1()
                         .border_color(cx.theme().border)
-                        .bg(cx.theme().background)
+                        .bg(cx.theme().colors.secondary)
                         .v_flex()
-                        .child(Textarea::new(&self.state).bordered(false))
+                        .overflow_hidden()
+                        .child(
+                            Textarea::new(&self.state)
+                                .bg(cx.theme().colors.secondary)
+                                .bordered(false)
+                                .min_h(rems(6.0)),
+                        )
                         .child(
                             div()
-                                .flex()
-                                .flex_row()
+                                .h_flex()
                                 .items_center()
-                                .justify_between()
-                                .p_2()
-                                .border_t_1()
-                                .border_color(cx.theme().border)
+                                .justify_end()
+                                .gap_2()
+                                .px_2()
+                                .py_2()
                                 .child(
-                                    Select::new(&self.models)
-                                        .title_prefix("Model: ")
-                                        .menu_max_h(rems(10.0)),
+                                    div().flex().flex_row().items_center().child(
+                                        Select::new(&self.models)
+                                            .bg(cx.theme().colors.secondary)
+                                            .border_0()
+                                            .rounded_full()
+                                            .title_prefix("Model: ")
+                                            .menu_max_h(rems(10.0)),
+                                    ),
                                 )
                                 .child(
                                     Button::new("generate")
                                         .primary()
                                         .label("Generate")
+                                        .rounded_full()
                                         .on_click(cx.listener(|this, _, window, cx| {
                                             this.generate(window, cx)
                                         })),

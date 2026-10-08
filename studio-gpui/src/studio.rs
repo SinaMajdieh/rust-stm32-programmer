@@ -9,8 +9,8 @@ pub struct Studio;
 impl Studio {
     pub fn new(_window: &mut Window, cx: &mut Context<Self>) -> Self {
         let workspace = cx.new(Workspace::new);
-        let editor = cx.new(|cx| Editor::new(Project::default(), _window, cx));
-        Navigator::new().push(editor, cx);
+        let _editor = cx.new(|cx| Editor::new(Project::default(), _window, cx));
+        Navigator::new().push(workspace, cx);
         Self
     }
 }
