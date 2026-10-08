@@ -116,6 +116,7 @@ impl Render for Generation {
                             Textarea::new(&self.state)
                                 .bg(cx.theme().colors.secondary)
                                 .bordered(false)
+                                .text_lg()
                                 .min_h(rems(6.0)),
                         )
                         .child(
@@ -127,14 +128,19 @@ impl Render for Generation {
                                 .px_2()
                                 .py_2()
                                 .child(
-                                    div().flex().flex_row().items_center().child(
-                                        Select::new(&self.models)
-                                            .bg(cx.theme().colors.secondary)
-                                            .border_0()
-                                            .rounded_full()
-                                            .title_prefix("Model: ")
-                                            .menu_max_h(rems(10.0)),
-                                    ),
+                                    // Fixed width container prevents layout shifting on model change
+                                    div()
+                                        .w_64() // adjust to rems(13.0) - rems(16.0) depending on typical model name length
+                                        .flex_none()
+                                        .child(
+                                            Select::new(&self.models)
+                                                .w_full()
+                                                .bg(cx.theme().colors.secondary)
+                                                .border_0()
+                                                .rounded_full()
+                                                .title_prefix("Model: ")
+                                                .menu_max_h(rems(10.0)),
+                                        ),
                                 )
                                 .child(
                                     Button::new("generate")

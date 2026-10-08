@@ -1,0 +1,7 @@
+[
+  {
+    "label": "cargo run",
+    "command": "cargo run",
+    "use_new_terminal": true
+  }
+]

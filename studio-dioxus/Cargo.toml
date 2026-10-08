@@ -14,6 +14,8 @@ dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version 
 firmware-targets.workspace = true
 rfd.workspace = true
 strum.workspace = true
+tw_merge.workspace = true
+icons.workspace = true
 
 [features]
 default = ["desktop"]
