@@ -51,13 +51,6 @@ impl Editor {
         }
     }
 
-    fn select_stage(&mut self, stage: Stage) {
-        // The EditorStepper has already verified that the stage is available.
-        //
-        // The editor only needs to react to the selection here.
-        println!("Selected stage: {stage:?}");
-    }
-
     pub fn project(&self) -> &Entity<Project> {
         &self.project
     }
@@ -151,7 +144,9 @@ impl Editor {
 
 impl Render for Editor {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let active_stage = self.active_stage;
+        let latest_stage = self.project().read(cx).latest_stage();
+
+        let is_open = |stage: Stage| stage <= latest_stage;
 
         div()
             .size_full()
@@ -162,35 +157,36 @@ impl Render for Editor {
             .child(
                 div().w_full().max_w_2_3().child(
                     Accordion::new("editor-accordion")
+                        .multiple(true)
                         .rounded_xl()
                         .bordered(false)
-                        .on_toggle_click(cx.listener(|this, indices: &[usize], _window, cx| {
+                        /*.on_toggle_click(cx.listener(|this, indices: &[usize], _window, cx| {
                             this.active_stage = indices
                                 .first()
                                 .copied()
                                 .and_then(|idx| Stage::try_from(idx).ok());
-
                             cx.notify();
-                        }))
+                        }))*/
                         .item(|item| {
                             item.icon(IconName::Sparkles)
                                 .title("Generation")
-                                .open(active_stage == Some(Stage::Generation))
+                                .open(is_open(Stage::Generation))
+                                .border_0()
                                 .child(self.generation.clone())
                         })
                         .item(|item| {
                             item.icon(IconName::Cpu)
                                 .title("Build")
-                                .disabled(!self.project().read(cx).has_generation())
-                                .open(active_stage == Some(Stage::Build))
-                                .child("Build will be here soon")
+                                .open(is_open(Stage::Build))
+                                .border_0()
+                                .child(div().p_4().child("Build will be here soon"))
                         })
                         .item(|item| {
                             item.icon(IconName::Upload)
                                 .title("Deploy")
-                                .disabled(!self.project().read(cx).has_valid_build())
-                                .open(active_stage == Some(Stage::Deploy))
-                                .child("Deploy will be here soon")
+                                .open(is_open(Stage::Deploy))
+                                .border_0()
+                                .child(div().p_4().child("Deploy will be here soon"))
                         }),
                 ),
             )

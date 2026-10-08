@@ -1,6 +1,6 @@
 use super::revision::Revision;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[repr(usize)]
 pub enum Stage {
     #[default]

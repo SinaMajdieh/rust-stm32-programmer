@@ -199,7 +199,7 @@ impl Render for Generation {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.theme();
 
-        div().size_full().v_flex().items_center().p_8().child(
+        div().size_full().v_flex().p_4().child(
             div()
                 .w_full()
                 .max_w_5_6()
