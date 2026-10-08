@@ -1,9 +1,9 @@
-use backend::{Model, project::GenerationRequest};
+use backend::{Model, ModelId, project::GenerationRequest};
 use gpui_kit::{
-    AppContext, Context, Entity, InteractiveElement, IntoElement, ParentElement, Render,
-    SharedString, Styled, Window,
+    AppContext, Context, Entity, EventEmitter, InteractiveElement, IntoElement, ParentElement,
+    Render, SharedString, Styled, Window,
     WindowBackgroundAppearance::Transparent,
-    base::{IndexPath, StyledExt, input::TextareaState},
+    base::{Disableable, IndexPath, StyledExt, input::TextareaState},
     component::{
         ActiveTheme, Colorize,
         button::{Button, ButtonVariants},
@@ -33,7 +33,14 @@ impl SelectItem for ModelOption {
 pub struct Generation {
     state: Entity<TextareaState>,
     models: Entity<SelectState<SearchableVec<ModelOption>>>,
+    is_loading: bool,
 }
+
+pub enum GenerationEvent {
+    Submit { prompt: String, model: ModelId },
+}
+
+impl EventEmitter<GenerationEvent> for Generation {}
 
 impl Generation {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
@@ -72,19 +79,37 @@ impl Generation {
                 .placeholder("What would you like to build?")
         });
 
-        Self { state, models }
+        Self {
+            state,
+            models,
+            is_loading: false,
+        }
+    }
+
+    pub fn set_loading(&mut self, loading: bool, cx: &mut Context<Self>) {
+        self.is_loading = loading;
+        cx.notify();
     }
 
     fn generate(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let settings = cx.global::<Settings>();
+        if self.is_loading {
+            return;
+        }
 
         let prompt = self.state.read(cx).text().to_string();
-        let prompt = prompt.trim();
-        let model = self.models.read(cx).selected_value().cloned().unwrap().id();
-        let system_prompt = settings.config.llm.system_prompt().unwrap();
+        let prompt = prompt.trim().to_owned();
 
-        let request = GenerationRequest::new(model.as_str(), prompt, Some(system_prompt));
-        println!("{:#?}", request);
+        if prompt.is_empty() {
+            return;
+        }
+
+        let Some(model) = self.models.read(cx).selected_value().map(|m| m.id()) else {
+            return;
+        };
+
+        self.is_loading = true;
+        cx.notify();
+        cx.emit(GenerationEvent::Submit { prompt, model });
     }
 }
 
@@ -145,7 +170,12 @@ impl Render for Generation {
                                 .child(
                                     Button::new("generate")
                                         .primary()
-                                        .label("Generate")
+                                        .label(if self.is_loading {
+                                            "Generating..."
+                                        } else {
+                                            "Generate"
+                                        })
+                                        .disabled(self.is_loading)
                                         .rounded_full()
                                         .on_click(cx.listener(|this, _, window, cx| {
                                             this.generate(window, cx)

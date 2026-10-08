@@ -3,7 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use ::generation::LlmGenerator;
+use ::generation::{GenerationError, GenerationOutput, LlmGenerator};
 use firmware_targets::{BuildError, Target, TargetKind, TemplateKind, create_target};
 use serde::{Deserialize, Serialize};
 
@@ -133,26 +133,45 @@ impl Project {
         self.save()
     }
 
-    /// Generates firmware source code using the supplied language model.
+    /// Generate firmware code and store the result in this project.
     ///
-    /// Generating new source invalidates the existing build and programming
-    /// result because both were produced from older source code.
+    /// This is the high-level API intended for non-GPUI callers.
     pub async fn generate(
         &mut self,
         request: GenerationRequest,
         generator: &LlmGenerator,
-    ) -> Result<(), ::generation::GenerationError> {
-        let output = generator
+    ) -> Result<(), GenerationError> {
+        let output = Self::generate_output(&request, generator).await?;
+
+        self.apply_generation(request, output);
+
+        Ok(())
+    }
+
+    /// Performs the asynchronous generation operation without
+    /// borrowing project state.
+    ///
+    /// This is useful for UI layers where `Project` is stored inside
+    /// an asynchronous/reactive state container such as `Entity<Project>`.
+    pub async fn generate_output(
+        request: &GenerationRequest,
+        generator: &LlmGenerator,
+    ) -> Result<GenerationOutput, GenerationError> {
+        generator
             .generate(::generation::GenerationRequest::new(
                 &request.model,
                 &request.prompt,
                 request.system_prompt.as_deref(),
             ))
-            .await?;
+            .await
+    }
 
+    /// Applies a successfully generated result to the project.
+    ///
+    /// This operation is synchronous so the project does not need to
+    /// remain mutably borrowed across an `.await`.
+    pub fn apply_generation(&mut self, request: GenerationRequest, output: GenerationOutput) {
         self.generation = Some(Generation::new(request, output));
-
-        Ok(())
     }
 
     /// Returns the generated source code, if available.

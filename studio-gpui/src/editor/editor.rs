@@ -1,14 +1,22 @@
-use backend::project::Project;
+use backend::{
+    GenerationError, LlmGenerator, ModelId,
+    project::{GenerationRequest, Project},
+};
 use gpui_kit::{
     AppContext, Context, Entity, FontWeight, InteractiveElement, IntoElement, ParentElement,
     Render, Styled, Subscription, Window,
     assets::IconName,
     base::{StyledExt, h_flex},
     component::{ActiveTheme, Colorize, accordion::Accordion, green_500, green_600},
-    div, px, rgb,
+    div,
+    private::anyhow,
+    px, rgb,
 };
 
-use crate::editor::Generation;
+use crate::{
+    editor::{Generation, GenerationEvent},
+    settings::Settings,
+};
 
 use super::{EditorStepper, Stage, StepperEvent};
 
@@ -17,16 +25,27 @@ pub struct Editor {
     project: Entity<Project>,
     generation: Entity<Generation>,
     active_stage: Option<Stage>,
+    _subscriptions: Vec<Subscription>,
 }
 
 impl Editor {
     pub fn new(project: Project, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let project = cx.new(|_| project);
         let generation = cx.new(|cx| Generation::new(window, cx));
+
+        let sub = cx.subscribe(
+            &generation,
+            |this, generation, event: &GenerationEvent, cx| match event {
+                GenerationEvent::Submit { prompt, model } => {
+                    this.handle_generate(prompt.to_owned(), model.to_owned(), generation, cx);
+                }
+            },
+        );
         Self {
             project,
             generation,
             active_stage: Some(Stage::Generation),
+            _subscriptions: vec![sub],
         }
     }
 
@@ -39,6 +58,64 @@ impl Editor {
 
     pub fn project(&self) -> &Entity<Project> {
         &self.project
+    }
+
+    fn handle_generate(
+        &mut self,
+        prompt: String,
+        model: ModelId,
+        generation: Entity<Generation>,
+        cx: &mut Context<Self>,
+    ) {
+        let settings = cx.global::<Settings>();
+
+        let system_prompt = settings.config.llm.system_prompt().unwrap();
+
+        let request = GenerationRequest::new(model.as_str(), prompt, Some(system_prompt));
+
+        let generator_config = settings.config.llm.generator.clone();
+        let project = self.project.clone();
+
+        generation.update(cx, |generation, cx| {
+            generation.set_loading(true, cx);
+        });
+
+        cx.spawn(async move |this, cx| {
+            let result = async {
+                let generator = LlmGenerator::from_config(generator_config)?;
+
+                let output = Project::generate_output(&request, &generator).await?;
+
+                project.update(cx, |project, cx| {
+                    project.apply_generation(request, output);
+                    cx.notify();
+                });
+
+                Ok::<_, GenerationError>(())
+            }
+            .await;
+
+            match result {
+                Ok(()) => {
+                    generation.update(cx, |generation, cx| {
+                        generation.set_loading(false, cx);
+                    });
+
+                    this.update(cx, |editor, cx| {
+                        editor.active_stage = Some(Stage::Build);
+                        cx.notify();
+                    });
+                }
+
+                Err(error) => {
+                    generation.update(cx, |generation, cx| {
+                        generation.set_loading(false, cx);
+                        eprintln!("{}", error)
+                    });
+                }
+            }
+        })
+        .detach();
     }
 }
 
