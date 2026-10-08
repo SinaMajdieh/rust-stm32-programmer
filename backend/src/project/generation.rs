@@ -1,7 +1,9 @@
 use generation::GenerationOutput;
 use serde::{Deserialize, Serialize};
 
-use super::{revision::Revision, stage::Stage};
+use crate::project::stage::StageArtifact;
+
+use super::revision::Revision;
 
 /// Input passed to the language model for source generation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -61,7 +63,7 @@ impl Generation {
     }
 }
 
-impl Stage for Generation {
+impl StageArtifact for Generation {
     fn revision(&self) -> Revision {
         self.revision
     }

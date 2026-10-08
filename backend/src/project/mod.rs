@@ -16,8 +16,11 @@ mod stage;
 
 pub use error::{ProjectBuildError, ProjectError, ProjectIoError, ProjectProgrammingError};
 pub use generation::GenerationRequest;
+pub use stage::Stage;
 
-use crate::project::{build::Build, generation::Generation, program::Program, stage::Stage};
+use crate::project::{
+    build::Build, generation::Generation, program::Program, stage::StageArtifact,
+};
 
 /// A firmware project and the state produced by its pipeline stages.
 ///
@@ -286,5 +289,15 @@ impl Project {
         }
 
         Ok(())
+    }
+
+    pub fn latest_stage(&self) -> Stage {
+        if self.has_valid_build() {
+            return Stage::Deploy;
+        } else if self.has_generation() {
+            return Stage::Build;
+        } else {
+            return Stage::Generation;
+        }
     }
 }

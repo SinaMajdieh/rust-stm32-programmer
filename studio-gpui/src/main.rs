@@ -3,8 +3,8 @@ mod editor;
 mod projects;
 mod settings;
 mod studio;
+mod tokio_runtime;
 mod workspace;
-
 use std::path::PathBuf;
 
 use gpui_kit::assets::AllAssets;
@@ -17,16 +17,20 @@ use tracing_subscriber::EnvFilter;
 
 use crate::settings::Settings;
 use crate::studio::Studio;
+use crate::tokio_runtime::TokioRuntime;
 
 fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
+
     gpui_kit::application()
         .with_assets(AllAssets)
         .run(|cx: &mut App| {
             gpui_kit::init(cx);
             init_theme(cx);
+
+            cx.set_global(TokioRuntime::new());
 
             let bounds = Bounds::centered(None, size(px(800.0), px(582.0)), cx);
 

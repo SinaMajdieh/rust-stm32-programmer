@@ -6,7 +6,7 @@ selected_template = "hal"
 
 [llm]
 # Model used when --model is not provided.
-selected_model = "openai:gpt-5.6-luna"
+selected_model = "ollama:qwen2.5-coder:7b-instruct"
 
 # System prompt file used for generation.
 system_prompt_path = "hal_prompt.txt"

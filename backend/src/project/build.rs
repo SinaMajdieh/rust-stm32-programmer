@@ -1,7 +1,9 @@
 use firmware_targets::BuildArtifacts;
 use serde::{Deserialize, Serialize};
 
-use super::{revision::Revision, stage::Stage};
+use crate::project::stage::StageArtifact;
+
+use super::revision::Revision;
 
 /// Firmware build output.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,7 +27,7 @@ impl Build {
     }
 }
 
-impl Stage for Build {
+impl StageArtifact for Build {
     fn revision(&self) -> Revision {
         self.revision
     }

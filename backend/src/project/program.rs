@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use super::{revision::Revision, stage::Stage};
+use crate::project::stage::StageArtifact;
+
+use super::revision::Revision;
 
 /// Successful firmware programming result.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,7 +20,7 @@ impl Program {
     }
 }
 
-impl Stage for Program {
+impl StageArtifact for Program {
     fn revision(&self) -> Revision {
         self.revision
     }
