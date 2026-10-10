@@ -1,7 +1,7 @@
 use backend::{Model, ModelId};
 use gpui_kit::{
-    AppContext, Context, Entity, EventEmitter, InteractiveElement, IntoElement, ParentElement,
-    Render, SharedString, Styled, Window,
+    AppContext, Context, Entity, EventEmitter, IntoElement, ParentElement, Render, SharedString,
+    Styled, Window,
     base::{Disableable, IndexPath, StyledExt, input::TextareaState},
     component::{
         ActiveTheme,
@@ -14,70 +14,88 @@ use gpui_kit::{
     div, rems,
 };
 
-use crate::settings::Settings;
+use crate::{
+    editor::stage::{StageState, StageView},
+    settings::Settings,
+};
 
-/// Adapter wrapper around backend `Model` to implement GPUI-Kit's `SelectItem`.
+/// Adapter around a backend model for use in GPUI-Kit's select component.
 #[derive(Clone, Debug)]
-pub struct ModelOption(pub Model);
+pub struct ModelOption(Model);
+
+impl From<Model> for ModelOption {
+    fn from(model: Model) -> Self {
+        Self(model)
+    }
+}
 
 impl SelectItem for ModelOption {
     type Value = Model;
 
-    #[inline]
     fn title(&self) -> SharedString {
         self.0.name().into()
     }
 
-    #[inline]
     fn value(&self) -> &Self::Value {
         &self.0
     }
 }
 
-/// Represents the status message rendered below the input controls.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum GenerationFeedback {
-    Success(SharedString),
-    Error(SharedString),
-}
-
-/// Events dispatched by the `Generation` view to notify parent controllers.
+/// Events emitted by the generation form.
 pub enum GenerationEvent {
+    /// Requests code generation using the supplied prompt and model.
     Submit { prompt: String, model: ModelId },
 }
 
-/// Generation form component managing user prompts, model selection,
-/// loading states, and result alerts.
+/// Form for submitting code-generation requests.
+///
+/// The parent controller owns the generation workflow and updates the stage
+/// state as asynchronous work progresses.
 pub struct Generation {
-    state: Entity<TextareaState>,
+    prompt: Entity<TextareaState>,
     models: Entity<SelectState<SearchableVec<ModelOption>>>,
-    is_loading: bool,
-    feedback: Option<GenerationFeedback>,
+    state: StageState,
 }
 
 impl EventEmitter<GenerationEvent> for Generation {}
 
-impl Generation {
-    /// Constructs a new `Generation` view and initializes inner form states.
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let settings = cx.global::<Settings>();
-        let llm_config = &settings.config.llm;
+impl StageView for Generation {
+    fn state(&self) -> &StageState {
+        &self.state
+    }
 
-        // Locate currently configured model index, if present.
-        let selected_index = llm_config
+    fn update_state(&mut self, state: StageState) {
+        self.state = state;
+    }
+
+    fn busy_message() -> &'static str {
+        "Generating code..."
+    }
+
+    fn success_message() -> &'static str {
+        "Code generated successfully."
+    }
+}
+
+impl Generation {
+    /// Creates the generation form using the application's current settings.
+    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let llm = &cx.global::<Settings>().config.llm;
+
+        let selected_index = llm
             .generator
             .available_models
             .iter()
-            .position(|m| m.id() == llm_config.selected_model)
+            .position(|model| model.id() == llm.selected_model)
             .map(IndexPath::new);
 
-        let model_options: Vec<ModelOption> = llm_config
+        let model_options = llm
             .generator
             .available_models
             .iter()
             .cloned()
-            .map(ModelOption)
-            .collect();
+            .map(ModelOption::from)
+            .collect::<Vec<_>>();
 
         let models = cx.new(|cx| {
             SelectState::new(
@@ -89,177 +107,148 @@ impl Generation {
             .searchable(true)
         });
 
-        let state = cx.new(|cx| {
+        let prompt = cx.new(|cx| {
             TextareaState::new(window, cx)
-                .auto_grow(4, 8)
+                .auto_grow(2, 8)
                 .placeholder("What would you like to build?")
                 .default_value("Make the onboard LED blink every 2 seconds.")
         });
 
         Self {
-            state,
+            prompt,
             models,
-            is_loading: false,
-            feedback: None,
+            state: StageState::Ready,
         }
     }
 
-    /// Explicitly updates the loading indicator state.
-    pub fn set_loading(&mut self, loading: bool, cx: &mut Context<Self>) {
-        if self.is_loading != loading {
-            self.is_loading = loading;
-            cx.notify();
-        }
-    }
-
-    /// Halts loading and displays a success alert message.
-    pub fn success(&mut self, message: impl Into<SharedString>, cx: &mut Context<Self>) {
-        self.is_loading = false;
-        self.feedback = Some(GenerationFeedback::Success(message.into()));
-        cx.notify();
-    }
-
-    /// Halts loading and displays an error alert with the failure description.
-    pub fn failed(&mut self, error: impl Into<SharedString>, cx: &mut Context<Self>) {
-        self.is_loading = false;
-        self.feedback = Some(GenerationFeedback::Error(error.into()));
-        cx.notify();
-    }
-
-    /// Clears any active alert banner.
-    pub fn clear_feedback(&mut self, cx: &mut Context<Self>) {
-        if self.feedback.is_some() {
-            self.feedback = None;
-            cx.notify();
-        }
-    }
-
-    /// Validates inputs, resets previous alerts, and emits `GenerationEvent::Submit`.
+    /// Validates the form and emits a generation request.
     fn generate(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.is_loading {
+        if self.state.is_busy() {
             return;
         }
 
-        // Borrow textarea text and trim without redundant heap reallocations.
-        let raw_text = self.state.read(cx).text().to_string();
-        let prompt = raw_text.trim();
+        let prompt = self.prompt.read(cx).text().to_string().trim().to_owned();
+
         if prompt.is_empty() {
             return;
         }
 
-        let Some(model) = self.models.read(cx).selected_value().map(|m| m.id()) else {
+        let Some(model) = self.models.read(cx).selected_value().map(Model::id) else {
             return;
         };
 
-        let prompt = prompt.to_owned();
-
-        // Clear previous notifications & set progress state
-        self.feedback = None;
-        self.is_loading = true;
-        cx.notify();
-
+        self.mark_busy(cx);
         cx.emit(GenerationEvent::Submit { prompt, model });
     }
 
-    /// Builds the status container rendered directly below the main card.
-    fn render_status(&self, cx: &Context<Self>) -> Option<impl IntoElement> {
-        if self.is_loading {
-            return Some(
+    /// Renders the current generation status, if it has a visible message.
+    fn render_status(&self) -> Option<impl IntoElement> {
+        match &self.state {
+            StageState::Busy(message) => Some(
                 div()
                     .w_full()
                     .h_flex()
                     .items_center()
+                    .child(ShimmerText::new(message.clone()).text_lg().font_medium())
+                    .into_any_element(),
+            ),
+
+            StageState::Succeeded(message) => Some(
+                div()
+                    .w_full()
                     .child(
-                        ShimmerText::new("Generating code...")
-                            .text_lg()
-                            .font_medium(),
+                        Alert::success("generation-success", message.clone())
+                            .title("Generation Completed"),
                     )
                     .into_any_element(),
-            );
+            ),
+
+            StageState::Failed(message) => Some(
+                div()
+                    .w_full()
+                    .child(
+                        Alert::error("generation-error", message.clone())
+                            .title("Generation Failed"),
+                    )
+                    .into_any_element(),
+            ),
+
+            StageState::Stale | StageState::Ready => None,
         }
-
-        if let Some(feedback) = &self.feedback {
-            let alert_element = match feedback {
-                GenerationFeedback::Success(msg) => {
-                    Alert::success("gen-success", msg.clone()).title("Generation Completed")
-                }
-                GenerationFeedback::Error(err) => {
-                    Alert::error("gen-error", err.clone()).title("Generation Failed")
-                }
-            };
-
-            return Some(div().w_full().child(alert_element).into_any_element());
-        }
-
-        None
     }
 }
 
 impl Render for Generation {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.theme();
+        let is_busy = self.state.is_busy();
 
-        div().size_full().v_flex().p_4().child(
-            div()
-                .w_full()
-                .max_w_5_6()
-                .v_flex()
-                .gap_4()
-                .child(
-                    div()
-                        .font_semibold()
-                        .text_xl()
-                        .text_color(theme.foreground)
-                        .child("What would you like to build?"),
-                )
-                .child(
-                    div()
-                        .w_full()
-                        .rounded_lg()
-                        .border_1()
-                        .border_color(theme.border)
-                        .bg(theme.colors.secondary)
-                        .v_flex()
-                        .overflow_hidden()
-                        .child(
-                            Textarea::new(&self.state)
-                                .bg(theme.colors.secondary)
-                                .bordered(false)
-                                .text_lg()
-                                .min_h(rems(6.0)),
-                        )
-                        .child(
-                            div()
-                                .h_flex()
-                                .items_center()
-                                .justify_end()
-                                .gap_2()
-                                .px_2()
-                                .py_2()
-                                .child(
-                                    div().w_64().flex_none().child(
-                                        Select::new(&self.models)
-                                            .w_full()
-                                            .bg(theme.colors.secondary)
-                                            .border_0()
+        div()
+            .size_full()
+            .v_flex()
+            .p_4()
+            .items_center()
+            .justify_center()
+            .child(
+                div()
+                    .w_full()
+                    .max_w_5_6()
+                    .v_flex()
+                    .gap_4()
+                    .child(
+                        div()
+                            .font_semibold()
+                            .text_xl()
+                            .text_color(theme.foreground)
+                            .child("What would you like to build?"),
+                    )
+                    .child(
+                        div()
+                            .w_full()
+                            .rounded_lg()
+                            .border_1()
+                            .border_color(theme.border)
+                            .bg(theme.colors.secondary)
+                            .v_flex()
+                            .overflow_hidden()
+                            .child(
+                                Textarea::new(&self.prompt)
+                                    .bg(theme.colors.secondary)
+                                    .bordered(false)
+                                    .text_lg(),
+                            )
+                            .child(
+                                div()
+                                    .h_flex()
+                                    .items_center()
+                                    .justify_end()
+                                    .gap_2()
+                                    .px_2()
+                                    .py_2()
+                                    .child(
+                                        div().w_64().flex_none().child(
+                                            Select::new(&self.models)
+                                                .w_full()
+                                                .bg(theme.colors.secondary)
+                                                .border_0()
+                                                .rounded_full()
+                                                .title_prefix("Model: ")
+                                                .menu_max_h(rems(10.0)),
+                                        ),
+                                    )
+                                    .child(
+                                        Button::new("generate")
+                                            .primary()
+                                            .label("Generate")
+                                            .disabled(is_busy)
                                             .rounded_full()
-                                            .title_prefix("Model: ")
-                                            .menu_max_h(rems(10.0)),
+                                            .on_click(cx.listener(|this, _, window, cx| {
+                                                this.generate(window, cx);
+                                            })),
                                     ),
-                                )
-                                .child(
-                                    Button::new("generate")
-                                        .primary()
-                                        .label("Generate")
-                                        .disabled(self.is_loading)
-                                        .rounded_full()
-                                        .on_click(cx.listener(|this, _, window, cx| {
-                                            this.generate(window, cx)
-                                        })),
-                                ),
-                        ),
-                )
-                .children(self.render_status(cx)),
-        )
+                            ),
+                    )
+                    .children(self.render_status()),
+            )
     }
 }

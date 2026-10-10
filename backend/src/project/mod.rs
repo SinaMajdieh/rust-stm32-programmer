@@ -4,7 +4,7 @@ use std::{
 };
 
 use ::generation::{GenerationError, GenerationOutput, LlmGenerator};
-use firmware_targets::{BuildError, Target, TargetKind, TemplateKind, create_target};
+use firmware_targets::{TargetKind, TemplateKind};
 use serde::{Deserialize, Serialize};
 
 mod build;
@@ -19,7 +19,10 @@ pub use generation::GenerationRequest;
 pub use stage::Stage;
 
 use crate::project::{
-    build::Build, generation::Generation, program::Program, stage::StageArtifact,
+    build::{Build, BuildInput, BuildOutput},
+    generation::Generation,
+    program::{Program, ProgramInput, ProgramOutput},
+    stage::StageArtifact,
 };
 
 /// A firmware project and the state produced by its pipeline stages.
@@ -191,35 +194,33 @@ impl Project {
         self.generation.is_some()
     }
 
-    /// Builds the currently generated firmware source.
-    ///
-    /// A successful build invalidates the previous programming result.
-    pub fn build(&mut self) -> Result<(), ProjectBuildError> {
+    /// Prepares an owned snapshot for background compilation.
+    pub fn prepare_build(&self) -> Result<BuildInput, ProjectBuildError> {
         let generation = self
             .generation
             .as_ref()
             .ok_or(ProjectBuildError::GenerationMissing)?;
 
-        let target_name = format!("{:?}", self.target);
+        Ok(BuildInput {
+            target: self.target.clone(),
+            template: self.template,
+            root: self.root.clone(),
+            source: generation.code().to_owned(),
+            revision: generation.revision(),
+        })
+    }
 
-        let target =
-            create_target(&self.target).ok_or_else(|| ProjectBuildError::TargetUnsupported {
-                target: target_name.clone(),
-            })?;
+    /// Applies a successfully compiled build to the project.
+    pub fn apply_build(&mut self, output: BuildOutput) {
+        self.build = Some(output.build);
+        self.upload = None;
+    }
 
-        let mut generated_project = target
-            .generate_project(self.template, &self.root)
-            .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
-
-        generated_project
-            .write_source("src/main.c", generation.code())
-            .map_err(|source| ProjectBuildError::firmware(&target_name, BuildError::Io(source)))?;
-
-        let artifacts = generated_project.compile().map_err(|source| {
-            ProjectBuildError::firmware(&target_name, BuildError::Compile(source))
-        })?;
-
-        self.build = Some(Build::new(generation.revision(), artifacts));
+    /// Synchronous convenience API for CLI and other non-UI callers.
+    pub fn build(&mut self) -> Result<(), ProjectBuildError> {
+        let input = self.prepare_build()?;
+        let output = input.compile()?;
+        self.apply_build(output);
 
         Ok(())
     }
@@ -235,8 +236,8 @@ impl Project {
             .is_some_and(|build| build.is_valid_for(generation.revision()))
     }
 
-    /// Programs the current firmware build onto the target device.
-    pub fn program(&mut self) -> Result<(), ProjectProgrammingError> {
+    /// Prepares an owned snapshot for background programming.
+    pub fn prepare_program(&self) -> Result<ProgramInput, ProjectProgrammingError> {
         let build = self
             .build
             .as_ref()
@@ -246,22 +247,23 @@ impl Project {
             return Err(ProjectProgrammingError::BuildOutdated);
         }
 
-        let target_name = format!("{:?}", self.target);
+        Ok(ProgramInput {
+            target: self.target.clone(),
+            elf: build.artifacts().elf().to_path_buf(),
+            revision: build.revision(),
+        })
+    }
 
-        let target = create_target(&self.target).ok_or_else(|| {
-            ProjectProgrammingError::TargetUnsupported {
-                target: target_name.clone(),
-            }
-        })?;
+    /// Applies a successfully programmed result to the project.
+    pub fn apply_program(&mut self, output: ProgramOutput) {
+        self.upload = Some(Program::new(output.revision));
+    }
 
-        target.program(build.artifacts().elf()).map_err(|source| {
-            ProjectProgrammingError::Firmware {
-                target: target_name,
-                source,
-            }
-        })?;
-
-        self.upload = Some(Program::new(build.revision()));
+    /// Synchronous convenience API for CLI and other non-GPUI callers.
+    pub fn program(&mut self) -> Result<(), ProjectProgrammingError> {
+        let input = self.prepare_program()?;
+        let output = input.execute()?;
+        self.apply_program(output);
 
         Ok(())
     }
