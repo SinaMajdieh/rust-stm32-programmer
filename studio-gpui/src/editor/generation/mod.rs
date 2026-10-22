@@ -2,9 +2,10 @@ use backend::{Model, ModelId};
 use gpui_kit::{
     AppContext, Context, Entity, EventEmitter, IntoElement, ParentElement, Render, SharedString,
     Styled, Window,
+    assets::IconName,
     base::{Disableable, IndexPath, StyledExt, input::TextareaState},
     component::{
-        ActiveTheme,
+        ActiveTheme, Colorize, Sizable,
         alert::Alert,
         button::{Button, ButtonVariants},
         input::Textarea,
@@ -18,6 +19,11 @@ use crate::{
     editor::stage::{StageState, StageView},
     settings::Settings,
 };
+
+pub mod progress;
+
+const MODEL_SELECT_PLACEHOLDER: &str =
+    "for example \"Make the onboard LED blink every 2 seconds.\"";
 
 /// Adapter around a backend model for use in GPUI-Kit's select component.
 #[derive(Clone, Debug)]
@@ -33,7 +39,7 @@ impl SelectItem for ModelOption {
     type Value = Model;
 
     fn title(&self) -> SharedString {
-        self.0.name().into()
+        format!("{} ({})", self.0.name(), self.0.provider()).into()
     }
 
     fn value(&self) -> &Self::Value {
@@ -109,8 +115,8 @@ impl Generation {
 
         let prompt = cx.new(|cx| {
             TextareaState::new(window, cx)
-                .auto_grow(2, 8)
-                .placeholder("What would you like to build?")
+                .auto_grow(8, 10)
+                .placeholder(MODEL_SELECT_PLACEHOLDER)
                 .default_value("Make the onboard LED blink every 2 seconds.")
         });
 
@@ -186,15 +192,20 @@ impl Render for Generation {
         div()
             .size_full()
             .v_flex()
-            .p_4()
-            .items_center()
             .justify_center()
+            .p_4()
+            .gap_4()
             .child(
                 div()
                     .w_full()
-                    .max_w_5_6()
                     .v_flex()
                     .gap_4()
+                    .rounded_md()
+                    .border_1()
+                    .border_color(theme.border)
+                    .bg(theme.colors.secondary)
+                    .p_6()
+                    .overflow_hidden()
                     .child(
                         div()
                             .font_semibold()
@@ -203,52 +214,44 @@ impl Render for Generation {
                             .child("What would you like to build?"),
                     )
                     .child(
-                        div()
-                            .w_full()
-                            .rounded_lg()
-                            .border_1()
-                            .border_color(theme.border)
+                        Textarea::new(&self.prompt)
+                            .large()
                             .bg(theme.colors.secondary)
-                            .v_flex()
-                            .overflow_hidden()
+                            .bordered(true)
+                            .text_lg(),
+                    )
+                    .child(
+                        div()
+                            .h_flex()
+                            .items_stretch()
+                            .justify_end()
+                            .gap_2()
                             .child(
-                                Textarea::new(&self.prompt)
-                                    .bg(theme.colors.secondary)
-                                    .bordered(false)
-                                    .text_lg(),
+                                div().flex_1().min_w_0().max_w_64().child(
+                                    Select::new(&self.models)
+                                        .large()
+                                        .w_full()
+                                        .h_full()
+                                        .rounded_md()
+                                        .title_prefix("Model: ")
+                                        .menu_max_h(rems(10.0)),
+                                ),
                             )
                             .child(
-                                div()
-                                    .h_flex()
-                                    .items_center()
-                                    .justify_end()
-                                    .gap_2()
-                                    .px_2()
-                                    .py_2()
-                                    .child(
-                                        div().w_64().flex_none().child(
-                                            Select::new(&self.models)
-                                                .w_full()
-                                                .bg(theme.colors.secondary)
-                                                .border_0()
-                                                .rounded_full()
-                                                .title_prefix("Model: ")
-                                                .menu_max_h(rems(10.0)),
-                                        ),
-                                    )
-                                    .child(
-                                        Button::new("generate")
-                                            .primary()
-                                            .label("Generate")
-                                            .disabled(is_busy)
-                                            .rounded_full()
-                                            .on_click(cx.listener(|this, _, window, cx| {
-                                                this.generate(window, cx);
-                                            })),
-                                    ),
+                                Button::new("generate")
+                                    .large()
+                                    .h_full()
+                                    .primary()
+                                    .label("Generate")
+                                    .icon(IconName::Sparkles)
+                                    .disabled(is_busy)
+                                    .rounded_md()
+                                    .on_click(cx.listener(|this, _, window, cx| {
+                                        this.generate(window, cx);
+                                    })),
                             ),
-                    )
-                    .children(self.render_status()),
+                    ),
             )
+            .children(self.render_status())
     }
 }

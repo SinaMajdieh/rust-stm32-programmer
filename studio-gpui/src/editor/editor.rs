@@ -4,7 +4,14 @@ use backend::{
 };
 use gpui_kit::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, Styled, Subscription, Window,
-    assets::IconName, base::StyledExt, component::accordion::Accordion, div,
+    assets::IconName,
+    base::{StyledExt, v_flex},
+    component::{
+        ActiveTheme, Colorize, Sizable,
+        accordion::Accordion,
+        stepper::{Stepper, StepperItem},
+    },
+    div, px, rgb,
 };
 
 use crate::{
@@ -214,7 +221,7 @@ impl Editor {
     /// Builds the generated code and reconciles stage states.
     fn handle_build(&mut self, build: Entity<Build>, cx: &mut Context<Self>) {
         let project = self.project.clone();
-                self.deploy.update(cx, |stage, cx| stage.mark_stale(cx));
+        self.deploy.update(cx, |stage, cx| stage.mark_stale(cx));
 
         let input = match project.read(cx).prepare_build() {
             Ok(input) => input,
@@ -334,48 +341,81 @@ impl Editor {
 }
 
 impl Render for Editor {
+    //     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    //         let generation_stale = self.generation.read(cx).state().is_stale();
+    //         let build_stale = self.build.read(cx).state().is_stale();
+    //         let deploy_stale = self.deploy.read(cx).state().is_stale();
+    //
+    //         div()
+    //             .size_full()
+    //             .v_flex()
+    //             .items_center()
+    //             .justify_center()
+    //             .p_8()
+    //             .child(
+    //                 div().w_full().max_w_2_3().child(
+    //                     Accordion::new("editor-accordion")
+    //                         .multiple(true)
+    //                         .rounded_xl()
+    //                         .bordered(false)
+    //                         .item(|item| {
+    //                             item.icon(IconName::Sparkles)
+    //                                 .title("Generation")
+    //                                 .open(!generation_stale)
+    //                                 .disabled(generation_stale)
+    //                                 .border_0()
+    //                                 .child(self.generation.clone())
+    //                         })
+    //                         .item(|item| {
+    //                             item.icon(IconName::Cpu)
+    //                                 .title("Build")
+    //                                 .open(!build_stale)
+    //                                 .disabled(build_stale)
+    //                                 .border_0()
+    //                                 .child(self.build.clone())
+    //                         })
+    //                         .item(|item| {
+    //                             item.icon(IconName::Upload)
+    //                                 .title("Deploy")
+    //                                 .open(!deploy_stale)
+    //                                 .disabled(deploy_stale)
+    //                                 .border_0()
+    //                                 .child(self.deploy.clone())
+    //                         }),
+    //                 ),
+    //             )
+    //     }
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let generation_stale = self.generation.read(cx).state().is_stale();
-        let build_stale = self.build.read(cx).state().is_stale();
-        let deploy_stale = self.deploy.read(cx).state().is_stale();
+        let theme = cx.theme();
 
         div()
             .size_full()
             .v_flex()
-            .items_center()
-            .justify_center()
-            .p_8()
+            .p_4()
+            .gap_3()
             .child(
-                div().w_full().max_w_2_3().child(
-                    Accordion::new("editor-accordion")
-                        .multiple(true)
-                        .rounded_xl()
-                        .bordered(false)
-                        .item(|item| {
-                            item.icon(IconName::Sparkles)
-                                .title("Generation")
-                                .open(!generation_stale)
-                                .disabled(generation_stale)
-                                .border_0()
-                                .child(self.generation.clone())
-                        })
-                        .item(|item| {
-                            item.icon(IconName::Cpu)
-                                .title("Build")
-                                .open(!build_stale)
-                                .disabled(build_stale)
-                                .border_0()
-                                .child(self.build.clone())
-                        })
-                        .item(|item| {
-                            item.icon(IconName::Upload)
-                                .title("Deploy")
-                                .open(!deploy_stale)
-                                .disabled(deploy_stale)
-                                .border_0()
-                                .child(self.deploy.clone())
-                        }),
-                ),
+                div()
+                    .w_full()
+                    .flex_none()
+                    .border_t_1()
+                    .border_color(theme.border)
+                    .px_4()
+                    .py_4()
+                    .child(
+                        Stepper::new("pipeline")
+                            .selected_index(0)
+                            .large()
+                            .text_center(true)
+                            .items_stretch()
+                            .items([
+                                StepperItem::new().child(v_flex().items_center().child("Prompt")),
+                                StepperItem::new()
+                                    .child(v_flex().items_center().child("Generation")),
+                                StepperItem::new().child(v_flex().items_center().child("Build")),
+                                StepperItem::new().child(v_flex().items_center().child("Deploy")),
+                            ]),
+                    ),
             )
+            .child(div().w_full().child(self.generation.clone()))
     }
 }
