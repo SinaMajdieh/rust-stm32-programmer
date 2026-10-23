@@ -1,4 +1,6 @@
 mod alert;
+mod components;
+mod demo;
 mod editor;
 mod projects;
 mod settings;
@@ -36,7 +38,7 @@ fn main() {
 
             cx.open_window(
                 WindowOptions {
-                    window_bounds: Some(WindowBounds::Windowed(bounds)),
+                    window_bounds: Some(WindowBounds::Maximized(bounds)),
                     titlebar: Some(TitlebarOptions {
                         title: Some("STM32 Studio".into()),
                         appears_transparent: false,
@@ -49,6 +51,7 @@ fn main() {
                     Navigator::try_install(cx, NavigatorConfig::default())
                         .expect("failed to install navigator");
                     Settings::load("config.toml", cx).expect("Could not load config");
+
                     let studio = cx.new(|cx| Studio::new(window, cx));
                     cx.new(|cx| Root::new(studio, window, cx))
                 },

@@ -3,9 +3,9 @@ use gpui_kit::{
     AppContext, Context, Entity, EventEmitter, IntoElement, ParentElement, Render, SharedString,
     Styled, Window,
     assets::IconName,
-    base::{Disableable, IndexPath, StyledExt, input::TextareaState},
+    base::{Disableable, IndexPath, StyledExt, h_flex, input::TextareaState, v_flex},
     component::{
-        ActiveTheme, Colorize, Sizable,
+        ActiveTheme, Icon, Sizable,
         alert::Alert,
         button::{Button, ButtonVariants},
         input::Textarea,
@@ -20,7 +20,9 @@ use crate::{
     settings::Settings,
 };
 
+pub mod fail;
 pub mod progress;
+pub mod success;
 
 const MODEL_SELECT_PLACEHOLDER: &str =
     "for example \"Make the onboard LED blink every 2 seconds.\"";
@@ -115,7 +117,7 @@ impl Generation {
 
         let prompt = cx.new(|cx| {
             TextareaState::new(window, cx)
-                .auto_grow(8, 10)
+                .auto_grow(6, 10)
                 .placeholder(MODEL_SELECT_PLACEHOLDER)
                 .default_value("Make the onboard LED blink every 2 seconds.")
         });
@@ -192,27 +194,40 @@ impl Render for Generation {
         div()
             .size_full()
             .v_flex()
-            .justify_center()
-            .p_4()
+            .justify_start()
+            .border_1()
+            .border_color(theme.colors.border)
+            .rounded_md()
+            .px_8()
+            .py_12()
             .gap_4()
+            // Header
             .child(
-                div()
+                v_flex()
                     .w_full()
-                    .v_flex()
-                    .gap_4()
-                    .rounded_md()
-                    .border_1()
-                    .border_color(theme.border)
-                    .bg(theme.colors.secondary)
-                    .p_6()
-                    .overflow_hidden()
+                    .items_center()
+                    .justify_center()
+                    .gap_2()
+                    .child(div().child(Icon::new(IconName::CodeXml).size_12()))
+                    .child(div().text_3xl().child("Create a new project"))
                     .child(
                         div()
-                            .font_semibold()
-                            .text_xl()
-                            .text_color(theme.foreground)
-                            .child("What would you like to build?"),
-                    )
+                            .text_color(theme.colors.muted_foreground)
+                            .text_center()
+                            .text_align(gpui_kit::TextAlign::Center)
+                            .child(
+                                "Describe what you want to build, chose a model, and let AI handle the rest",
+                            ),
+                    ),
+            )
+            // Prompt and controls
+            .child(
+                v_flex()
+                    .w_full()
+                    .gap_4()
+                    .rounded_md()
+                    .p_6()
+                    .overflow_hidden()
                     .child(
                         Textarea::new(&self.prompt)
                             .large()
@@ -221,26 +236,46 @@ impl Render for Generation {
                             .text_lg(),
                     )
                     .child(
-                        div()
-                            .h_flex()
+                        h_flex()
+                            .w_full()
+                            .justify_between()
                             .items_stretch()
-                            .justify_end()
                             .gap_2()
+                            // Model selector
                             .child(
-                                div().flex_1().min_w_0().max_w_64().child(
-                                    Select::new(&self.models)
-                                        .large()
-                                        .w_full()
-                                        .h_full()
-                                        .rounded_md()
-                                        .title_prefix("Model: ")
-                                        .menu_max_h(rems(10.0)),
-                                ),
+                                h_flex()
+                                    .flex_1()
+                                    .min_w_64()
+                                    .items_center()
+                                    .gap_2()
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .items_center()
+                                            .justify_center()
+                                            .child("Model:"),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .min_w_0()
+                                            .child(
+                                                Select::new(&self.models)
+                                                    .large()
+                                                    .w_full()
+                                                    .h_full()
+                                                    .rounded_md()
+                                                    .menu_max_h(rems(10.0)),
+                                            ),
+                                    ),
                             )
+                            // Generate action
                             .child(
                                 Button::new("generate")
                                     .large()
                                     .h_full()
+                                    .flex_1()
+                                    .min_w_32()
                                     .primary()
                                     .label("Generate")
                                     .icon(IconName::Sparkles)

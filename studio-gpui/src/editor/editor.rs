@@ -4,14 +4,12 @@ use backend::{
 };
 use gpui_kit::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, Styled, Subscription, Window,
-    assets::IconName,
     base::{StyledExt, v_flex},
     component::{
-        ActiveTheme, Colorize, Sizable,
-        accordion::Accordion,
+        ActiveTheme, Sizable,
         stepper::{Stepper, StepperItem},
     },
-    div, px, rgb,
+    div,
 };
 
 use crate::{
