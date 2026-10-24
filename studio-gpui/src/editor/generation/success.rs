@@ -90,7 +90,6 @@ impl Render for GenerationSuccess {
             )
             .child(
                 div()
-                    .flex_1()
                     .p_8()
                     .bg(theme.colors.secondary.darken(0.25))
                     .border_color(theme.colors.border)
