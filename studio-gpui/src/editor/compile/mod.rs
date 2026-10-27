@@ -11,6 +11,9 @@ use gpui_kit::{
 
 use crate::editor::stage::{StageState, StageView};
 
+pub mod fail;
+pub mod progress;
+
 /// Events emitted by the build stage.
 pub enum BuildEvent {
     /// Requests compilation of the current project.

@@ -15,7 +15,7 @@ use gpui_kit::{
 use crate::{
     TokioRuntime,
     editor::{
-        build::{Build, BuildEvent},
+        compile::{Build, BuildEvent},
         deploy::{Deploy, DeployEvent},
         generation::{Generation, GenerationEvent},
         stage::StageView,

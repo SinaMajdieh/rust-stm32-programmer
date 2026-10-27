@@ -7,7 +7,9 @@ use gpui_kit::{
     StatefulInteractiveElement, Styled, Window, div, px, relative,
 };
 
-use crate::editor::{Generation, GenerationFailed, GenerationProgress, GenerationSuccess};
+use crate::editor::{
+    BuildFailed, BuildProgress, Generation, GenerationFailed, GenerationProgress, GenerationSuccess,
+};
 
 // -----------------------------------------------------------------------------
 // Gallery data
@@ -257,13 +259,35 @@ impl DemoApp {
             ),
         ];
 
-        let sections = vec![GallerySection::new(
-            "generation",
-            "Generation",
-            "From a natural-language prompt to generated firmware.",
-            generation_items,
-            cx,
-        )];
+        let build_items = vec![
+            GalleryItem::new(
+                "In Progress",
+                "Live Build Progress",
+                cx.new(|cx| BuildProgress::new(window, cx)).into(),
+            ),
+            GalleryItem::new(
+                "Failed",
+                "Live Build Failed",
+                cx.new(|cx| BuildFailed::new(window, cx)).into(),
+            ),
+        ];
+
+        let sections = vec![
+            GallerySection::new(
+                "generation",
+                "Generation",
+                "From a natural-language prompt to generated firmware.",
+                generation_items,
+                cx,
+            ),
+            GallerySection::new(
+                "build",
+                "Build",
+                "From the generated code to the build",
+                build_items,
+                cx,
+            ),
+        ];
 
         let gallery = cx.new(|_| ComponentGallery::new(sections));
 
