@@ -78,7 +78,7 @@ impl Render for GenerationFailed {
                 v_flex()
                     .items_stretch()
                     .justify_start()
-                    .gap_2()
+                    .gap_3()
                     .child(div().text_3xl().child("What would you like to do?"))
                     .child(
                         v_flex()
@@ -88,58 +88,74 @@ impl Render for GenerationFailed {
                                 Button::new("regenerate")
                                     .primary()
                                     .w_full()
-                                    .min_h_32()
+                                    .min_h_24()
                                     .px_6()
                                     .py_4()
                                     .rounded_xl()
                                     .child(
-                                        v_flex()
+                                        h_flex()
                                             .w_full()
-                                            .items_start()
-                                            .gap_1()
-                                            .child(Icon::new(IconName::RotateCcw).size_5())
+                                            .items_center()
+                                            .justify_start()
+                                            .gap_4()
+                                            .child(Icon::new(IconName::RotateCcw).size_8())
                                             .child(
-                                                div()
-                                                    .text_2xl()
-                                                    .font_bold()
-                                                    .child("Regenerate"),
+                                                v_flex()
+                                                    .w_full()
+                                                    .items_start()
+                                                    .justify_center()
+                                                    .gap_1()
+                                                    .child(
+                                                        div()
+                                                            .text_2xl()
+                                                            .font_bold()
+                                                            .child("Regenerate"),
+                                                    )
+                                                    .child(
+                                                        div()
+                                                            .text_lg()
+                                                            .text_color(theme.colors.muted)
+                                                            .child("Try generating again with the current prompt"),
+                                                    ),
                                             )
-                                            .child(
-                                                div()
-                                                    .text_lg()
-                                                    .text_color(theme.colors.muted)
-                                                    .child("Try generating again with the current prompt"),
-                                            ),
                                     ),
                             )
                             .child(
                                 Button::new("back-to-prompt")
                                     .w_full()
-                                    .min_h_32()
+                                    .min_h_24()
                                     .px_6()
                                     .py_4()
                                     .rounded_xl()
                                     .border_2()
                                     .border_color(theme.colors.border)
-                                    .bg(theme.colors.background)
+                                    .bg(theme.colors.secondary)
                                     .child(
-                                        v_flex()
+                                        h_flex()
                                             .w_full()
-                                            .items_start()
-                                            .gap_1()
-                                            .child(Icon::new(IconName::SquareSlash).size_5())
+                                            .items_center()
+                                            .justify_start()
+                                            .gap_4()
+                                            .child(Icon::new(IconName::SquareSlash).size_8())
                                             .child(
-                                                div()
-                                                    .text_2xl()
-                                                    .font_bold()
-                                                    .child("Back to prompt"),
+                                                v_flex()
+                                                    .w_full()
+                                                    .items_start()
+                                                    .justify_center()
+                                                    .gap_1()
+                                                    .child(
+                                                        div()
+                                                            .text_2xl()
+                                                            .font_bold()
+                                                            .child("Back to prompt"),
+                                                    )
+                                                    .child(
+                                                        div()
+                                                            .text_lg()
+                                                            .text_color(theme.colors.muted_foreground)
+                                                            .child("Try chaging the propt or switching to a different model."),
+                                                    ),
                                             )
-                                            .child(
-                                                div()
-                                                    .text_lg()
-                                                    .text_color(theme.colors.muted)
-                                                    .child("Try chaging the propt or switching to a different model."),
-                                            ),
                                     ),
                             ),
                     )

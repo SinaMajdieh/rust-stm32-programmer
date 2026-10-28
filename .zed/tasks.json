@@ -1,7 +1,7 @@
 [
   {
-    "label": "cargo run",
-    "command": "cargo run",
+    "label": "studio-gpui",
+    "command": "cargo run -p studio-gpui",
     "use_new_terminal": true
   }
 ]

@@ -13,6 +13,7 @@ use crate::editor::stage::{StageState, StageView};
 
 pub mod fail;
 pub mod progress;
+pub mod success;
 
 /// Events emitted by the build stage.
 pub enum BuildEvent {

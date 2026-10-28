@@ -137,7 +137,7 @@ impl Render for BuildFailed {
                                     .rounded_xl()
                                     .border_2()
                                     .border_color(theme.colors.border)
-                                    .bg(theme.colors.background)
+                                    .bg(theme.colors.secondary)
                                     .child(
                                         h_flex()
                                             .w_full()
@@ -160,7 +160,7 @@ impl Render for BuildFailed {
                                                     .child(
                                                         div()
                                                             .text_lg()
-                                                            .text_color(theme.colors.muted)
+                                                            .text_color(theme.colors.muted_foreground)
                                                             .child(
                                                                 "Try compiling again with the current files",
                                                             ),
@@ -178,7 +178,7 @@ impl Render for BuildFailed {
                                     .rounded_xl()
                                     .border_2()
                                     .border_color(theme.colors.border)
-                                    .bg(theme.colors.background)
+                                    .bg(theme.colors.secondary)
                                     .child(
                                         h_flex()
                                             .w_full()
@@ -201,7 +201,7 @@ impl Render for BuildFailed {
                                                     .child(
                                                         div()
                                                             .text_lg()
-                                                            .text_color(theme.colors.muted)
+                                                            .text_color(theme.colors.muted_foreground)
                                                             .child(
                                                                 "Open the files in the explorer",
                                                             ),

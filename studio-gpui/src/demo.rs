@@ -8,7 +8,8 @@ use gpui_kit::{
 };
 
 use crate::editor::{
-    BuildFailed, BuildProgress, Generation, GenerationFailed, GenerationProgress, GenerationSuccess,
+    BuildFailed, BuildProgress, BuildSuccess, Generation, GenerationFailed, GenerationProgress,
+    GenerationSuccess,
 };
 
 // -----------------------------------------------------------------------------
@@ -264,6 +265,11 @@ impl DemoApp {
                 "In Progress",
                 "Live Build Progress",
                 cx.new(|cx| BuildProgress::new(window, cx)).into(),
+            ),
+            GalleryItem::new(
+                "Success",
+                "Live Build was Successful",
+                cx.new(|cx| BuildSuccess::new(window, cx)).into(),
             ),
             GalleryItem::new(
                 "Failed",
