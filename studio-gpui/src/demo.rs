@@ -8,13 +8,9 @@ use gpui_kit::{
 };
 
 use crate::editor::{
-    BuildFailed, BuildProgress, BuildSuccess, Generation, GenerationFailed, GenerationProgress,
-    GenerationSuccess,
+    BuildFailed, BuildProgress, BuildSuccess, DeployFail, DeployProgress, DeploySuccess,
+    Generation, GenerationFailed, GenerationProgress, GenerationSuccess,
 };
-
-// -----------------------------------------------------------------------------
-// Gallery data
-// -----------------------------------------------------------------------------
 
 #[derive(Clone)]
 pub struct GalleryItem {
@@ -60,10 +56,6 @@ impl GallerySection {
         }
     }
 }
-
-// -----------------------------------------------------------------------------
-// Component gallery
-// -----------------------------------------------------------------------------
 
 pub struct ComponentGallery {
     sections: Vec<GallerySection>,
@@ -227,10 +219,6 @@ impl Render for ComponentGallery {
     }
 }
 
-// -----------------------------------------------------------------------------
-// Demo application
-// -----------------------------------------------------------------------------
-
 pub struct DemoApp {
     gallery: Entity<ComponentGallery>,
 }
@@ -278,12 +266,30 @@ impl DemoApp {
             ),
         ];
 
+        let deploy_items = vec![
+            GalleryItem::new(
+                "In Progress",
+                "Live Deploy Progress",
+                cx.new(|cx| DeployProgress::new(window, cx)).into(),
+            ),
+            GalleryItem::new(
+                "Success",
+                "Live Deployment was Successful",
+                cx.new(|cx| DeploySuccess::new(window, cx)).into(),
+            ),
+            GalleryItem::new(
+                "Fail",
+                "Live Deployment Failed",
+                cx.new(|cx| DeployFail::new(window, cx)).into(),
+            ),
+        ];
+
         let sections = vec![
             GallerySection::new(
-                "generation",
-                "Generation",
-                "From a natural-language prompt to generated firmware.",
-                generation_items,
+                "deploy",
+                "Deploy",
+                "From the built firmware to deployment",
+                deploy_items,
                 cx,
             ),
             GallerySection::new(
@@ -291,6 +297,13 @@ impl DemoApp {
                 "Build",
                 "From the generated code to the build",
                 build_items,
+                cx,
+            ),
+            GallerySection::new(
+                "generation",
+                "Generation",
+                "From a natural-language prompt to generated firmware.",
+                generation_items,
                 cx,
             ),
         ];

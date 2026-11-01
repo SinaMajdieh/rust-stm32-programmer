@@ -5,6 +5,7 @@ mod generation;
 mod stage;
 
 pub use compile::{fail::BuildFailed, progress::BuildProgress, success::BuildSuccess};
+pub use deploy::{fail::DeployFail, progress::DeployProgress, success::DeploySuccess};
 pub use editor::Editor;
 pub use generation::{
     Generation, fail::GenerationFailed, progress::GenerationProgress, success::GenerationSuccess,

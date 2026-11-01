@@ -55,7 +55,7 @@ impl Render for BuildSuccess {
                             .text_color(theme.colors.muted_foreground)
                             .text_center()
                             .text_align(gpui_kit::TextAlign::Center)
-                            .child("Youre firmware is ready to be deployed"),
+                            .child("Your firmware is ready to be deployed"),
                     ),
             )
             .child(
@@ -107,11 +107,11 @@ impl Render for BuildSuccess {
                                     .child(v_flex().items_center().child("Generate").child(
                                         div().text_color(theme.colors.muted_foreground).child(""),
                                     )),
-                                StepperItem::new().child(
-                                    v_flex().items_center().child("Build").child(
+                                StepperItem::new()
+                                    .icon(Icon::new(IconName::Check).large())
+                                    .child(v_flex().items_center().child("Build").child(
                                         div().text_color(theme.colors.muted_foreground).child(""),
-                                    ),
-                                ),
+                                    )),
                                 StepperItem::new().child(
                                     v_flex().items_center().child("Deploy").child(
                                         div()

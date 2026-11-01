@@ -10,6 +10,9 @@ use gpui_kit::{
 };
 
 use crate::editor::stage::{StageState, StageView};
+pub mod fail;
+pub mod progress;
+pub mod success;
 
 /// Events emitted by the deploy stage.
 pub enum DeployEvent {
